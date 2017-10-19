@@ -1,13 +1,12 @@
-import * as https from 'https';
-import * as KCors from 'kcors';
-import * as Koa from 'koa';
-import * as KJsonError from 'koa-json-error';
-import * as KLogger from 'koa-logger';
-import { omit } from 'lodash';
+import * as https from 'https'
+import * as KCors from 'kcors'
+import * as Koa from 'koa'
+import * as KJsonError from 'koa-json-error'
+import * as KLogger from 'koa-logger'
 
-import { proxyTo } from './proxy';
-import { setupRouter } from './routes';
-import { SSLOptions } from './ssl';
+import { proxyTo } from './proxy'
+import { setupRouter } from './routes'
+import { SSLOptions } from './ssl'
 
 const app = new Koa()
 
