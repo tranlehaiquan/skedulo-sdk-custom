@@ -9,7 +9,7 @@ import BaseRoute from './base'
 
 const appRoute = new Router()
 
-export default function main(app: Koa) {
+export function setupRouter(app: Koa) {
 
   appRoute.use(
 

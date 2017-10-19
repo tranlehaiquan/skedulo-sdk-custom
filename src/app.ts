@@ -1,17 +1,13 @@
-import * as fs from 'fs'
-import * as path from 'path'
-import * as https from 'https'
+import * as https from 'https';
+import * as KCors from 'kcors';
+import * as Koa from 'koa';
+import * as KJsonError from 'koa-json-error';
+import * as KLogger from 'koa-logger';
+import { omit } from 'lodash';
 
-import { omit } from 'lodash'
-
-import * as Koa from 'koa'
-import * as KLogger from 'koa-logger'
-import * as KJsonError from 'koa-json-error'
-import * as KCors from 'kcors'
-
-import Router from './routes'
-
-import { SSLOptions } from './ssl'
+import { proxyTo } from './proxy';
+import { setupRouter } from './routes';
+import { SSLOptions } from './ssl';
 
 const app = new Koa()
 
@@ -30,7 +26,7 @@ app.use(KLogger())
 app.use(KCors())
 
 // Attach all request handlers ( router ) to the app
-Router(app)
+setupRouter(app)
 
 const server = https.createServer(SSLOptions, app.callback())
 
@@ -40,8 +36,6 @@ const port = 1928
 server.listen(port, host, () => {
   console.info(`Start CP SDK... Running as https://${host}:${port}`)
 })
-
-import { proxyTo } from './proxy'
 
 const sub = proxyTo({ port: 3000 }, { port: 1929 }).subscribe()
 
