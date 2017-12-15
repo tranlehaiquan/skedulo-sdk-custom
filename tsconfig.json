@@ -2,20 +2,26 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "commonjs",
+    "jsx": "react",
     "moduleResolution": "node",
     "lib": [
       "es2017",
       "dom"
     ],
-    "declaration": true,
+    "declaration": false,
     "rootDir": "./src",
-    "outDir": "dist/",
-    "strict": true
+    "outDir": "app/",
+    "strict": true,
+    "strictFunctionTypes": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ],
   "exclude": [
-    "test"
+    "src/tests/**/*",
+    "jest"
   ]
 }

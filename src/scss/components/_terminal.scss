@@ -1,0 +1,27 @@
+
+.terminal {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  font-size: $font-size-normal;
+  color: $white-1;
+  background: $black-1;
+  padding: $global-padding;
+  margin: $global-margin 0;
+  display: block;
+
+  .stderr {
+    color: $red-1;
+  }
+
+  button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: .8em;
+    font-family: $body-font-family;
+    color: white;
+    background: $skedblue-2;
+    outline: 0;
+    border: 0;
+    cursor: pointer;
+  }
+}

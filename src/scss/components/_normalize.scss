@@ -1,0 +1,822 @@
+////
+/// @group typography-base
+////
+
+// Base Typography
+// - - - - - - - - - - - - - - -
+// These are styles applied to basic HTML tags, including:
+//   - Paragraphs <p>
+//   - Bold/italics <b> <strong> <i> <em>
+//   - Small text <small>
+//   - Headings <h1>—<h6>
+//   - Anchors <a>
+//   - Dividers <hr>
+//   - Lists <ul> <ol> <dl>
+//   - Blockquotes <blockquote>
+//   - Code blocks <code>
+//   - Abbreviations <abbr>
+//   - Citations <cite>
+//   - Keystrokes <kbd>
+
+/// Font family for header elements.
+/// @type String | List
+$header-font-family: $body-font-family !default;
+
+/// Font weight of headers.
+/// @type String
+$header-font-weight: $global-weight-light !default;
+
+/// Font style (e.g. italicized) of headers.
+/// @type String
+$header-font-style: normal !default;
+
+/// Font stack used for elements that use monospaced type, such as code samples
+/// @type String | List
+$font-family-monospace: Consolas, 'Liberation Mono', Courier, monospace !default;
+
+/// Sizes of headings at various screen sizes. Each key is a breakpoint, and each value is a map of heading sizes.
+/// @type Map
+$header-sizes: (
+  'h1': 18,
+  'h2': 16,
+  'h3': 13,
+  'h4': 13,
+  'h5': 13,
+  'h6': 13,
+) !default;
+
+/// Color of headers.
+/// @type Color
+$header-color: $black-1 !default;
+
+/// Line height of headers.
+/// @type Number
+$header-lineheight: 1.4 !default;
+
+/// Bottom margin of headers.
+/// @type Number
+$header-margin-bottom: 0.5rem !default;
+
+/// Text rendering method of headers.
+/// @type String
+$header-text-rendering: optimizeLegibility !default;
+
+/// Font size of `<small>` elements.
+/// @type Number
+$small-font-size: 80% !default;
+
+/// Color of `<small>` elements when placed inside headers.
+/// @type Color
+$header-small-font-color: $body-font-color !default;
+
+/// Line height of text inside `<p>` elements.
+/// @type Number
+$paragraph-lineheight: 1.6 !default;
+
+/// Bottom margin of paragraphs.
+/// @type Number
+$paragraph-margin-bottom: 1rem !default;
+
+/// Text rendering method for paragraph text.
+/// @type String
+$paragraph-text-rendering: optimizeLegibility !default;
+
+/// Text color of code samples.
+/// @type Color
+$code-color: $body-font-color !default;
+
+/// Font family of code samples.
+/// @type String | List
+$code-font-family: $font-family-monospace !default;
+
+/// Font weight of text in code samples.
+/// @type String
+$code-font-weight: $global-weight-light !default;
+
+/// Background color of code samples.
+/// @type Color
+$code-background: $silver-1 !default;
+
+/// Border around code samples.
+/// @type List
+$code-border: 1px solid $border-color !default;
+
+/// Padding around text of code samples.
+/// @type Number | List
+$code-padding: rem-calc(2 5 1) !default;
+
+/// Default border for a divider.
+/// @type List
+$hr-border: 1px solid $border-color !default;
+
+/// Default margin for a divider.
+/// @type Number | List
+$hr-margin: 24px auto !default;
+
+/// Line height for items in a list.
+/// @type Number
+$list-lineheight: $paragraph-lineheight !default;
+
+/// Bottom margin for items in a list.
+/// @type Number
+$list-margin-bottom: $paragraph-margin-bottom !default;
+
+/// Bullet type to use for unordered lists (e.g., `square`, `circle`, `disc`).
+/// @type String
+$list-style-type: disc !default;
+
+/// Positioning for bullets on unordered list items.
+/// @type String
+$list-style-position: outside !default;
+
+/// Left (or right) margin for lists.
+/// @type Number
+$list-side-margin: 1.25rem !default;
+
+/// Left (or right) margin for a list inside a list.
+/// @type Number
+$list-nested-side-margin: 1.25rem !default;
+
+/// Bottom margin for `<dl>` elements.
+/// @type Number
+$defnlist-margin-bottom: 1rem !default;
+
+/// Font weight for `<dt>` elements.
+/// @type String
+$defnlist-term-weight: $global-weight-bold !default;
+
+/// Spacing between `<dt>` and `<dd>` elements.
+/// @type Number
+$defnlist-term-margin-bottom: 0.3rem !default;
+
+/// Padding inside a `<blockquote>` element.
+/// @type Number | List
+$blockquote-padding: rem-calc(9 20 0 19) !default;
+
+/// Side border for `<blockquote>` elements.
+/// @type List
+$blockquote-border: 1px solid $border-color !default;
+
+/// Font size for `<cite>` elements.
+/// @type Number
+$cite-font-size: rem-calc(13) !default;
+
+/// Font family for `<kbd>` elements.
+/// @type String | List
+$keystroke-font: $font-family-monospace !default;
+
+/// Text color for `<kbd>` elements.
+/// @type Color
+$keystroke-color: $body-font-color !default;
+
+/// Background color for `<kbd>` elements.
+/// @type Color
+$keystroke-background: $silver-1 !default;
+
+/// Padding for `<kbd>` elements.
+/// @type Number | List
+$keystroke-padding: rem-calc(2 4 0) !default;
+
+/// Border radius for `<kbd>` elements.
+/// @type Number | List
+$keystroke-radius: $global-radius !default;
+
+/// Bottom border style for `<abbr>` elements.
+/// @type List
+$abbr-underline: 1px dotted $black-1 !default;
+
+@mixin skedulo-normalize {
+  /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
+
+  /**
+   * 1. Change the default font family in all browsers (opinionated).
+   * 2. Prevent adjustments of font size after orientation changes in IE and iOS.
+   */
+
+  html {
+    font-family: sans-serif; /* 1 */
+    font-size: $global-font-size;
+    -ms-text-size-adjust: 100%; /* 2 */
+    -webkit-text-size-adjust: 100%; /* 2 */
+  }
+
+  /**
+   * Remove the margin in all browsers (opinionated).
+   */
+
+  body {
+    margin: 0;
+  }
+
+  /* HTML5 display definitions
+     ========================================================================== */
+
+  /**
+   * Add the correct display in IE 9-.
+   * 1. Add the correct display in Edge, IE, and Firefox.
+   * 2. Add the correct display in IE.
+   */
+
+  article,
+  aside,
+  details, /* 1 */
+  figcaption,
+  figure,
+  footer,
+  header,
+  main, /* 2 */
+  menu,
+  nav,
+  section,
+  summary { /* 1 */
+    display: block;
+  }
+
+  /**
+   * Add the correct display in IE 9-.
+   */
+
+  audio,
+  canvas,
+  progress,
+  video {
+    display: inline-block;
+  }
+
+  /**
+   * Add the correct display in iOS 4-7.
+   */
+
+  audio:not([controls]) {
+    display: none;
+    height: 0;
+  }
+
+  /**
+   * Add the correct vertical alignment in Chrome, Firefox, and Opera.
+   */
+
+  progress {
+    vertical-align: baseline;
+  }
+
+  /**
+   * Add the correct display in IE 10-.
+   * 1. Add the correct display in IE.
+   */
+
+  template, /* 1 */
+  [hidden] {
+    display: none;
+  }
+
+  /* Links
+     ========================================================================== */
+
+  /**
+   * 1. Remove the gray background on active links in IE 10.
+   * 2. Remove gaps in links underline in iOS 8+ and Safari 8+.
+   */
+
+  a {
+    background-color: transparent; /* 1 */
+    -webkit-text-decoration-skip: objects; /* 2 */
+  }
+
+  /**
+   * Remove the outline on focused links when they are also active or hovered
+   * in all browsers (opinionated).
+   */
+
+  a:active,
+  a:hover {
+    outline-width: 0;
+  }
+
+  /* Text-level semantics
+     ========================================================================== */
+
+  /**
+   * 1. Remove the bottom border in Firefox 39-.
+   * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
+   */
+
+  abbr[title] {
+    border-bottom: none; /* 1 */
+    text-decoration: underline; /* 2 */
+    text-decoration: underline dotted; /* 2 */
+  }
+
+  /**
+   * Prevent the duplicate application of `bolder` by the next rule in Safari 6.
+   */
+
+  b,
+  strong {
+    font-weight: inherit;
+  }
+
+  /**
+   * Add the correct font weight in Chrome, Edge, and Safari.
+   */
+
+  b,
+  strong {
+    font-weight: bolder;
+  }
+
+  /**
+   * Add the correct font style in Android 4.3-.
+   */
+
+  dfn {
+    font-style: italic;
+  }
+
+  /**
+   * Correct the font size and margin on `h1` elements within `section` and
+   * `article` contexts in Chrome, Firefox, and Safari.
+   */
+
+
+
+  /**
+   * Add the correct background and color in IE 9-.
+   */
+
+  mark {
+    background-color: #ff0;
+    color: #000;
+  }
+
+  /**
+   * Add the correct font size in all browsers.
+   */
+
+  small {
+    font-size: 80%;
+  }
+
+  /**
+   * Prevent `sub` and `sup` elements from affecting the line height in
+   * all browsers.
+   */
+
+  sub,
+  sup {
+    font-size: 90%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+
+  sup {
+    top: -0.2em;
+  }
+
+  /* Embedded content
+     ========================================================================== */
+
+  /**
+   * Remove the border on images inside links in IE 10-.
+   */
+
+  img {
+    border-style: none;
+  }
+
+  /**
+   * Hide the overflow in IE.
+   */
+
+  svg:not(:root) {
+    overflow: hidden;
+  }
+
+  /* Grouping content
+     ========================================================================== */
+
+  /**
+   * 1. Correct the inheritance and scaling of font size in all browsers.
+   * 2. Correct the odd `em` font sizing in all browsers.
+   */
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: monospace; /* 1 */
+    font-size: 1em; /* 2 */
+  }
+
+  /**
+   * Add the correct margin in IE 8.
+   */
+
+  figure {
+    margin: 1em 40px;
+  }
+
+  /**
+   * 1. Add the correct box sizing in Firefox.
+   * 2. Show the overflow in Edge and IE.
+   */
+
+  hr {
+    box-sizing: content-box; /* 1 */
+    height: 0; /* 1 */
+    overflow: visible; /* 2 */
+  }
+
+  /* Forms
+     ========================================================================== */
+
+  /**
+   * 1. Change font properties to `inherit` in all browsers (opinionated).
+   * 2. Remove the margin in Firefox and Safari.
+   */
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font: inherit; /* 1 */
+    margin: 0; /* 2 */
+  }
+
+  /**
+   * Restore the font weight unset by the previous rule.
+   */
+
+  optgroup {
+    font-weight: bold;
+  }
+
+  /**
+   * Show the overflow in IE.
+   * 1. Show the overflow in Edge.
+   */
+
+  button,
+  input { /* 1 */
+    overflow: visible;
+  }
+
+  /**
+   * Remove the inheritance of text transform in Edge, Firefox, and IE.
+   * 1. Remove the inheritance of text transform in Firefox.
+   */
+
+  button,
+  select { /* 1 */
+    text-transform: none;
+  }
+
+  /**
+   * 1. Prevent a WebKit bug where (2) destroys native `audio` and `video`
+   *    controls in Android 4.
+   * 2. Correct the inability to style clickable types in iOS and Safari.
+   */
+
+  button,
+  html [type='button'], /* 1 */
+  [type='reset'],
+  [type='submit'] {
+    -webkit-appearance: button; /* 2 */
+  }
+
+  /**
+   * Remove the inner border and padding in Firefox.
+   */
+
+  button::-moz-focus-inner,
+  [type='button']::-moz-focus-inner,
+  [type='reset']::-moz-focus-inner,
+  [type='submit']::-moz-focus-inner {
+    border-style: none;
+    padding: 0;
+  }
+
+  /**
+   * Restore the focus styles unset by the previous rule.
+   */
+
+  button:-moz-focusring,
+  [type='button']:-moz-focusring,
+  [type='reset']:-moz-focusring,
+  [type='submit']:-moz-focusring {
+    outline: 1px dotted ButtonText;
+  }
+
+  /**
+   * Change the border, margin, and padding in all browsers (opinionated).
+   */
+
+  fieldset {
+    border: 1px solid #c0c0c0;
+    margin: 0 2px;
+    padding: 0.35em 0.625em 0.75em;
+  }
+
+  /**
+   * 1. Correct the text wrapping in Edge and IE.
+   * 2. Correct the color inheritance from `fieldset` elements in IE.
+   * 3. Remove the padding so developers are not caught out when they zero out
+   *    `fieldset` elements in all browsers.
+   */
+
+  legend {
+    box-sizing: border-box; /* 1 */
+    color: inherit; /* 2 */
+    display: table; /* 1 */
+    max-width: 100%; /* 1 */
+    padding: 0; /* 3 */
+    white-space: normal; /* 1 */
+  }
+
+  /**
+   * 1. Add the correct box sizing in IE 10-.
+   * 2. Remove the padding in IE 10-.
+   */
+
+  [type='checkbox'],
+  [type='radio'] {
+    box-sizing: border-box; /* 1 */
+    padding: 0; /* 2 */
+  }
+
+  /**
+   * Correct the cursor style of increment and decrement buttons in Chrome.
+   */
+
+  [type='number']::-webkit-inner-spin-button,
+  [type='number']::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  /**
+   * 1. Correct the odd appearance in Chrome and Safari.
+   * 2. Correct the outline style in Safari.
+   */
+
+  [type='search'] {
+    -webkit-appearance: textfield; /* 1 */
+    outline-offset: -2px; /* 2 */
+  }
+
+  /**
+   * Remove the inner padding and cancel buttons in Chrome and Safari on OS X.
+   */
+
+  [type='search']::-webkit-search-cancel-button,
+  [type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  /**
+   * Correct the text style of placeholders in Chrome, Edge, and Safari.
+   */
+
+  ::-webkit-input-placeholder {
+    color: inherit;
+    opacity: 0.54;
+  }
+
+  /**
+   * 1. Correct the inability to style clickable types in iOS and Safari.
+   * 2. Change font properties to `inherit` in Safari.
+   */
+
+  ::-webkit-file-upload-button {
+    -webkit-appearance: button; /* 1 */
+    font: inherit; /* 2 */
+  }
+}
+
+@include skedulo-normalize;
+
+html {
+  font-size: $global-font-size;
+}
+
+// Set box-sizing globally to handle padding and border widths
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+// Default body styles
+body {
+  padding: 0;
+  margin: 0;
+  font-family: $body-font-family;
+  font-weight: $global-weight-light;
+  line-height: $global-lineheight;
+  color: $body-font-color;
+  background: $body-background;
+  font-size: $body-font-size;
+}
+
+img {
+  // Grid defaults to get images and embeds to work properly
+  max-width: 100%;
+  height: auto;
+  -ms-interpolation-mode: bicubic;
+
+  // Get rid of gap under images by making them display: inline-block; by default
+  display: inline-block;
+  vertical-align: middle;
+}
+
+// Typography resets
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+p,
+blockquote,
+th,
+td {
+  margin: 0;
+  padding: 0;
+}
+
+// Paragraphs
+p {
+  font-size: inherit;
+  line-height: $paragraph-lineheight;
+  margin-bottom: $paragraph-margin-bottom;
+  text-rendering: $paragraph-text-rendering;
+}
+
+// Emphasized text
+em,
+i {
+  font-style: italic;
+  line-height: inherit;
+}
+
+// Strong text
+strong,
+b {
+  font-weight: $global-weight-bold;
+  line-height: inherit;
+}
+
+// Small text
+small {
+  font-size: $small-font-size;
+  line-height: inherit;
+}
+
+// Headings
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $header-font-family;
+  font-weight: $header-font-weight;
+  font-style: $header-font-style;
+  color: $header-color;
+  text-rendering: $header-text-rendering;
+  margin-top: 0;
+  margin-bottom: $header-margin-bottom;
+  line-height: $header-lineheight;
+
+  small {
+    color: $header-small-font-color;
+    line-height: 0;
+  }
+}
+
+h4 {
+  text-transform: uppercase;
+}
+
+h5 {
+  font-weight: $global-weight-regular;
+}
+
+// Heading sizes
+@each $header, $font-size in $header-sizes {
+  #{$header} {
+    font-size: $font-size + px;
+  }
+}
+
+// Links
+a {
+  color: $anchor-color;
+  text-decoration: $anchor-text-decoration;
+  line-height: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    @if $anchor-text-decoration-hover != $anchor-text-decoration {
+      text-decoration: $anchor-text-decoration-hover;
+    }
+  }
+}
+
+// Horizontal rule
+hr {
+  height: 0;
+  border-right: 0;
+  border-top: 0;
+  border-bottom: $hr-border;
+  border-left: 0;
+  margin: $hr-margin;
+  clear: both;
+
+  &.small {
+    margin: 2px auto;
+  }
+
+  &.medium {
+    margin: $global-padding auto;
+  }
+}
+
+// Lists
+ul,
+ol,
+dl {
+  line-height: $list-lineheight;
+  margin-bottom: $list-margin-bottom;
+  list-style-position: $list-style-position;
+}
+
+// List items
+li {
+  font-size: inherit;
+}
+
+// Unordered lists
+ul {
+  list-style-type: $list-style-type;
+  margin-left: $list-side-margin;
+}
+
+// Ordered lists
+ol {
+  margin-left: $list-side-margin;
+}
+
+// Nested unordered/ordered lists
+ul,
+ol {
+  & & {
+    margin-left: $list-nested-side-margin;
+    margin-bottom: 0;
+  }
+}
+
+// Definition lists
+dl {
+  margin-bottom: $defnlist-margin-bottom;
+
+  dt {
+    margin-bottom: $defnlist-term-margin-bottom;
+    font-weight: $defnlist-term-weight;
+  }
+}
+
+// Blockquotes
+blockquote {
+  margin: 0 0 $paragraph-margin-bottom;
+  padding: $blockquote-padding;
+  border-left: $blockquote-border;
+
+  &,
+  p {
+    line-height: $paragraph-lineheight;
+  }
+}
+
+// Abbreviations
+abbr {
+  color: $body-font-color;
+  cursor: help;
+  border-bottom: $abbr-underline;
+}
+

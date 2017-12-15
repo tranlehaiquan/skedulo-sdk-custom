@@ -1,0 +1,38 @@
+$input-error-color: $red-1 !default;
+$input-valid-color: $lime-1 !default;
+
+@mixin validation-style ( $border-color ) {
+  border-left: 1px solid $border-color !important;
+}
+
+@mixin validation ( $border-color ) {
+  [type='text'],
+  [type='number'],
+  select,
+  textarea,
+  .Select-control {
+    @include validation-style($border-color);
+
+    &:focus {
+      @include validation-style($border-color);
+    }
+  }
+}
+
+@mixin skedulo-form-error {
+  .error-message {
+    color: $input-error-color;
+    display: block;
+    line-height: 1.3;
+    font-size: $font-size-small;
+    padding: 5px 0;
+  }
+
+  .required {
+    @include validation($input-error-color);
+
+    &.valid {
+      @include validation($input-valid-color);
+    }
+  }
+}

@@ -1,0 +1,80 @@
+////
+/// @group forms
+////
+
+/// Background color for select menus.
+/// @type Color
+$select-background: $white-1 !default;
+
+/// Color of the dropdown triangle inside select menus. Set to `transparent` to remove it entirely.
+/// @type Color
+$select-triangle-color: $grey-1 !default;
+
+/// Default radius for select menus.
+/// @type Color
+$select-radius: $global-radius !default;
+
+@mixin form-select {
+  width: 100%;
+  height: $global-form-element-height;
+  padding: ($form-spacing / 2) $global-select-right-padding ($form-spacing / 2) ($form-spacing / 2);
+  border: $input-border;
+  margin: 0 0 $form-spacing;
+  font-size: $input-font-size;
+  font-family: $input-font-family;
+  line-height: normal;
+  color: $input-color;
+  background-color: $select-background;
+  border-radius: $select-radius;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  @if $select-triangle-color != transparent {
+    background-image: $svg-tail-down;
+    background-size: $global-icon-font-size $global-icon-font-size;
+    background-position: right -1.2rem center;
+    background-origin: content-box;
+    background-repeat: no-repeat;
+  }
+
+  // Focus state
+  &:focus {
+    border: $input-border-focus;
+    background-color: $input-background-focus;
+    outline: none;
+
+    @if has-value($input-transition) {
+      transition: $input-transition;
+    }
+  }
+
+  // Disabled state
+  &:disabled {
+    opacity: $global-opacity-disabled;
+    cursor: $global-input-cursor-disabled;
+  }
+
+  // Hide the dropdown arrow shown in newer IE versions
+  &::-ms-expand {
+    display: none;
+  }
+
+  &[multiple] {
+    height: auto;
+    background-image: none;
+  }
+}
+
+@mixin skedulo-form-select {
+  select {
+    @include form-select;
+  }
+}
+
+.select-option-header {
+  cursor: pointer;
+  padding: 1px 10px;
+  border-top: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+  line-height: 20px;
+}

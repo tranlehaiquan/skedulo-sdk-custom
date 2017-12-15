@@ -1,0 +1,105 @@
+$title-spacing: 13px;
+$title-line-height: 30px;
+
+html,
+body,
+#root,
+.frame {
+  height: 100%;
+  width: 100%;
+  background: $white-1;
+}
+
+#root {
+  padding-top: $default-height;
+}
+
+.header {
+  @include clearfix;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: $skedblue-2;
+  color: $white-1;
+  padding: $title-spacing;
+  text-align: center;
+  font-weight: $global-weight-regular;
+  font-size: 18px;
+  line-height: $title-line-height;
+  height: $default-height;
+  z-index: 1;
+
+  &__logo {
+    float: left;
+    margin-right: $title-spacing;
+
+    &,
+    &.ski{
+      font-size: $title-line-height;
+      line-height: $title-line-height;
+    }
+  }
+
+  &__text {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    line-height: $default-height;
+  }
+
+  &__actions {
+    position: absolute;
+    right: $title-spacing;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &__user {
+    @include thumbnail;
+    @include thumbnail-size( $global-form-element-height-small );
+    line-height: $global-form-element-height-small + 2; // Fix uneven font spacing
+    font-size: $font-size-normal;
+    color: $skedblue-1;
+    letter-spacing: 0.8px;
+    background: $white-1;
+  }
+
+  .sked-dropdown-menu {
+    min-width: 180px;
+  }
+}
+
+.content {
+  @include scroll-style;
+  @include scroll-vertical;
+  overflow-x: hidden;
+  position: relative;
+  height: 100%;
+  background: $silver-3;
+
+  &__center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 400px;
+  }
+}
+
+.padding {
+  padding: $global-padding-large;
+}
+
+.padding-top-large {
+  padding-top: $default-height;
+}
+
+.padding-bottom-large {
+  padding-bottom: $default-height;
+}
+
+.padding-bottom {
+  padding-bottom: $global-padding;
+}

@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "../frontend/tslint.json"
+  ],
+  "rules": {
+    "interface-name": [false, "never-prefix"],
+    "no-console": [false],
+    "member-ordering": [false]
+  }
+}

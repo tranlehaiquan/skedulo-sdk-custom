@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <title>Skedulo - Connected Pages</title>
+
+  <!-- Require CSS Assets -->
+  <script>
+    const style = document.createElement('style')
+    style.innerText = require('fs').readFileSync(__dirname + '/scss/main.css', 'utf8')
+    document.getElementsByTagName("head")[0].appendChild(style)
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <!-- Require JS Assets and start this app -->
+  <script>require('./web/ui/App')</script>
+</body>
+
+</html>

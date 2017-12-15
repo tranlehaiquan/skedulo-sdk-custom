@@ -1,0 +1,164 @@
+////
+/// @group forms
+////
+
+/// Font color of text inputs.
+/// @type Color
+$input-color: $global-input-color;
+
+/// Font color of placeholder text within text inputs.
+/// @type Color
+$input-placeholder-color: $global-input-placeholder-color;
+
+/// Font family of text inputs.
+/// @type Font
+$input-font-family: inherit !default;
+
+/// Font size of text inputs.
+/// @type Number
+$input-font-size: 13px !default;
+
+$input-font-weight: $global-weight-light;
+
+/// Background color of text inputs.
+/// @type Color
+$input-background: $white-1 !default;
+
+/// Background color of focused of text inputs.
+/// @type Color
+$input-background-focus: $white-1 !default;
+
+/// Border around text inputs.
+/// @type Border
+$input-border: 1px solid $global-form-element-border-color !default;
+
+/// Border around focused text inputs.
+/// @type Color
+$input-border-focus: 1px solid $global-input-border-color-focus;
+
+/// Properties to transition on text inputs.
+/// @type Transition
+$input-transition: box-shadow 0.5s, border-color 0.25s ease-in-out !default;
+
+/// Enables the up/down buttons that Chrome and Firefox add to `<input type='number'>` elements.
+/// @type Boolean
+$input-number-spinners: true !default;
+
+/// Radius for text inputs.
+/// @type Border
+$input-radius: $global-radius !default;
+
+@mixin form-element {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: $global-input-padding;
+  border: $input-border;
+  margin: 0 0 $form-spacing;
+  font-family: $input-font-family;
+  font-size: $input-font-size;
+  font-weight: $input-font-weight;
+  color: $input-color;
+  background-color: $input-background;
+  border-radius: $input-radius;
+  line-height: $global-input-line-height;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  @if has-value($input-transition) {
+    transition: $input-transition;
+  }
+
+  // Focus state
+  &:focus {
+    border: $input-border-focus;
+    background-color: $input-background-focus;
+    outline: none;
+
+    @if has-value($input-transition) {
+      transition: $input-transition;
+    }
+  }
+}
+
+@mixin skedulo-form-text {
+  // Text inputs
+  [type=text],
+  [type=password],
+  [type=date],
+  [type=datetime],
+  [type=datetime-local],
+  [type=month],
+  [type=week],
+  [type=email],
+  [type=number],
+  [type=search],
+  [type=tel],
+  [type=time],
+  [type=url],
+  [type=color] {
+    @include form-element;
+    height: $global-form-element-height;
+  }
+
+  // Text areas
+  textarea {
+    @include scroll-style;
+    @include form-element;
+    max-width: 100%;
+    height: $global-textarea-height;
+    resize: none;
+
+    &[rows] {
+      height: auto;
+    }
+  }
+
+  input,
+  textarea {
+    // Placeholder text
+    &::placeholder {
+      color: $input-placeholder-color;
+      opacity: 1;
+    }
+
+    &:focus::placeholder {
+      color: $grey-4;
+    }
+
+    // Disabled/readonly state
+    &:disabled,
+    &[readonly] {
+      opacity: $global-opacity-disabled;
+      cursor: $global-input-cursor-disabled;
+      color: $global-input-color-disabled;
+    }
+  }
+
+  // Reset styles on button-like inputs
+  [type='submit'],
+  [type='button'] {
+    border-radius: $button-radius;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  // Reset Normalize setting content-box to search elements
+  // scss-lint:disable QualifyingElement
+  input[type='search'] {
+    box-sizing: border-box;
+  }
+
+  // Number input styles
+  [type='number'] {
+    @if not $input-number-spinners {
+      -moz-appearance: textfield;
+
+      [type='number']::-webkit-inner-spin-button,
+      [type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+}

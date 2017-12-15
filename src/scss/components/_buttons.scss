@@ -1,0 +1,391 @@
+$button-height: $global-form-element-height;
+$button-line-height: $button-height - 2;
+$button-font-size: $body-font-size;
+$button-spacing: 7px !default;
+$button-padding: 0 24px !default;
+$button-margin: 0 !default;
+$button-color: $white-1 !default;
+$button-color-alt: $black-1 !default;
+$button-radius: $global-radius !default;
+
+$button-disabled-background: $silver-1 !default;
+$button-disabled-color: $grey-3 !default;
+
+$button-transparent-color: $grey-1;
+$button-transparent-hover-color: $skedblue-1;
+$button-transparent-disabled-color: $grey-3;
+
+@mixin button-base {
+  @include ellipsis;
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  text-overflow: ellipsis;
+  height: $button-height;
+  line-height: $button-height;
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: all 0.25s ease-out, color 0.25s ease-out;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: $button-radius;
+  padding: $button-padding;
+  margin: $button-margin;
+  min-width: 36px;
+  font-size: $button-font-size;
+  font-weight: $global-weight-light;
+
+  &:focus {
+    outline: 0;
+  }
+
+  &[disabled],
+  &--disabled {
+    &,
+    &:hover {
+      cursor: not-allowed;
+    }
+  }
+}
+
+/// Expands a button to make it full-width.
+@mixin button-expand() {
+  display: block;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/// Sets the visual style of a button.
+/// @param {Color} $background [$button-background] - Background color of the button.
+/// @param {Color} $background-hover [$button-background-hover] - Background color of the button on hover.
+/// Set to `auto` to have the mixin automatically generate a hover color.
+/// @param {Color} $color [$button-color] - Text color of the button. Set to `auto` to automatically
+/// generate a color based on the background color.
+
+@mixin sk-button-style(
+  $background: $button-background,
+  $background-hover: $button-background-hover,
+  $color: $button-color
+) {
+  @if $color == auto {
+    $color: foreground($background, $button-color-alt, $button-color);
+  }
+
+  @if $background-hover == auto {
+    $background-hover: scale-color($background, $lightness: -20%);
+  }
+  background-color: $background;
+  color: $color;
+
+  &:hover,
+  &:active,
+  &.sk-button--selected {
+    &,
+    &:hover {
+      background-color: $background-hover;
+      color: $color;
+      z-index: 1;
+    }
+  }
+}
+
+/// Removes background fill on hover and focus for hollow buttons.
+@mixin button-hollow {
+  &,
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+@mixin button-hollow-style($border-color, $text-color, $background-hover) {
+  border: 1px solid $border-color;
+  color: $text-color;
+
+  &:hover,
+  &:active,
+  &.sk-button--selected {
+    &,
+    &:hover {
+      border-color: $background-hover;
+      background-color: $background-hover;
+      color: #fff;
+    }
+  }
+}
+
+/// Adds disabled styles to a button by fading the element, reseting the cursor, and disabling pointer events.
+@mixin button-disabled(
+  $background: $button-disabled-background,
+  $color: $button-disabled-color
+) {
+  opacity: 1;
+  background: $background !important;
+  border-color: $background !important;
+  color: $color !important;
+
+  i {
+    color: $color !important;
+  }
+}
+
+@mixin button-disabled-transparent ($background, $color, $border, $custom-selector: '') {
+  &#{$custom-selector},
+  &[disabled] {
+    &,
+    &:hover {
+      color: $color !important;
+      background: $background !important;
+      border-color: $border !important;
+    }
+  }
+}
+
+// Icon button
+$icon-button-size: $global-form-element-height-small !default;
+$icon-button-background: $silver-3 !default;
+$icon-button-color: $grey-1 !default;
+$icon-button-disabled-color: $grey-4 !default;
+$icon-button-active-background: $grey-1 !default;
+
+$icon-button-outlined-background-color: transparent;
+$icon-button-outlined-border-color: $grey-4;
+
+$icon-button-transpatent-color: $grey-2;
+$icon-button-transpatent-color-hover: $grey-1;
+
+@mixin button-icon-base {
+  @include button-base;
+  padding: 0;
+  width: $icon-button-size;
+  height: $icon-button-size;
+  min-width: $icon-button-size;
+  color: $icon-button-color;
+  line-height: $icon-button-size;
+  font-size: $button-font-size;
+
+  .ski {
+    font-size: $global-icon-font-size;
+    vertical-align: -15%;
+  }
+
+  &:hover,
+  &:active,
+  &--selected {
+    &,
+    &:hover {
+      background: $icon-button-active-background;
+      color: #fff;
+    }
+  }
+
+  &[disabled],
+  &--disabled {
+    &,
+    &:hover {
+      color: $icon-button-disabled-color;
+    }
+  }
+
+  &__text {
+    width: auto;
+    padding: 0 8px;
+
+    .ski {
+      margin-right: 4px;
+    }
+  }
+
+  &.icon-dropdown {
+    min-width: 50px;
+
+    .icon-dropdown__arrow {
+      margin-left: 3px;
+    }
+  }
+}
+
+@mixin sk-button-icon {
+  @include button-icon-base;
+  background: $icon-button-background;
+
+  &[disabled],
+  &--disabled {
+    &,
+    &:hover {
+      background: $icon-button-background;
+    }
+  }
+
+  &.transparent {
+    background: transparent;
+    color: $icon-button-transpatent-color;
+
+    &:hover,
+    &:active,
+    &.sk-button-icon--selected {
+      &,
+      &:hover {
+        background: transparent;
+        color: $icon-button-transpatent-color-hover;
+      }
+    }
+
+    @include button-disabled-transparent(transparent, $icon-button-disabled-color, transparent, '.sk-button-icon--disabled');
+  }
+}
+
+@mixin sk-button-icon-outlined {
+  @include button-icon-base;
+  background: $icon-button-outlined-background-color;
+  border: 1px solid $icon-button-outlined-border-color;
+
+  &:hover,
+  &:active,
+  &--selected {
+    &,
+    &:hover {
+      border-color: $icon-button-outlined-background-color;
+    }
+  }
+
+  &--no-hover {
+    &:hover,
+    &:active {
+      &,
+      &:hover {
+        background: $icon-button-outlined-background-color;
+        border: 1px solid $icon-button-outlined-border-color;
+        color: $icon-button-color;
+      }
+    }
+  }
+
+  &[disabled],
+  &--disabled {
+    &,
+    &:hover {
+      background: $icon-button-outlined-background-color;
+      border-color: $icon-button-outlined-border-color;
+    }
+  }
+}
+
+@mixin sk-button {
+  @include button-base;
+
+  &.expanded {
+    @include button-expand;
+  }
+
+  // Colors
+  &.primary {
+    @include sk-button-style(map-get($skedulo-palette, primary), auto, $white-1);
+  }
+
+  &.secondary {
+    @include sk-button-style(map-get($skedulo-palette, secondary), $blue-slate-3, $white-1);
+  }
+
+  &.success {
+    @include sk-button-style(map-get($skedulo-palette, success), auto, auto);
+  }
+
+  &.alert {
+    @include sk-button-style(map-get($skedulo-palette, alert), auto, auto);
+  }
+
+  // Hollow style
+  &.hollow {
+    @include button-hollow;
+
+    &.primary {
+      @include button-hollow-style(
+        map-get($skedulo-palette, primary),
+        map-get($skedulo-palette, primary),
+        map-get($skedulo-palette, primary)
+      );
+    }
+
+    &.secondary {
+      @include button-hollow-style(
+        $grey-3,
+        $grey-1,
+        $blue-slate-4
+      );
+    }
+
+    &.success {
+      @include button-hollow-style(
+        map-get($skedulo-palette, success),
+        map-get($skedulo-palette, success),
+        map-get($skedulo-palette, success));
+    }
+
+    &.alert {
+      @include button-hollow-style(
+        map-get($skedulo-palette, alert),
+        map-get($skedulo-palette, alert),
+        map-get($skedulo-palette, alert)
+      );
+    }
+  }
+
+  // Disabled style
+  &.disabled,
+  &[disabled] {
+    @include button-disabled;
+  }
+
+  &.transparent {
+    border-color: transparent;
+    background: transparent;
+    color: $button-transparent-color;
+
+    &:hover,
+    &:active,
+    &.sk-button--selected {
+      &,
+      &:hover {
+        color: $button-transparent-hover-color;
+      }
+    }
+
+    @include button-disabled-transparent(transparent, $button-transparent-disabled-color, transparent, '.disabled');
+  }
+}
+
+@mixin sk-button-small {
+  font-size: .8em;
+  font-family: $body-font-family;
+  color: white;
+  background: $blue-slate-1;
+  outline: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+// Normal button
+.sk-button {
+  @include sk-button;
+}
+
+.sk-button + .sk-button {
+  margin-left: $global-margin;
+}
+
+// Full width button
+.expanded + .expanded {
+  margin-top: $global-margin;
+}
+
+// Icon button
+.sk-button-icon {
+  @include sk-button-icon;
+}
+
+// Outlined icon button
+.sk-button-icon-outlined {
+  @include sk-button-icon-outlined;
+}
+

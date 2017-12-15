@@ -1,0 +1,130 @@
+.scroll {
+  @include scroll-style;
+  @include scroll-vertical;
+  overflow-x: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+.relative {
+  position: relative;
+}
+
+.overlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: $z-index-max;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.center-in-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// All icons must have the global icon font size
+.ski {
+  font-size: $global-icon-font-size;
+}
+
+// Other icons
+.ski-chevron-left {
+  @extend .ski-chevron;
+  transform: rotate(90deg);
+}
+
+.ski-chevron-right {
+  @extend .ski-chevron;
+  transform: rotate(270deg);
+}
+
+.ski-chevron-up {
+  @extend .ski-chevron;
+  transform: rotate(180deg);
+}
+
+// UI styles
+.glyph {
+  border-radius: $global-radius;
+  text-align: center;
+  width: 140px;
+  height: 120px;
+  float: left;
+  display: block;
+  padding: 10px 5px;
+  margin: 5px;
+  border: 1px solid $border-color;
+
+  .mls {
+    display: block;
+  }
+
+  .ski {
+    color: $grey-1;
+    font-size: 40px;
+    line-height: 60px;
+  }
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+
+  .flex-expanded-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+}
+
+.new-project {
+  line-height: $global-form-element-height;
+
+  &-title {
+    font-size: 18px;
+    color: $black-1;
+    padding: 0 24px 0 8px;
+    line-height: 34px;
+  }
+}
+
+pre {
+  position: relative;
+  margin-bottom: $global-padding;
+  button {
+    @include sk-button-small;
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    transition: opacity .5s;
+  }
+  &:hover button {
+    opacity: 1;
+  }
+}
+
+.thumbnail {
+  @include thumbnail;
+  @include thumbnail-size($global-thumbnail-size);
+}

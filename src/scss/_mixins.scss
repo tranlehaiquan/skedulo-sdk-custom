@@ -1,0 +1,141 @@
+@mixin scroll-vertical($value: overlay) {
+  overflow-y: auto; // Fallback style for IE and Firefox
+  overflow-y: $value; // 'overlay' default for Chrome and Safari only
+}
+
+@mixin scroll-horizontal($value: overlay) {
+  overflow-x: auto; // Fallback style for IE and Firefox
+  overflow-x: $value; // 'overlay' default Chrome and Safari only
+}
+
+@mixin scroll-style($foreground-color: $scroll-background ) {
+  &::-webkit-scrollbar {
+    width: $scroll-block-size;
+    height: $scroll-block-size;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: $scroll-block-size / 2;
+    // Add some transparent border that will add some spacing around the styles scroll
+    border: $scroll-spacing solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    background-color: $foreground-color;
+  }
+
+  &::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+}
+
+
+// Thumbnail
+@mixin thumbnail {
+  @include user-select(none);
+  @include thumbnail-size($global-thumbnail-size);
+  border-radius: $global-radius;
+  position: relative;
+  overflow: hidden;
+  background: $global-thumbnail-background;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+
+  span {
+    display: block;
+    text-align: center;
+    padding-top: 1px; // Fix wrong vertical spacing of ProximaNova font
+  }
+
+  img {
+    border-radius: $global-radius;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+}
+
+@mixin thumbnail-size( $size ) {
+  width: $size;
+  height: $size;
+
+  span {
+    width: $size;
+    height: $size;
+    line-height: $size;
+  }
+
+  img {
+    width: $size;
+    height: $size;
+  }
+}
+
+// Dropdowns
+@mixin dropdown-arrow ( $direction, $spacing: '14px' ) {
+  // &:after,
+  &:before {
+    @extend .ski;
+    position: absolute;
+    top: 50%;
+    right: #{$spacing};
+    margin-top: -$global-icon-font-size / 2;
+  }
+
+  @if ($direction == up) {
+    &:before {
+      @extend .ski-chevron-up;
+    }
+  }
+
+  @if ($direction == down) {
+    &:before {
+      @extend .ski-chevron;
+    }
+  }
+}
+
+/// Adds a dropdown arrow.
+@mixin render-dropdown-chevron ($opened-selector: '--opened', $spacing: '14px') {
+  @include dropdown-arrow( down, $spacing );
+
+  &#{$opened-selector} {
+    @include dropdown-arrow( up, $spacing );
+  }
+}
+
+@mixin custom-triangle ($position: top, $background: $white-1) {
+  content: '';
+  display: block;
+  width: $global-triangle-size * 3;
+  height: $global-triangle-size * 3;
+  background: $background;
+  position: absolute;
+  transform: rotate(45deg);
+  z-index: 0;
+  box-shadow: 0 2px 6px 0 rgba(34, 48, 73, 0.24);
+  border-radius: $global-radius;
+
+  @if ($position == top) {
+    top: -$global-triangle-size + 2;
+  }
+
+  @if ($position == bottom) {
+    bottom: -$global-triangle-size + 2;
+  }
+
+  @if ($position == left) {
+    left: -$global-triangle-size + 2;
+  }
+
+  @if ($position == right) {
+    right: -$global-triangle-size + 2;
+  }
+}

@@ -1,0 +1,105 @@
+////
+/// @group callout
+////
+
+/// Default background color.
+/// @type Color
+$callout-background: $white-1 !default;
+
+/// Default border style for callouts.
+/// @type List
+$callout-border: 1px solid $border-color !default;
+
+/// Default bottom margin for callouts.
+/// @type Number
+$callout-margin: 0 0 $form-spacing 0 !default;
+
+/// Default inner padding for callouts.
+/// @type Number
+$callout-padding: $global-input-readonly-padding !default;
+
+/// Default border radius for callouts.
+/// @type Color
+$callout-radius: $global-radius !default;
+
+/// Amount to tint links used within colored panels. Set to `false` to disable this feature.
+/// @type Number | Boolean
+$callout-link-tint: 30% !default;
+
+/// Adds basic styles for a callout, including padding and margin.
+@mixin callout-base() {
+  margin: $callout-margin;
+  padding: $callout-padding;
+  border-left: $callout-border;
+  position: relative;
+  line-height: $global-input-line-height;
+  min-height: $global-form-element-height;
+
+  // Respect the padding, fool.
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+/// Generate quick styles for a callout using a single color and background as a baseline.
+@function get-color-background($name: 'primary', $variant: 'color') {
+  $color: null;
+
+  // Get the color spectrum
+  $color-background: map-get($skedulo-palette-color-background, $name);
+
+  // Get the color map
+  @if $color-background {
+    $color: map-get($color-background, $variant);
+  }
+
+  @return $color;
+}
+
+@mixin skedulo-callout {
+  .callout {
+    @include callout-base;
+
+    @each $name, $color in $skedulo-palette {
+      &.#{$name} {
+        border-color: get-color-background($name, 'color');
+        background: get-color-background($name, 'background');
+      }
+
+      &--actionable.#{$name} {
+        &:after,
+        &:before {
+          background: get-color-background($name, 'color');
+        }
+      }
+    }
+
+    &--actionable {
+      cursor: pointer;
+
+      &:after,
+      &:before {
+        content: '';
+        width: 2px;
+        border-radius: 16px;
+        height: 6px;
+        position: absolute;
+        right: $global-padding;
+      }
+
+      &:before {
+        @include transform(rotate(140deg));
+        top: 13px;
+      }
+
+      &:after {
+        @include transform(rotate(-140deg));
+        top: 16px;
+      }
+    }
+  }
+}
