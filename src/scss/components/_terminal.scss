@@ -1,6 +1,10 @@
 
 .terminal {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  height: calc(100vh - 200px);
+  overflow-y: overlay;
+  @include scroll-style;
+  @include scroll-vertical;
   font-size: $font-size-normal;
   color: $white-1;
   background: $black-1;

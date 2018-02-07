@@ -18,6 +18,7 @@ export class Terminal extends React.PureComponent<IProps, IState> {
   }
 
   private subscription: Subscription
+  private _codeElem: HTMLDivElement
 
   componentWillReceiveProps(newProps: IProps) {
 
@@ -31,9 +32,15 @@ export class Terminal extends React.PureComponent<IProps, IState> {
     this.subscription = this.startStream(this.props.log$)
   }
 
+  componentDidUpdate() {
+    this._codeElem.scrollTop = this._codeElem.scrollHeight
+  }
+
   componentWillUnmount() {
     this.subscription.unsubscribe()
   }
+
+  setCodeRef = (elem: HTMLDivElement) => this._codeElem = elem
 
   startStream(log$: IProps['log$']) {
 
@@ -42,17 +49,24 @@ export class Terminal extends React.PureComponent<IProps, IState> {
 
     return log$
       .do(logItem => {
-        this.setState({ logItems: [...this.state.logItems, this.processLogItem(logItem, i++)] })
+
+        // We "slice" the log to only render the most recent 4000 items
+        // The "key" to this function is actually always guaranteed to be unique
+        // When the index goes higher than the 4000 item max, the "index" would still
+        // be increasing incrementally
+        const updatedLogItems = [...this.state.logItems, this.processLogItem(logItem, i++)]
+        this.setState({ logItems: updatedLogItems.slice(-4000) })
+
       }, void 0)
       .subscribe()
   }
 
-  processLogItem(item: LogItem, index: number) {
+  processLogItem(item: LogItem, key: number) {
     switch (item.type) {
       case 'out':
-        return <div key={ index } className="stdout">{ item.value }</div>
+        return <div key={ key } className="stdout">{ item.value }</div>
       case 'err':
-        return <div key={ index } className="stderr">{ item.value }</div>
+        return <div key={ key } className="stderr">{ item.value }</div>
       default:
         throw new Error('Invalid Type')
     }
@@ -60,7 +74,7 @@ export class Terminal extends React.PureComponent<IProps, IState> {
 
   render() {
     return (
-      <code className="small-12 column terminal">
+      <code className="small-12 column terminal" ref={ this.setCodeRef }>
         { this.state.logItems }
       </code>
     )
