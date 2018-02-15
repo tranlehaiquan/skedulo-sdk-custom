@@ -732,9 +732,7 @@ a {
 
   &:hover,
   &:focus {
-    @if $anchor-text-decoration-hover != $anchor-text-decoration {
-      text-decoration: $anchor-text-decoration-hover;
-    }
+    color: $anchor-color-hover
   }
 }
 
