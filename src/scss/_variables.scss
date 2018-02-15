@@ -1,7 +1,4 @@
 // Colors
-$aqua-1: #59bfd6;
-$aqua-2: #26a7c5;
-
 $black-1: #0c131e;
 $black-2: #1b2a42;
 $black-3: #294167;
@@ -9,7 +6,7 @@ $black-3: #294167;
 $midnight-blue-1: #223049;
 $midnight-blue-2: #2f4265;
 $midnight-blue-3: #32476c;
-$midnight-blue-4:  #425e8f;
+$midnight-blue-4: #425e8f;
 
 $blue-slate-1: #485875;
 $blue-slate-2: #5b7095;
@@ -33,6 +30,9 @@ $skedblue-1: #008cff;
 $skedblue-2: #007ee6;
 $skedblue-3: #0070cc;
 $skedblue-4: #ebf6ff;
+
+$aqua-1: #59bfd6;
+$aqua-2: #26a7c5;
 
 $red-1: #c0142a;
 $red-2: #faedee;
@@ -66,7 +66,8 @@ $color-cancelled: $red-1;
 $color-confirmed: $color-ready;
 $color-checked-in: $color-on-site;
 $color-deleted: $color-cancelled;
-$color-declined: $color-cancelled;
+$color-declined: $grey-4;
+$color-declined-text: $grey-2;
 
 // Other variable colors
 $border-color: $grey-4;
@@ -127,20 +128,17 @@ $global-lineheight: 1.5 !default;
 
 $body-background: $white-1 !default;
 $body-font-size: $font-size-normal;
-$body-font-color: $slate-2 !default;
+$body-font-color: $black-1 !default;
 $body-font-family: 'Proxima Nova', 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif !default;
 
 /// Default color for links.
 /// @type Color
 $anchor-color: $black-1;
+$anchor-color-hover: $skedblue-1;
 
 /// Default text deocration for links.
 /// @type String
 $anchor-text-decoration: none !default;
-
-/// Default text decoration for links on hover.
-/// @type String
-$anchor-text-decoration-hover: underline !default;
 
 $global-spacing: 12px;
 
@@ -166,7 +164,6 @@ $global-padding-large: 24px !default;
 $global-padding-small: 8px !default;
 
 /// Global font weight
-$global-weight-bold: 700 !default;
 $global-weight-semi-bold: 600 !default;
 $global-weight-regular: 400 !default;
 $global-weight-light: 300 !default;
@@ -195,7 +192,9 @@ $custom-triangle-size: $global-triangle-size * 3;
 
 $global-gray-alpha: rgba(0, 0, 0, 0.5);
 
-$global-info-window-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.16);
+$global-info-window-box-shadow: 0 0 6px 1px rgba(0, 0, 0, 0.16);
+
+$global-create-form-selector: '.create-form';
 
 // Loader: spinning circle
 $loader-color: $skedblue-1;
@@ -247,13 +246,28 @@ $tooltip-pip-height: 5px !default;
 $tooltip-radius: $global-radius;
 $tooltip-letter-spacing: 0.2px !default;
 
+// Buttons
+$global-icon-button-color: $grey-1;
+
+// Dropdowns
+$global-dropdown-menu-pip-position: 10px;
+
+// Shared swimlane variables
+$global-side-panel-width: 230px;
+$global-card-backgropund: $white-1;
+$global-swimlane-utilities-height: 50px;
+$global-swimlane-top-bar-top-spacing: 7px;
+$global-swimlane-spacing: 10px;
+$global-lane-header-thumbnail-size: 32px;
+
 // Modals
 $modal-default-width: 600px;
 $modal-tiny-width: 280px;
 $modal-small-width: 480px;
-$modal-large-width: 970px;
+$modal-large-width: 976px;
 
 // Forms
+$global-form-spacing: 14px;
 $global-form-label-color: $black-1;
 $global-form-field-label-color: $grey-1;
 $global-form-spacing: 14px !default;
@@ -266,7 +280,7 @@ $global-input-background-disabled: $silver-3 !default;
 $global-input-placeholder-color: $grey-1 !default;
 $global-input-color: $body-font-color !default;
 $global-input-color-disabled: $grey-3;
-$global-input-radio-margin: 11px !default;
+$global-input-radio-margin: 16px !default;
 $global-input-line-height: 20px !default;
 $global-input-padding: 7px 12px 6px;
 $global-input-readonly-padding: 8px 12px 7px;
@@ -287,7 +301,6 @@ $task-title-color: $black-1;
 $task-description-color: $slate-2;
 
 // Media queries
-
 $small-width: 1440px;
 $medium-width: 1600px;
 $large-width: 1900px;
@@ -302,9 +315,10 @@ $min-xlarge-screen: '(min-width: #{$xlarge-width})';
 $z-index-max: 9999;
 $z-index-modal: 1005;
 $z-index-popover: 1002;
-$z-index-navbar: 1000;
+$z-index-header: 3;
+$z-index-nav: 2;
 $z-index-topbar: 999;
-$z-index-filter-bar: 998;
-$z-index-contextual: 997;
+$z-index-filter-bar: 2;
+$z-index-contextual: 1;
 $z-index-sked-dropdown-menu: 100;
 $z-index-resources-tray: 20;
