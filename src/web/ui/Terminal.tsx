@@ -18,7 +18,12 @@ export class Terminal extends React.PureComponent<IProps, IState> {
   }
 
   private subscription: Subscription
-  private _codeElem: HTMLDivElement
+  private _codeElem?: HTMLDivElement
+
+  constructor(props: IProps) {
+    super(props)
+    this.subscription = this.startStream(this.props.log$)
+  }
 
   componentWillReceiveProps(newProps: IProps) {
 
@@ -28,12 +33,8 @@ export class Terminal extends React.PureComponent<IProps, IState> {
     }
   }
 
-  componentDidMount() {
-    this.subscription = this.startStream(this.props.log$)
-  }
-
   componentDidUpdate() {
-    this._codeElem.scrollTop = this._codeElem.scrollHeight
+    this._codeElem!.scrollTop = this._codeElem!.scrollHeight
   }
 
   componentWillUnmount() {

@@ -52,7 +52,7 @@ export class App extends React.PureComponent<{}, IState> {
   }
 
   private subscription = new Subscription()
-  private eventChannel: EventChannel
+  private eventChannel?: EventChannel
 
   componentDidMount() {
     // We test for the presence of SSL certs and proceed if they're set up.
