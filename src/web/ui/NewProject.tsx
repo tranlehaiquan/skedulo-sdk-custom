@@ -46,9 +46,12 @@ export class NewProject extends React.PureComponent<IProps, IState> {
       },
 
       projectMetadata: {
+        version: 1,
         url: '',
         title: '',
-        menuID: ''
+        description: '',
+        menuID: '',
+        showInNavBar: true
       }
     }
 
@@ -100,12 +103,20 @@ export class NewProject extends React.PureComponent<IProps, IState> {
             <input type="text" value={ projectMetadata.title } onChange={ projectMetadataForm.setMap('title') } onBlur={ projectMetadataForm.setMap('url', urlBasedOnTitleBlurTransform) } />
           </label>
           <label className="required">
+            <span className="span-label">Page Description</span>
+            <input type="text" value={ projectMetadata.description } onChange={ projectMetadataForm.setMap('description') } onBlur={ projectMetadataForm.setMap('description') } />
+          </label>
+          <label className="required">
             <span className="span-label">Page URL</span>
             <input type="text" value={ projectMetadata.url } onChange={ projectMetadataForm.setMap('url') } onBlur={ projectMetadataForm.setMap('url', urlBlurTransform) } />
           </label>
           <label className="required">
             <span className="span-label">Menu I.D.</span>
             <input type="text" value={ projectMetadata.menuID } onChange={ projectMetadataForm.setMap('menuID', menuIdTransform) } />
+          </label>
+          <label className="required">
+            <span className="span-label">Show In Nav Bar?</span>
+            <input type="checkbox" checked={ projectMetadata.showInNavBar } onChange={ projectMetadataForm.setMap('showInNavBar', e => (e.target as HTMLInputElement).checked) } />
           </label>
           <hr />
           <label>

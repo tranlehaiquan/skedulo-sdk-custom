@@ -1,9 +1,14 @@
 import { Subject } from 'rxjs/Subject'
 
 export interface ProjectData {
-  url: string
+  version: number
+
   title: string
+  description: string
+
+  url: string
   menuID: string
+  showInNavBar: boolean
 }
 
 export interface SessionData {

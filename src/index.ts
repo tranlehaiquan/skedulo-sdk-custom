@@ -35,7 +35,7 @@ function createWindow() {
   win = new BrowserWindow({
     show: false,
     width: 1440,
-    height: 700,
+    height: 768,
     icon: path.join(BASE_PATH, '/assets/icons/64x64.png')
   })
 
