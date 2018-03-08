@@ -15,6 +15,7 @@ import { Markdown } from './Markdown'
 import { NewProject } from './NewProject'
 import { SelectProject } from './SelectProject'
 import { SSLHelp } from './SSLHelp'
+import { ManageCustomForms } from './ManageCustomForms'
 
 export enum View {
   Home,
@@ -23,7 +24,8 @@ export enum View {
   SetupSSLMarkdown,
   CreateProject,
   SelectProject,
-  ActiveProject
+  ActiveProject,
+  ManageLegacyCustomForm
 }
 
 function enumUnreachable(_x: never): never {
@@ -112,9 +114,10 @@ export class App extends React.PureComponent<{}, IState> {
   renderActionButtons = () => {
     return (
       <div>
-        <p>To begin, create a new page or select an existing project</p>
+        <p>To begin, select one of the following options.</p>
         <button className="sk-button primary" onClick={ this.setView(View.CreateProject) }>Create new project</button>
         <button className="sk-button secondary" onClick={ this.setView(View.SelectProject) }>Select existing project</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy Custom Forms</button>
       </div>
     )
   }
@@ -202,6 +205,8 @@ export class App extends React.PureComponent<{}, IState> {
         return <ActiveProject back={ this.back } project={ selectedProject! } session={ session! } />
       case View.CreateProject:
         return <NewProject back={ this.back } selectProject={ this.selectProject } />
+      case View.ManageLegacyCustomForm:
+        return <ManageCustomForms back={ this.back } session={ session! } />
     }
 
     return enumUnreachable(currentView)
@@ -212,7 +217,7 @@ export class App extends React.PureComponent<{}, IState> {
     const child = this.renderView()
 
     return (
-      <HeaderLayout onHomeClick={ this.goHome() }>
+      <HeaderLayout onHomeClick={ this.goHome() } key={ this.state.session ? this.state.session.token : '_default' }>
         { child }
       </HeaderLayout>
     )

@@ -76,7 +76,7 @@ function unixExec(command: string, cwd?: string) {
     rcFile = '~/.bashrc'
   }
 
-  const sourceRcCommand = `if [ -f ${rcFile} ]; then; source ${rcFile}; fi;`
+  const sourceRcCommand = `if [ -f ${rcFile} ]; then source ${rcFile}; fi;`
 
   const child = spawn(
     process.env.SHELL as string,

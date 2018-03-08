@@ -63,6 +63,98 @@
   transform: rotate(180deg);
 }
 
+.padding {
+  padding: $global-padding;
+}
+
+.padding-2x {
+  padding: $global-padding*2;
+}
+
+.padding-half {
+  padding: $global-padding/2;
+}
+
+.padding-half-right {
+  padding-right: $global-padding/2;
+}
+
+.padding-top {
+  padding-top: $global-padding !important;
+}
+
+.padding-right {
+  padding-right: $global-padding !important;
+}
+
+.padding-bottom {
+  padding-bottom: $global-padding !important;
+}
+
+.padding-left {
+  padding-left: $global-padding !important;
+}
+
+.rm-padding-top {
+  padding-top: 0 !important;
+}
+
+.rm-padding-right {
+  padding-right: 0 !important;
+}
+
+.rm-padding-bottom {
+  padding-bottom: 0 !important;
+}
+
+.rm-padding-left {
+  padding-left: 0 !important;
+}
+
+.margin-top {
+  margin-top: $global-margin !important;
+}
+
+.margin-right {
+  margin-right: $global-margin !important;
+}
+
+.margin-bottom {
+  margin-bottom: $global-margin !important;
+}
+
+.margin-left {
+  margin-left: $global-margin !important;
+}
+
+.offset-checkbox {
+  margin-left: $checkbox-size + $global-input-radio-margin;
+}
+
+.rm-margin-top {
+  margin-top: 0 !important;
+}
+
+.rm-margin-right {
+  margin-right: 0 !important;
+}
+
+.rm-margin-bottom {
+  margin-bottom: 0 !important;
+}
+
+.rm-margin-left {
+  margin-left: 0 !important;
+}
+
+.rm-margin {
+  margin: 0 !important;
+}
+
+.rm-padding {
+  padding: 0 !important;
+}
+
 // UI styles
 .glyph {
   border-radius: $global-radius;

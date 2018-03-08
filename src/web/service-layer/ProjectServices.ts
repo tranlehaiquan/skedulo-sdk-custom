@@ -4,7 +4,6 @@
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as RP from 'request-promise'
 import { Observable } from 'rxjs'
 import * as tar from 'tar'
 
@@ -12,6 +11,7 @@ import { proxyTo } from '../utils/proxy'
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { ICoverage, ProjectData, SessionData } from './types'
+import { NetworkingService } from './NetworkingService'
 
 export { LogItem } from '../utils/shell'
 
@@ -23,16 +23,7 @@ const proxyServer = proxyTo({ port: 3000 }, { port: 1929 })
 
 export class ProjectServices {
 
-  private baseRequest = RP.defaults({
-    headers: { Authorization: 'Bearer ' + this.session.token },
-    timeout: 1500,
-    gzip: true
-  })
-
-  private apiRequest = this.baseRequest.defaults({
-    baseUrl: this.session.API_SERVER
-  })
-
+  private apiRequest = (new NetworkingService(this.session)).getAPIRequest()
   constructor(private project: string, private session: SessionData) { }
 
   static getTemplates() {

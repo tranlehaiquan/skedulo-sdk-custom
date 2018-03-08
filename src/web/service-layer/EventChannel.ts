@@ -1,5 +1,5 @@
 import { ReplaySubject } from 'rxjs'
-
+import { isEqual } from 'lodash'
 import { start } from '../server/server'
 import { Event, EventType, ISession } from './types'
 
@@ -20,6 +20,7 @@ export class EventChannel {
     return this.obs$
       .filter(({ type }) => type === EventType.Session)
       .map(({ payload }) => payload as ISession['payload'])
+      .distinctUntilChanged((a, b) => isEqual(a, b))
   }
 
   dispose() {
