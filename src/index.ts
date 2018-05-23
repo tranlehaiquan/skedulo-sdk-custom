@@ -4,6 +4,7 @@ import * as url from 'url'
 
 import { BASE_PATH } from './base-path'
 
+// Don't let "win" be garbage collected
 let win: Electron.BrowserWindow | null
 
 app.on('ready', () => {
@@ -34,8 +35,10 @@ function createWindow() {
   // Create a "window", but don't show it
   win = new BrowserWindow({
     show: false,
-    width: 1440,
-    height: 768,
+    minWidth: 1024,
+    minHeight: 700,
+    width: 1024,
+    height: 700,
     icon: path.join(BASE_PATH, '/assets/icons/64x64.png')
   })
 

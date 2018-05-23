@@ -55,6 +55,7 @@ async function getPackageDefinition(directory: string) {
     throw new Error('This does not seem to be a valid project')
   }
 
+  // tslint:disable-next-line:non-literal-require
   const definition = require(path.join(directory, 'definition.json')) as Definition
 
   // Ensure that the object is valid

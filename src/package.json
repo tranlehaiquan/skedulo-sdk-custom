@@ -24,6 +24,7 @@
     "@types/react": "^16.3.14",
     "@types/react-dom": "^16.0.5",
     "@types/request-promise": "^4.1.39",
+    "@types/semver": "^5.5.0",
     "@types/shelljs": "^0.7.5",
     "@types/tar": "^4.0.0",
     "bourbon": "^4.3.4",
@@ -47,7 +48,8 @@
     "react-dom": "^16.3.2",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "rxjs": "^5.5.6",
+    "rxjs": "5",
+    "semver": "^5.5.0",
     "shelljs": "^0.7.8",
     "tar": "^4.0.2"
   },

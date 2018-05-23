@@ -17,19 +17,19 @@ export class Terminal extends React.PureComponent<IProps, IState> {
     logItems: []
   }
 
-  private subscription: Subscription
+  private subscription: Subscription = new Subscription()
   private _codeElem?: HTMLDivElement
 
-  constructor(props: IProps) {
-    super(props)
-    this.subscription = this.startStream(this.props.log$)
+  componentDidMount() {
+    this.subscription.add(this.startStream(this.props.log$))
   }
 
   componentWillReceiveProps(newProps: IProps) {
 
     if (newProps.log$ !== this.props.log$) {
       this.subscription.unsubscribe()
-      this.subscription = this.startStream(newProps.log$)
+      this.subscription = new Subscription()
+      this.subscription.add(this.startStream(newProps.log$))
     }
   }
 

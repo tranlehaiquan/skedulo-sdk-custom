@@ -2,7 +2,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { Subscription } from 'rxjs'
+import { shell } from 'electron'
+import { Subscription, Observable } from 'rxjs'
 
 import { getPlatform, Platform } from '../../platform'
 import { EventChannel } from '../service-layer/EventChannel'
@@ -16,6 +17,12 @@ import { NewProject } from './NewProject'
 import { SelectProject } from './SelectProject'
 import { SSLHelp } from './SSLHelp'
 import { ManageCustomForms } from './ManageCustomForms'
+import { debugDevStack } from '../utils/shell'
+
+function openUrl(url: string) {
+  shell.openExternal(url)
+}
+
 
 export enum View {
   Home,
@@ -41,10 +48,21 @@ export interface IState {
   session: SessionData | null
   errorMessage?: string
   connectionError: string | null
-  userMetadata: UserMetadata | null
+  userMetadata: UserMetadata | null,
+  debug: {
+    node: DebugState | null,
+    yarn: DebugState | null,
+    openssl: DebugState | null
+  }
 }
 
-export class App extends React.PureComponent<{}, IState> {
+interface DebugState {
+  valid: boolean,
+  reason: string | null
+  link: string | null
+}
+
+export class App extends React.Component<{}, IState> {
 
   state: IState = {
     currentView: View.Home,
@@ -54,11 +72,16 @@ export class App extends React.PureComponent<{}, IState> {
     platform: getPlatform(),
     sslCertsPresent: sslCertsPresent(),
     userMetadata: null,
-    connectionError: null
+    connectionError: null,
+    debug: {
+      node: null,
+      yarn: null,
+      openssl: null
+    }
   }
 
   private subscription = new Subscription()
-  private eventChannel?: EventChannel
+  private eventChannel = new EventChannel()
 
   componentDidMount() {
     // We test for the presence of SSL certs and proceed if they're set up.
@@ -69,41 +92,15 @@ export class App extends React.PureComponent<{}, IState> {
       this.setState({ currentView: View.SSLNotSetPrompt })
     } else {
 
-      this.eventChannel = new EventChannel()
-
       const newProjSub = this.eventChannel.onNewProject()
         .do(() => this.setState({ currentView: View.CreateProject }))
         .do(() => MainServices.focus())
-        .subscribe(void 0, error => console.error(error))
 
-      const sessionSub = this.eventChannel.onSessionEvent()
-        .do(session => {
-
-          if (session) {
-
-            this.setState({ session })
-
-            fetch(session.API_SERVER + '/custom/usermetadata', {
-              headers: { Authorization: `Bearer ${session.token}` }
-            })
-              .then(response => {
-                if (response.status === 200) {
-                  return response.json().then(res => res.result as UserMetadata)
-                } else if (response.status >= 400) {
-                  return response.json().then(res => `Connection Error : ${res.errorType}: ${res.message}`).then(errMsg => Promise.reject(errMsg))
-                } else {
-                  return Promise.reject('Could not connect to the server. Please try again later.')
-                }
-              })
-              .then(userMetadata => this.setState({ userMetadata, connectionError: null }))
-              .catch(connectionError => this.setState({ connectionError }))
-          } else {
-            this.setState({ session, connectionError: null, userMetadata: null })
-          }
-        })
-        .subscribe(void 0, error => console.error(error))
-
-      this.subscription.add(newProjSub).add(sessionSub)
+      this.subscription
+        .add(
+          Observable.merge(newProjSub, this.getDebugState(), this.maintainSession())
+            .subscribe(void 0, error => console.error(error))
+        )
     }
   }
 
@@ -132,6 +129,47 @@ export class App extends React.PureComponent<{}, IState> {
     }
   }
 
+  getDebugState = () => {
+
+    const { nodeExists, yarnExists, openSSLExists } = debugDevStack()
+    const setter = (namespace: keyof IState['debug']) => (status: DebugState) => this.setState({ debug: { ...this.state.debug, [namespace]: status } })
+
+    return Observable.merge(
+      nodeExists.do(setter('node')),
+      yarnExists.do(setter('yarn')),
+      openSSLExists.do(setter('openssl'))
+    )
+  }
+
+  maintainSession = () => {
+
+    return this.eventChannel.onSessionEvent()
+      .do(session => {
+
+        if (session) {
+
+          this.setState({ session })
+
+          fetch(session.API_SERVER + '/custom/usermetadata', {
+            headers: { Authorization: `Bearer ${session.token}` }
+          })
+            .then(response => {
+              if (response.status === 200) {
+                return response.json().then(res => res.result as UserMetadata)
+              } else if (response.status >= 400) {
+                return response.json().then(res => `Connection Error : ${res.errorType}: ${res.message}`).then(errMsg => Promise.reject(errMsg))
+              } else {
+                return Promise.reject('Could not connect to the server. Please try again later.')
+              }
+            })
+            .then(userMetadata => this.setState({ userMetadata, connectionError: null }))
+            .catch(connectionError => this.setState({ connectionError }))
+        } else {
+          this.setState({ session: null, connectionError: null, userMetadata: null, currentView: View.Home })
+        }
+      })
+  }
+
   renderNotConnected = () => {
 
     const isConnecting = !!(this.state.session && !this.state.userMetadata)
@@ -144,7 +182,7 @@ export class App extends React.PureComponent<{}, IState> {
     } else if (isConnecting) {
       message = 'Connecting ...'
     } else {
-      message = 'To begin, enable "Developer Mode" from Connected Page settings in Skedulo Web App'
+      message = 'To begin, enable "Developer Mode" from Connected Page settings in the Skedulo Web App'
     }
 
     return (
@@ -168,9 +206,10 @@ export class App extends React.PureComponent<{}, IState> {
     const isConnected = !!(this.state.session && this.state.userMetadata)
 
     return (
-      <ContentLayout centered>
+      <ContentLayout className="content__center--large" centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
         { isConnected ? this.renderActionButtons() : this.renderNotConnected() }
+        <DebugInstall { ...this.state.debug } />
       </ContentLayout>
     )
   }
@@ -179,10 +218,10 @@ export class App extends React.PureComponent<{}, IState> {
     return (
       <ContentLayout centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
-        <p>You need to setup self signed SSL certificates to continue. Click <a onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
-          {/*  or click <a onClick={ this.setView(View.SetupSSLMarkdown) }>here</a>&nbsp; */ }
-          {/* to read documentation related to SSL.  */ }
+        <p>
+          You need to setup self signed SSL certificates to continue. Click <a onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
         </p>
+        <DebugInstall { ...this.state.debug } />
       </ContentLayout>
     )
   }
@@ -259,9 +298,37 @@ export class App extends React.PureComponent<{}, IState> {
     const child = this.renderView()
 
     return (
-      <HeaderLayout onHomeClick={ this.goHome() } key={ this.state.session ? this.state.session.token : '_default' } userMetadata={ this.state.userMetadata }>
+      <HeaderLayout key={ this.state.session ? this.state.session.token : '_default' } onHomeClick={ this.goHome() } userMetadata={ this.state.userMetadata }>
         { child }
       </HeaderLayout>
+    )
+  }
+}
+
+export class DebugInstall extends React.PureComponent<IState['debug']> {
+
+  renderItem = (key: string, item: DebugState | null) => {
+    if (!item) {
+      return <li><i className="icon sk-loader-small" />{ key }</li>
+    }
+
+    if (item.valid) {
+      return <li><i className="icon color-green ski ski-tick" />{ key }</li>
+    } else {
+      return <li><i className="icon color-red ski ski-remove" />{ key } { item.reason }. { item.link && <span><br /><a className="blue-link" onClick={ () => openUrl(item.link!) }>Install Now</a></span> }</li>
+    }
+  }
+
+  render() {
+    return (
+      <div className="text-left padding-top">
+        <h3>System Requirements</h3>
+        <ul className="installation__steps">
+          { this.renderItem('OpenSSL', this.props.openssl) }
+          { this.renderItem('Node', this.props.node) }
+          { this.renderItem('Yarn', this.props.yarn) }
+        </ul>
+      </div>
     )
   }
 }

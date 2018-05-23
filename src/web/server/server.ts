@@ -16,7 +16,7 @@ export function start(eventChannel: Channel) {
   const errJsonOptions = {
     // Avoid showing the stacktrace in 'production' env
     postFormat: (_: Error, obj: Error) => {
-      process.env.NODE_ENV === 'production' ? omit(obj, 'stack') : obj
+      return process.env.NODE_ENV === 'production' ? omit(obj, 'stack') : obj
     }
   }
 

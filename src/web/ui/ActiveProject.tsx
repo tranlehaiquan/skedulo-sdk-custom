@@ -97,7 +97,7 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
       message = 'Preparing ...'
     } else if (devReady) {
       const url = this.props.session.origin + '/c-dev'
-      message = <React.Fragment><p>Navigate to the following link to view the page</p><p><a onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
+      message = <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
     } else {
       message = 'Select "start development" to begin building your connected page'
     }

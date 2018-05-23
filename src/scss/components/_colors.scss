@@ -1,0 +1,289 @@
+////////////////////////////////////
+// Statuses background and buttons
+/////////////////////////////////////
+
+.color-base {
+  color: $body-font-color;
+}
+
+.color-black {
+  color: #000;
+}
+
+.color-blue {
+  color: $skedblue-1;
+}
+
+.color-green {
+  color: $lime-1;
+}
+
+.color-grey {
+  color: $grey-1;
+}
+
+.color-orange {
+  color: $orange-1;
+}
+
+.color-red {
+  color: $red-1;
+}
+
+.color-white {
+  color: #fff;
+}
+
+.bg-color-silver {
+  background: $silver-1;
+}
+
+.border-base {
+  border-color: $body-font-color;
+}
+
+.border-black {
+  border-color: #000 !important;
+}
+
+.border-blue {
+  border-color: $skedblue-1 !important;
+}
+
+.border-green {
+  border-color: $lime-1 !important;
+}
+
+.border-grey {
+  border-color: $grey-1 !important;
+}
+
+.border-orange {
+  border-color: $orange-1 !important;
+}
+
+.border-red {
+  border-color: $red-1 !important;
+}
+
+.border-white {
+  border-color: #fff !important;
+}
+
+.bg-base {
+  background: $body-font-color !important;
+}
+
+.bg-black {
+  background: #000 !important;
+}
+
+.bg-blue {
+  background: $skedblue-1 !important;
+  color: #fff;
+}
+
+.bg-green {
+  background: $lime-1 !important;
+  color: #fff;
+}
+
+.bg-grey {
+  background: $grey-1 !important;
+  color: #fff;
+}
+
+.bg-orange {
+  background: $orange-1 !important;
+  color: #fff;
+}
+
+.bg-red {
+  background: $red-1 !important;
+  color: #fff;
+}
+
+.bg-white {
+  background: #fff !important;
+  color: $body-font-color;
+}
+
+// Statuses colors
+.color-queued,
+.ski-status-queued {
+  color: $color-queued !important;
+}
+
+.color-pending-allocation,
+.ski-status-pending-allocation {
+  color: $color-pending-allocation !important;
+}
+
+.color-pending-dispatch,
+.ski-status-pending-dispatch {
+  color: $color-pending-dispatch !important;
+}
+
+.color-dispatched,
+.ski-status-dispatched {
+  color: $color-dispatched !important;
+}
+
+.color-ready,
+.ski-status-ready {
+  color: $color-ready !important;
+}
+
+.color-en-route,
+.ski-status-en-route {
+  color: $color-en-route !important;
+}
+
+.color-on-site,
+.ski-status-on-site {
+  color: $color-on-site !important;
+}
+
+.color-in-progress,
+.ski-status-in-progress {
+  color: $color-in-progress !important;
+}
+
+.color-complete,
+.ski-status-complete {
+  color: $color-complete !important;
+}
+
+.color-cancelled,
+.ski-status-cancelled {
+  color: $color-cancelled !important;
+}
+
+.border-queued {
+  border-color: $color-queued !important;
+}
+
+.border-pending-allocation {
+  border-color: $color-pending-allocation !important;
+}
+
+.border-pending-dispatch {
+  border-color: $color-pending-dispatch !important;
+}
+
+.border-dispatched {
+  border-color: $color-dispatched !important;
+}
+
+.border-ready {
+  border-color: $color-ready !important;
+}
+
+.border-en-route {
+  border-color: $color-en-route !important;
+}
+
+.border-on-site {
+  border-color: $color-on-site !important;
+}
+
+.border-in-progress {
+  border-color: $color-in-progress !important;
+}
+
+.border-complete {
+  border-color: $color-complete !important;
+}
+
+.border-cancelled {
+  border-color: $color-cancelled !important;
+}
+
+.background-queued {
+  background: $color-queued !important;
+}
+
+.background-pending-allocation {
+  background: $color-pending-allocation !important;
+}
+
+.background-pending-dispatch {
+  background: $color-pending-dispatch !important;
+}
+
+.background-dispatched {
+  background: $color-dispatched !important;
+}
+
+.background-ready {
+  background: $color-ready !important;
+}
+
+.background-en-route {
+  background: $color-en-route !important;
+}
+
+.background-on-site {
+  background: $color-on-site !important;
+}
+
+.background-in-progress {
+  background: $color-in-progress !important;
+}
+
+.background-complete {
+  background: $color-complete !important;
+}
+
+.background-cancelled {
+  background: $color-cancelled !important;
+}
+
+// Allocations statuses
+.color-confirmed {
+  color: $color-confirmed !important;
+}
+
+.color-checked-in {
+  color: $color-checked-in !important;
+}
+
+.color-deleted {
+  color: $color-deleted !important;
+}
+
+.color-declined {
+  color: $color-declined-text !important;
+}
+
+.border-confirmed {
+  border-color: $color-confirmed !important;
+}
+
+.border-checked-in {
+  border-color: $color-checked-in !important;
+}
+
+.border-deleted {
+  border-color: $color-deleted !important;
+}
+
+.border-declined {
+  border-color: $color-declined !important;
+}
+
+.background-confirmed {
+  background: $color-confirmed !important;
+}
+
+.background-checked-in {
+  background: $color-checked-in !important;
+}
+
+.background-deleted {
+  background: $color-deleted !important;
+}
+
+.background-declined {
+  background: $color-declined !important;
+}

@@ -1,0 +1,113 @@
+@import 'skis';
+
+// Double-bounce / circles loader
+@mixin loader-double-bounce($size: 64px) {
+  .shrink-grow {
+    width: $size;
+    height: $size;
+    border-radius: 50%;
+    background-color: $loader-color;
+    opacity: 0.6;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+    animation: sk-bounce 2.0s infinite ease-in-out;
+  }
+
+  .circle-2 {
+    -webkit-animation-delay: -1.0s;
+    animation-delay: -1.0s;
+  }
+
+  @-webkit-keyframes sk-bounce {
+    0%, 100% { -webkit-transform: scale(0.0) }
+    50% { -webkit-transform: scale(1.0) }
+  }
+
+  @keyframes sk-bounce {
+    0%, 100% {
+      transform: scale(0.0);
+      -webkit-transform: scale(0.0);
+    } 50% {
+        transform: scale(1.0);
+        -webkit-transform: scale(1.0);
+      }
+  }
+}
+
+// Spinner
+@mixin loader($size: 10em) {
+  $border: $size * 0.11;
+
+  @include animation(sk-spin 1.5s infinite linear);
+  border-top: $border solid rgba($loader-color, 0.2);
+  border-right: $border solid rgba($loader-color, 0.2);
+  border-bottom: $border solid rgba($loader-color, 0.2);
+  border-left: $border solid $loader-color;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  border-radius: 50%;
+  width: $size;
+  height: $size;
+  z-index: 9999;
+
+  &:after {
+    border-radius: 50%;
+    width: $size;
+    height: $size;
+  }
+
+  &.center-in-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -$size/2;
+    margin-top: -$size/2;
+  }
+}
+
+.sk-loader-large {
+  height: 64px;
+  width: 64px;
+  position: relative;
+  @include loader-double-bounce();
+}
+
+.sk-loader-medium {
+  @include loader($loader-medium);
+}
+
+.sk-loader-small {
+  @include loader($loader-small);
+}
+
+.sk-loader-tiny {
+  @include loader($loader-tiny);
+}
+
+@-webkit-keyframes sk-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sk-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}

@@ -2,6 +2,7 @@ import { ChildProcess, spawn } from 'child_process'
 import * as _ from 'lodash'
 import { Observable } from 'rxjs'
 import * as shell from 'shelljs'
+import * as semver from 'semver'
 
 import { getPlatform } from '../../platform'
 
@@ -39,8 +40,8 @@ export function shellExec(command: string, cwd?: string) {
 
     const sub = Observable
       .merge(
-      stdout$.map((out): LogItem => ({ type: 'out', value: out })),
-      stderr$.map((out): LogItem => ({ type: 'err', value: out }))
+        stdout$.map((out): LogItem => ({ type: 'out', value: out })),
+        stderr$.map((out): LogItem => ({ type: 'err', value: out }))
       )
       .subscribe(val => observer.next(val), err => observer.error(err), () => observer.complete())
 
@@ -90,6 +91,89 @@ function unixExec(command: string, cwd?: string) {
   return child
 }
 
+export function debugDevStack() {
+
+  const yarnExists = shellExec('yarn --version')
+    .last()
+    .map(notification => {
+
+      const versionRange = `>=1.3`
+      const installLink = 'https://yarnpkg.com/lang/en/docs/install'
+
+      if (notification.type === 'out') {
+        const valid = semver.satisfies(notification.value, versionRange)
+
+        return {
+          valid,
+          reason: valid ? null : `version must be ${versionRange}`,
+          link: valid ? null : installLink
+        }
+      } else {
+        return {
+          valid: false,
+          reason: `is not installed. Please ensure Yarn${versionRange} is installed and properly set on your $PATH`,
+          link: installLink
+        }
+      }
+    })
+
+  const nodeExists = shellExec('node --version')
+    .last()
+    .map(notification => {
+
+      const versionRange = `>=8.9`
+      const installLink = 'https://nodejs.org/en/download/package-manager'
+
+      if (notification.type === 'out') {
+        const valid = semver.satisfies(notification.value, versionRange)
+
+        return {
+          valid,
+          reason: valid ? null : `version must be ${versionRange}`,
+          link: valid ? null : installLink
+        }
+      } else {
+        return {
+          valid: false,
+          reason: `is not installed. Please ensure NodeJS${versionRange} is installed and properly set on your $PATH`,
+          link: installLink
+        }
+      }
+    })
+
+  const openSSLExists = shellExec('openssl version')
+    .last()
+    .map(notification => {
+
+      const versionRange = `>=2.2`
+
+      if (notification.type === 'out') {
+
+        const coerced = semver.coerce(notification.value)
+        const valid = coerced ? semver.satisfies(coerced.version, versionRange) : false
+
+        return {
+          valid,
+          reason: valid ? null : `version must be ${versionRange}`,
+          link: null
+        }
+      } else {
+        return {
+          valid: false,
+          reason: `not found. Please ensure OpenSSL${versionRange} is installed and properly set on your $PATH`,
+          link: null
+        }
+      }
+
+    })
+
+  return {
+    openSSLExists,
+    nodeExists,
+    yarnExists
+  }
+}
+
 /**
  * Process Management ( side-state )
  */
@@ -117,5 +201,10 @@ function killOrRemoveProcess(pid: number) {
 }
 
 declare const window: any
-window.addEventListener('beforeunload', cleanupRunningProcesses)
+window.addEventListener('beforeunload', () => cleanupRunningProcesses())
+window.addEventListener('unload', () => cleanupRunningProcesses)
 
+// Cleanup running processes on EXIT
+process.on('exit', () => {
+  cleanupRunningProcesses()
+})

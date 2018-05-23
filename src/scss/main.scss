@@ -3,6 +3,7 @@
 @import 'mixins';
 @import 'variables';
 @import 'components/normalize';
+@import 'icons/icons';
 @import 'components/layout';
 @import '../../../frontend/public/styles/scss/icons/icons';
 @import 'components/loading';
@@ -12,5 +13,7 @@
 @import 'components/grid';
 @import 'components/terminal';
 @import 'components/misc';
+@import 'components/colors';
 @import 'components/callout';
 @include skedulo-callout;
+@import 'components/app';

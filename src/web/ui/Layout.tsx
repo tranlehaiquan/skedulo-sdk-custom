@@ -44,12 +44,13 @@ export const HeaderLayout: React.StatelessComponent<ILayoutProps> = props => {
 
 export interface IContentProps {
   centered?: boolean
+  className?: string
 }
 
 export const ContentLayout: React.StatelessComponent<IContentProps> = props => {
 
   return (
-    <div data-sk-name="content" className={ props.centered ? 'content__center text-center' : 'padding' } >
+    <div data-sk-name="content" className={ (props.centered ? 'content__center text-center ' : 'padding ') + (props.className ? props.className : '') } >
       { props.children }
     </div>
   )
