@@ -13,8 +13,9 @@ export interface ProjectData {
 
 export interface SessionData {
   token: string
-  REALTIME_SERVER: string
+  origin: string
   API_SERVER: string
+  REALTIME_SERVER: string
 }
 
 export enum EventType {
@@ -51,3 +52,37 @@ export interface ICoverage {
 export type Event = INewProject | ISession
 
 export type Channel = Subject<Event>
+
+export interface WhoAmI {
+  resourceId: string
+  tenantId: string
+  userId: string
+  username: string
+  vendorInfo: {
+    vendor: string
+    vendorUserId: string
+  }
+  roles: string[]
+}
+
+export interface UserMetadata {
+  id: string,
+  email: string,
+  username: string,
+  fullName: string,
+  profileId: string,
+  roleId: string,
+  orgName: string,
+  orgId: string,
+  userroles: string,
+  smallPhotoUrl: string,
+  category: null,
+  resourceId: string,
+  team: {
+    id: string,
+    name: string,
+    description: string,
+    vendor: string,
+    orgId: string
+  }
+}

@@ -1,7 +1,6 @@
 
 .terminal {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-  height: calc(100vh - 200px);
   overflow-y: overlay;
   @include scroll-style;
   @include scroll-vertical;
@@ -27,5 +26,9 @@
     outline: 0;
     border: 0;
     cursor: pointer;
+  }
+
+  &--full-height {
+    height: calc(100vh - 250px);
   }
 }

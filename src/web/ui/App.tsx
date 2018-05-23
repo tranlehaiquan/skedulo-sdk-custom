@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs'
 import { getPlatform, Platform } from '../../platform'
 import { EventChannel } from '../service-layer/EventChannel'
 import { MainServices } from '../service-layer/MainServices'
-import { ProjectData, SessionData } from '../service-layer/types'
+import { ProjectData, SessionData, UserMetadata } from '../service-layer/types'
 import { setUpSSLDocLocation, sslCertsPresent } from '../utils/ssl'
 import { ActiveProject } from './ActiveProject'
 import { ContentLayout, HeaderLayout } from './Layout'
@@ -40,6 +40,8 @@ export interface IState {
   selectedProject: string | null
   session: SessionData | null
   errorMessage?: string
+  connectionError: string | null
+  userMetadata: UserMetadata | null
 }
 
 export class App extends React.PureComponent<{}, IState> {
@@ -50,7 +52,9 @@ export class App extends React.PureComponent<{}, IState> {
     session: null,
     selectedProject: null,
     platform: getPlatform(),
-    sslCertsPresent: sslCertsPresent()
+    sslCertsPresent: sslCertsPresent(),
+    userMetadata: null,
+    connectionError: null
   }
 
   private subscription = new Subscription()
@@ -73,7 +77,30 @@ export class App extends React.PureComponent<{}, IState> {
         .subscribe(void 0, error => console.error(error))
 
       const sessionSub = this.eventChannel.onSessionEvent()
-        .do(session => this.setState({ session }))
+        .do(session => {
+
+          if (session) {
+
+            this.setState({ session })
+
+            fetch(session.API_SERVER + '/custom/usermetadata', {
+              headers: { Authorization: `Bearer ${session.token}` }
+            })
+              .then(response => {
+                if (response.status === 200) {
+                  return response.json().then(res => res.result as UserMetadata)
+                } else if (response.status >= 400) {
+                  return response.json().then(res => `Connection Error : ${res.errorType}: ${res.message}`).then(errMsg => Promise.reject(errMsg))
+                } else {
+                  return Promise.reject('Could not connect to the server. Please try again later.')
+                }
+              })
+              .then(userMetadata => this.setState({ userMetadata, connectionError: null }))
+              .catch(connectionError => this.setState({ connectionError }))
+          } else {
+            this.setState({ session, connectionError: null, userMetadata: null })
+          }
+        })
         .subscribe(void 0, error => console.error(error))
 
       this.subscription.add(newProjSub).add(sessionSub)
@@ -106,8 +133,22 @@ export class App extends React.PureComponent<{}, IState> {
   }
 
   renderNotConnected = () => {
+
+    const isConnecting = !!(this.state.session && !this.state.userMetadata)
+    const connectionError = this.state.connectionError
+
+    let message: string
+
+    if (connectionError) {
+      message = connectionError
+    } else if (isConnecting) {
+      message = 'Connecting ...'
+    } else {
+      message = 'To begin, enable "Developer Mode" from Connected Page settings in Skedulo Web App'
+    }
+
     return (
-      <p>To begin, enable "Developer Mode" from Connected Page settings in Skedulo Web App.</p>
+      <p>{ message }</p>
     )
   }
 
@@ -124,7 +165,7 @@ export class App extends React.PureComponent<{}, IState> {
 
   renderHome = () => {
 
-    const isConnected = !!this.state.session
+    const isConnected = !!(this.state.session && this.state.userMetadata)
 
     return (
       <ContentLayout centered>
@@ -138,9 +179,10 @@ export class App extends React.PureComponent<{}, IState> {
     return (
       <ContentLayout centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
-        <p>You need to setup SSL certificates to continue. Click <a onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp;
-          for instructions on how to do this for your platform or click <a onClick={ this.setView(View.SetupSSLMarkdown) }>here</a>&nbsp;
-          to read documentation related to SSL. </p>
+        <p>You need to setup self signed SSL certificates to continue. Click <a onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
+          {/*  or click <a onClick={ this.setView(View.SetupSSLMarkdown) }>here</a>&nbsp; */ }
+          {/* to read documentation related to SSL.  */ }
+        </p>
       </ContentLayout>
     )
   }
@@ -217,7 +259,7 @@ export class App extends React.PureComponent<{}, IState> {
     const child = this.renderView()
 
     return (
-      <HeaderLayout onHomeClick={ this.goHome() } key={ this.state.session ? this.state.session.token : '_default' }>
+      <HeaderLayout onHomeClick={ this.goHome() } key={ this.state.session ? this.state.session.token : '_default' } userMetadata={ this.state.userMetadata }>
         { child }
       </HeaderLayout>
     )

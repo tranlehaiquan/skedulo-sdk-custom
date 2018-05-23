@@ -33,14 +33,27 @@ export default function (eventChannel: Channel) {
 
   router.post('/session/start', jsonParser, validationFnForSchema(EnvSchema), ctx => {
 
+    const origin = ctx.headers.origin
     const env = ctx.state.body as Pick<SessionData, 'REALTIME_SERVER' | 'API_SERVER'>
+    const token = ctx.state.token as string
+
+    if (!token) {
+      ctx.throw(401, { error: 'Authentication Failed' })
+      return
+    }
+
+    if (!origin || !origin.length) {
+      ctx.throw(400, { error: 'Invalid Origin' })
+      return
+    }
 
     eventChannel.next({
       type: EventType.Session,
       payload: {
-        token: ctx.state.token,
-        REALTIME_SERVER: env.REALTIME_SERVER,
-        API_SERVER: env.API_SERVER
+        token,
+        origin,
+        API_SERVER: env.API_SERVER,
+        REALTIME_SERVER: env.REALTIME_SERVER
       }
     })
 

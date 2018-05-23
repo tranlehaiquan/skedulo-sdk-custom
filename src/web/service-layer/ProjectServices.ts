@@ -31,7 +31,7 @@ export class ProjectServices {
     return [
       {
         name: 'Skedulo Base | React/Typescript',
-        path: path.join(TEMPLATE_PATH, '/react-ts-2.6.tar.gz')
+        path: path.join(TEMPLATE_PATH, '/react-ts-2.8.tar.gz')
       }
     ]
   }

@@ -6,11 +6,15 @@ import { LogItem, ProjectServices } from '../service-layer/ProjectServices'
 import { ProjectData, SessionData } from '../service-layer/types'
 import { ContentLayout } from './Layout'
 import { Terminal } from './Terminal'
+import { shell } from 'electron'
+
+function openUrl(url: string) {
+  shell.openExternal(url)
+}
 
 export interface IProps {
   project: string
   back: () => void
-
   session: SessionData
 }
 
@@ -87,12 +91,13 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
 
     const { devReady, inProgress } = this.state
 
-    let message = ``
+    let message: React.ReactFragment
 
     if (!devReady && inProgress) {
       message = 'Preparing ...'
     } else if (devReady) {
-      message = 'Ready! You can now develop this connected page and view it in Skedulo'
+      const url = this.props.session.origin + '/c-dev'
+      message = <React.Fragment><p>Navigate to the following link to view the page</p><p><a onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
     } else {
       message = 'Select "start development" to begin building your connected page'
     }

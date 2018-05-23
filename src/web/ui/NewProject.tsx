@@ -99,11 +99,11 @@ export class NewProject extends React.PureComponent<IProps, IState> {
 
         <div className="padding-top padding-bottom">
           <label className="required">
-            <span className="span-label">Page title</span>
+            <span className="span-label">Title</span>
             <input type="text" value={ projectMetadata.title } onChange={ projectMetadataForm.setMap('title') } onBlur={ projectMetadataForm.setMap('url', urlBasedOnTitleBlurTransform) } />
           </label>
           <label className="required">
-            <span className="span-label">Page Description</span>
+            <span className="span-label">Description</span>
             <input type="text" value={ projectMetadata.description } onChange={ projectMetadataForm.setMap('description') } onBlur={ projectMetadataForm.setMap('description') } />
           </label>
           <label className="required">

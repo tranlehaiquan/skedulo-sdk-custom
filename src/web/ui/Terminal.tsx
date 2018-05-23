@@ -75,7 +75,7 @@ export class Terminal extends React.PureComponent<IProps, IState> {
 
   render() {
     return (
-      <code className="small-12 column terminal" ref={ this.setCodeRef }>
+      <code className="small-12 column terminal terminal--full-height" ref={ this.setCodeRef }>
         { this.state.logItems }
       </code>
     )
