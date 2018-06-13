@@ -2,13 +2,17 @@ import * as https from 'https'
 import * as KCors from 'kcors'
 import * as Koa from 'koa'
 import * as KJsonError from 'koa-json-error'
-import { omit } from 'lodash'
+import { omit, noop } from 'lodash'
 
 import { Channel } from '../service-layer/types'
-import { getSSLOptions } from '../utils/ssl'
+import { getSSLOptions, sslCertsPresent } from '../utils/ssl'
 import { setupRouter } from './routes'
 
 export function start(eventChannel: Channel) {
+
+  if (!sslCertsPresent()) {
+    return noop
+  }
 
   const app = new Koa()
 

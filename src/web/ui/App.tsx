@@ -90,6 +90,11 @@ export class App extends React.Component<{}, IState> {
     // correctly to keep things simple. We can automate that process down the line.
     if (!this.state.sslCertsPresent) {
       this.setState({ currentView: View.SSLNotSetPrompt })
+
+      this.subscription.add(
+        this.getDebugState().subscribe(void 0, error => console.error(error))
+      )
+
     } else {
 
       const newProjSub = this.eventChannel.onNewProject()
@@ -219,7 +224,7 @@ export class App extends React.Component<{}, IState> {
       <ContentLayout centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
         <p>
-          You need to setup self signed SSL certificates to continue. Click <a onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
+          You need to setup self-signed SSL certificates to continue. Click <a className="blue-link" onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
         </p>
         <DebugInstall { ...this.state.debug } />
       </ContentLayout>

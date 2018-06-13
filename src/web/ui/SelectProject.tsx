@@ -60,9 +60,9 @@ export class SelectProject extends React.PureComponent<IProps, IState> {
           disabled={ !this.state.selectedDirectory }>
           Open project</button>
 
-        <hr />
+        { /* <hr />
         <h2>Recent projects</h2>
-        <div>List recently opened projects here ...</div>
+        <div>List recently opened projects here ...</div> */ }
 
       </ContentLayout>
     )

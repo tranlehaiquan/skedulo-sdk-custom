@@ -65,7 +65,7 @@ export class SSLHelp extends React.PureComponent {
         </p>
 
         <p>
-          The commands described below must be run in a unix terminal of choice. They are tailoured to your system and once complete, will generate
+          The commands described below must be run in a unix terminal of choice. They are tailored to your system and once complete, will generate
           Root CA certificates and place them in the following folder { sslDir }.
         </p>
 
@@ -80,7 +80,7 @@ export class SSLHelp extends React.PureComponent {
         <h2>Create Root CA</h2>
         { rootCACerts.map((command, index) => <CommandSegment key={ index } command={ command } onClick={ this.copyToClipboard(command) } />) }
 
-        <h2>Create Self Signed Cert</h2>
+        <h2>Create Self-Signed Cert</h2>
         { selfSignedCerts.map((command, index) => <CommandSegment key={ index } command={ command } onClick={ this.copyToClipboard(command) } />) }
 
         <h2>Trusting your self-signed cert</h2>
