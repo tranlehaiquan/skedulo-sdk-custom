@@ -16,11 +16,13 @@
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
     "arrow-parens": [true, "ban-single-arg-parens"],
     "no-var-requires": [false],
+    "member-ordering": [false],
+    "no-submodule-imports": [false],
 
     // JSX-Rules
     "jsx-space-before-trailing-slash": [true],
     "jsx-equals-spacing": [true, "never"],
     "jsx-curly-spacing": [true, "always"],
-    "jsx-alignment": [true, "always"]
+    "jsx-alignment": [false, "always"]
   }
 }

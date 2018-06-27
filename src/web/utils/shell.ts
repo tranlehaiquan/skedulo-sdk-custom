@@ -145,7 +145,17 @@ export function debugDevStack() {
     .last()
     .map(notification => {
 
-      const versionRange = `>=2.2`
+      const versionRange = `>=1.1`
+
+      let link: string | null = null
+
+      switch (getPlatform()) {
+        case 'win':
+          link = `https://chocolatey.org/packages/OpenSSL.Light`
+          break
+        default:
+          break
+      }
 
       if (notification.type === 'out') {
 
@@ -155,13 +165,13 @@ export function debugDevStack() {
         return {
           valid,
           reason: valid ? null : `version must be ${versionRange}`,
-          link: null
+          link
         }
       } else {
         return {
           valid: false,
           reason: `not found. Please ensure OpenSSL${versionRange} is installed and properly set on your $PATH`,
-          link: null
+          link
         }
       }
 

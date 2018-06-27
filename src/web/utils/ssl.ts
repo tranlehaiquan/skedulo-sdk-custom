@@ -46,11 +46,11 @@ function getUnixCreateSSLCommands(destDir: string = sslDir) {
   const keyPath = path.join(destDir, '/server.key')
   const certPath = path.join(destDir, '/server.crt')
 
-  const makeDir = `mkdir ${ destDir }`
-  const createRootCAKey = `openssl genrsa -des3 -out ${ rootCAKeyPath } 2048`
-  const createRootCACert = `openssl req -x509 -new -nodes -key ${ rootCAKeyPath } -sha256 -days 1024 -out ${ rootCACertPath }`
+  const makeDir = `mkdir ${destDir}`
+  const createRootCAKey = `openssl genrsa -des3 -out ${rootCAKeyPath} 2048`
+  const createRootCACert = `openssl req -x509 -new -nodes -key ${rootCAKeyPath} -sha256 -days 1024 -out ${rootCACertPath}`
 
-  const createSelfSignedCert1 = `openssl req -new -sha256 -nodes -out ${ csrPath } -newkey rsa:2048 -keyout ${ keyPath } -config <( cat <<EOF
+  const createSelfSignedCert1 = `openssl req -new -sha256 -nodes -out ${csrPath} -newkey rsa:2048 -keyout ${keyPath} -config <( cat <<EOF
 [req]
 default_bits = 2048
 prompt = no
@@ -68,7 +68,7 @@ CN = localhost
 EOF
 )`
 
-  const createSelfSignedCert2 = `openssl x509 -req -in ${ csrPath } -CA ${ rootCACertPath } -CAkey ${ rootCAKeyPath } -CAcreateserial -out ${ certPath } -days 500 -sha256 -extfile <( cat <<EOF
+  const createSelfSignedCert2 = `openssl x509 -req -in ${csrPath} -CA ${rootCACertPath} -CAkey ${rootCAKeyPath} -CAcreateserial -out ${certPath} -days 500 -sha256 -extfile <( cat <<EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
@@ -103,18 +103,20 @@ function getWindowsCreateSSLCommands(destDir: string = sslDir) {
   const csrPath = path.join(destDir, '/server.csr')
   const keyPath = path.join(destDir, '/server.key')
   const certPath = path.join(destDir, '/server.crt')
+  const configPath = path.join(destDir, '/config.cnf')
+  const v3Path = path.join(destDir, '/v3.ext')
 
-  const makeDir = `mkdir ${ destDir }`
-  const createRootCAKey = `openssl genrsa -des3 -out ${ rootCAKeyPath } 2048`
-  const createRootCACert = `openssl req -x509 -new -nodes -key ${ rootCAKeyPath } -sha256 -days 1024 -out ${ rootCACertPath }`
+  const makeDir = `mkdir ${destDir}`
+  const createRootCAKey = `openssl genrsa -des3 -out ${rootCAKeyPath} 2048`
+  const createRootCACert = `openssl req -x509 -new -nodes -key ${rootCAKeyPath} -sha256 -days 1024 -out ${rootCACertPath}`
 
-  const createSelfSignedCert1 = `openssl req -new -sha256 -nodes -out ${ csrPath } -newkey rsa:2048 -keyout ${ keyPath } -config <(
+  const createSelfSignedConfig = `(
 echo [req]
 echo default_bits = 2048
 echo prompt = no
 echo default_md = sha256
 echo distinguished_name = dn
-echo
+echo.
 echo [dn]
 echo C=US
 echo ST=New York
@@ -123,17 +125,21 @@ echo O=End Point
 echo OU=Testing Domain
 echo emailAddress=admin@myemail.com
 echo CN = localhost
-)`
+) > ${configPath}`
 
-  const createSelfSignedCert2 = `openssl x509 -req -in ${ csrPath } -CA ${ rootCACertPath } -CAkey ${ rootCAKeyPath } -CAcreateserial -out ${ certPath } -days 500 -sha256 -extfile <( cat <<EOF
+  const createV3 = `(
 echo authorityKeyIdentifier=keyid,issuer
 echo basicConstraints=CA:FALSE
 echo keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 echo subjectAltName = @alt_names
-echo
+echo.
 echo [alt_names]
 echo DNS.1 = localhost
-)`
+) > ${v3Path}`
+
+  const createSelfSignedCert1 = `openssl req -new -sha256 -nodes -out ${csrPath} -newkey rsa:2048 -keyout ${keyPath} -config ${configPath}`
+
+  const createSelfSignedCert2 = `openssl x509 -req -in ${csrPath} -CA ${rootCACertPath} -CAkey ${rootCAKeyPath} -CAcreateserial -out ${certPath} -days 500 -sha256 -extfile ${v3Path}`
 
   const rootCACerts = [
     createRootCAKey,
@@ -141,6 +147,8 @@ echo DNS.1 = localhost
   ]
 
   const selfSignedCerts = [
+    createSelfSignedConfig,
+    createV3,
     createSelfSignedCert1,
     createSelfSignedCert2
   ]

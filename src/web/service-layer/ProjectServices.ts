@@ -30,7 +30,7 @@ export class ProjectServices {
 
     return [
       {
-        name: 'React | Typescript | SASS',
+        name: 'React | Typescript | SASS (Recommended)',
         path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
       },
       {
