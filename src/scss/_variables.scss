@@ -117,6 +117,7 @@ $scroll-background: $grey-3;
 
 $global-font-size: 100% !default;
 
+$font-size-xsmall: 11px;
 $font-size-small: 12px;
 $font-size-normal: 13px;
 $font-size-large: 14px;
@@ -164,6 +165,7 @@ $global-padding-large: 24px !default;
 $global-padding-small: 8px !default;
 
 /// Global font weight
+$global-weight-medium: 500 !default;
 $global-weight-semi-bold: 600 !default;
 $global-weight-regular: 400 !default;
 $global-weight-light: 300 !default;
