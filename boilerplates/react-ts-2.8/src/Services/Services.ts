@@ -50,8 +50,8 @@ export interface Vocabulary {
 
 export interface Services {
   graphQL: {
-    fetch<T>(operation: GraphQLRequest): Promise<T>
-    mutate(operation: GraphQLRequest): Promise<GraphQLMutationResult>
+    fetch<T>(operation: GraphQLRequest, endpoint?: string): Promise<T>
+    mutate(operation: GraphQLRequest, endpoint?: string): Promise<GraphQLMutationResult>
     fetchMetadataFor(model: string): Promise<IntrospectionModelType>
   },
   metadata: {
