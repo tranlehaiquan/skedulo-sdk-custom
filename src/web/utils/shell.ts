@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import { Observable } from 'rxjs'
 import * as shell from 'shelljs'
 import * as semver from 'semver'
+import { MainServices } from '../service-layer/MainServices'
 
 import { getPlatform } from '../../platform'
 
@@ -19,9 +20,9 @@ function streamToRx<T>(stream: NodeJS.ReadableStream) {
   })
 }
 
-export function shellExec(command: string, cwd?: string) {
+export function shellExec(command: string, cwd?: string): Observable<LogItem> {
 
-  return new Observable<LogItem>(observer => {
+  return new Observable<ChildProcess>(observer => {
 
     const platform = getPlatform()
 
@@ -33,26 +34,39 @@ export function shellExec(command: string, cwd?: string) {
       child = unixExec(command, cwd)
     }
 
-    addProcess(child)
+    observer.next(child)
+    MainServices.addChildProcess(child.pid)
 
-    const stdout$ = streamToRx<string>(child.stdout)
-    const stderr$ = streamToRx<string>(child.stderr)
+    let childClosed = false
 
-    const sub = Observable
-      .merge(
+    // Complete the "observable" when the child is "closed"
+    child.on('close', () => {
+      childClosed = true
+      observer.complete()
+    })
+
+    return () => {
+
+      if (childClosed) {
+        // Use this method to safely "remove" the child-process
+        // from the process-id list
+        MainServices.removeChildProcess(child.pid)
+
+      } else {
+        // Use this method to close the child-process if its still "alive"
+        MainServices.closeChildProcess(child.pid)
+      }
+    }
+  })
+    .switchMap(child => {
+      const stdout$ = streamToRx<string>(child.stdout)
+      const stderr$ = streamToRx<string>(child.stderr)
+
+      return Observable.merge(
         stdout$.map((out): LogItem => ({ type: 'out', value: out })),
         stderr$.map((out): LogItem => ({ type: 'err', value: out }))
       )
-      .subscribe(val => observer.next(val), err => observer.error(err), () => observer.complete())
-
-    return () => {
-      child.kill()
-      sub.unsubscribe()
-
-      // If already killed
-      killOrRemoveProcess(child.pid)
-    }
-  })
+    })
 }
 
 function windowsExec(command: string, cwd?: string) {
@@ -82,7 +96,7 @@ function unixExec(command: string, cwd?: string) {
   const child = spawn(
     process.env.SHELL as string,
     ['-c', `${sourceRcCommand} ${command}`],
-    { stdio: 'pipe', cwd, env: _.omit(process.env, 'PREFIX') }
+    { stdio: 'pipe', cwd, env: _.omit(process.env, 'PREFIX'), detached: true }
   )
 
   child.stderr.setEncoding('utf8')
@@ -183,38 +197,3 @@ export function debugDevStack() {
     yarnExists
   }
 }
-
-/**
- * Process Management ( side-state )
- */
-
-const runningProcesses: { [key: number]: ChildProcess } = {}
-
-function cleanupRunningProcesses() {
-  Object.values(runningProcesses).map(cp => cp.kill())
-}
-
-function addProcess(cp: ChildProcess) {
-  runningProcesses[cp.pid] = cp
-}
-
-function killOrRemoveProcess(pid: number) {
-  const cp = runningProcesses[pid]
-
-  // Kill Process if its still running
-  if (cp && !cp.killed) {
-    cp.kill()
-  }
-
-  // Remove the process from internal lists
-  Reflect.deleteProperty(runningProcesses, pid)
-}
-
-declare const window: any
-window.addEventListener('beforeunload', () => cleanupRunningProcesses())
-window.addEventListener('unload', () => cleanupRunningProcesses)
-
-// Cleanup running processes on EXIT
-process.on('exit', () => {
-  cleanupRunningProcesses()
-})
