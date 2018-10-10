@@ -25,7 +25,7 @@ export interface IState {
   projectMetadata: ProjectData
 }
 
-export class NewProject extends React.PureComponent<IProps, IState> {
+export class NewConnectedPageProject extends React.PureComponent<IProps, IState> {
 
   private projectMetadataForm: FormHelper<IState['projectMetadata']>
   private projectForm: FormHelper<IState['project']>

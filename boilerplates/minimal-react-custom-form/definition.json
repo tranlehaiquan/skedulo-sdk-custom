@@ -1,0 +1,9 @@
+{
+  "projectName": "Minimal Custom Form",
+  "forms": [
+    {
+      "name": "Test Form",
+      "root": "test_form/"
+    }
+  ]
+}

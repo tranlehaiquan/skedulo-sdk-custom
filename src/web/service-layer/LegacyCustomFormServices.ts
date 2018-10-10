@@ -9,6 +9,7 @@ interface Form {
 
 interface Meta {
   sdkVersion: number
+  deployTime?: number
 }
 
 export interface Definition {

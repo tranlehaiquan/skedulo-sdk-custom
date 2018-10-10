@@ -3,10 +3,12 @@ import * as React from 'react'
 import { Observable, Subscription } from 'rxjs'
 
 import { LogItem, ProjectServices } from '../service-layer/ProjectServices'
-import { ProjectData, SessionData } from '../service-layer/types'
+import { ProjectData, MobileProjectData, SessionData } from '../service-layer/types'
+import { MobileProjectServices } from '../service-layer/MobileProjectServices'
 import { ContentLayout } from './Layout'
 import { Terminal } from './Terminal'
 import { shell } from 'electron'
+import { ProjectType } from '../service-layer/types'
 
 function openUrl(url: string) {
   shell.openExternal(url)
@@ -16,18 +18,22 @@ export interface IProps {
   project: string
   back: () => void
   session: SessionData
+  projectType: ProjectType
 }
 
 export interface IState {
   log$: Observable<LogItem> | null
   inProgress: boolean
   devReady: boolean
-  projectData: ProjectData | null
+  projectData: ProjectData | MobileProjectData | null
 }
 
 export class ActiveProject extends React.PureComponent<IProps, IState> {
 
-  private prjServices = new ProjectServices(this.props.project, this.props.session)
+  private prjServices = this.props.projectType === ProjectType.ConnectedPage
+    ? new ProjectServices(this.props.project, this.props.session)
+    : new MobileProjectServices(this.props.project, this.props.session)
+
   private subscriptions = new Subscription()
 
   state: IState = {
@@ -88,32 +94,40 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
   }
 
   renderDevReady = () => {
-
+    const { projectType } = this.props
     const { devReady, inProgress } = this.state
 
-    let message: React.ReactFragment
-
     if (!devReady && inProgress) {
-      message = 'Preparing ...'
-    } else if (devReady) {
-      const url = this.props.session.origin + '/c-dev'
-      message = <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
-    } else {
-      message = 'Select "start development" to begin building your connected page'
+      return 'Preparing ...'
     }
 
-    return message
+    if (projectType === ProjectType.ConnectedPage) {
+      if (devReady) {
+        const url = this.props.session.origin + '/c-dev'
+        return <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
+      } else {
+        return 'Select "start development" to begin building your connected page'
+      }
+    } else {
+      if (devReady) {
+        return <React.Fragment><p>Use the following url template to view custom forms:<br /><a className="blue-link">http://localhost:9050/form/index.html#/[context id]/[form index]</a></p></React.Fragment>
+      } else {
+        return 'Select "start development" to begin building your custom page'
+      }
+    }
   }
 
   render() {
-
+    const { projectType } = this.props
     const { projectData } = this.state
+
+    const projectTitle = projectType === ProjectType.ConnectedPage ? (projectData! as ProjectData).title : (projectData! as MobileProjectData).projectName
 
     return (
       <ContentLayout>
         <div className="flex-row new-project">
           <button className="sk-button-icon transparent" onClick={ this.props.back }><i className="ski ski-arrow-left" /></button>
-          <div className="new-project-title">{ projectData!.title }</div>
+          <div className="new-project-title">{ projectTitle }</div>
           <div className="flex-expanded-cell">{ this.renderDevReady() }</div>
           <div>
             { this.state.inProgress

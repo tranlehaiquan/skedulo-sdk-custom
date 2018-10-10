@@ -13,25 +13,31 @@ import { setUpSSLDocLocation, sslCertsPresent } from '../utils/ssl'
 import { ActiveProject } from './ActiveProject'
 import { ContentLayout, HeaderLayout } from './Layout'
 import { Markdown } from './Markdown'
-import { NewProject } from './NewProject'
+import { NewConnectedPageProject } from './NewConnectedPageProject'
+import { NewCustomFormProject } from './NewCustomFormProject'
 import { SelectProject } from './SelectProject'
 import { SSLHelp } from './SSLHelp'
 import { ManageCustomForms } from './ManageCustomForms'
 import { debugDevStack } from '../utils/shell'
+import { ProjectType } from '../service-layer/types'
 
 function openUrl(url: string) {
   shell.openExternal(url)
 }
 
-
 export enum View {
   Home,
+  ManageConnectedPages,
+  ManageCustomForms,
   SSLNotSetPrompt,
   SetupSSL,
   SetupSSLMarkdown,
-  CreateProject,
-  SelectProject,
-  ActiveProject,
+  CreateCPProject,
+  SelectCPProject,
+  ActiveCPProject,
+  CreateCFProject,
+  SelectCFProject,
+  ActiveCFProject,
   ManageLegacyCustomForm
 }
 
@@ -98,7 +104,7 @@ export class App extends React.Component<{}, IState> {
     } else {
 
       const newProjSub = this.eventChannel.onNewProject()
-        .do(() => this.setState({ currentView: View.CreateProject }))
+        .do(() => this.setState({ currentView: View.CreateCPProject }))
         .do(() => MainServices.focus())
 
       this.subscription
@@ -114,11 +120,11 @@ export class App extends React.Component<{}, IState> {
     this.subscription.unsubscribe()
   }
 
-  back = () => this.setState({ currentView: View.Home, selectedProject: null, projectData: null, errorMessage: '' })
+  back = (view?: View) => this.setState({ currentView: view ? view : View.Home, selectedProject: null, projectData: null, errorMessage: '' })
   setView = (currentView: IState['currentView']) => () => this.setState({ currentView })
   goHome = () => this.setView(this.state.sslCertsPresent ? View.Home : View.SSLNotSetPrompt)
 
-  selectProject = (selectedProject: string) => {
+  selectConnectedPageProject = (selectedProject: string) => {
 
     if (!fs.existsSync(path.join(selectedProject, '/sked.proj.json'))) {
       this.setState({
@@ -126,7 +132,22 @@ export class App extends React.Component<{}, IState> {
       })
     } else {
       this.setState({
-        currentView: View.ActiveProject,
+        currentView: View.ActiveCPProject,
+        selectedProject,
+        projectData: null,
+        errorMessage: ''
+      })
+    }
+  }
+
+  selectCustomFormProject = (selectedProject: string) => {
+    if (!fs.existsSync(path.join(selectedProject, '/definition.json'))) {
+      this.setState({
+        errorMessage: 'The folder you have selected does not contain a valid Custom Form project file. Please select another.'
+      })
+    } else {
+      this.setState({
+        currentView: View.ActiveCFProject,
         selectedProject,
         projectData: null,
         errorMessage: ''
@@ -195,13 +216,33 @@ export class App extends React.Component<{}, IState> {
     )
   }
 
-  renderActionButtons = () => {
+  renderHomeActionButtons = () => {
     return (
       <div>
         <p>To begin, select one of the following options.</p>
-        <button className="sk-button primary" onClick={ this.setView(View.CreateProject) }>Create new project</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.SelectProject) }>Select existing project</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy Custom Forms</button>
+        <button className="sk-button primary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.ManageCustomForms) }>Manage Custom Forms</button>
+      </div>
+    )
+  }
+
+  renderConnectedPageActionButtons = () => {
+    return (
+      <div>
+        <p>Select an action to manage Connected Pages.</p>
+        <button className="sk-button primary" onClick={ this.setView(View.CreateCPProject) }>Create new project</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.SelectCPProject) }>Select existing project</button>
+      </div>
+    )
+  }
+
+  renderCustomFormActionButtons = () => {
+    return (
+      <div>
+        <p>Select an action to manage Custom Forms.</p>
+        <button className="sk-button primary" onClick={ this.setView(View.CreateCFProject) }>Create new project</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.SelectCFProject) }>Select existing project</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy an existing project</button>
       </div>
     )
   }
@@ -213,8 +254,26 @@ export class App extends React.Component<{}, IState> {
     return (
       <ContentLayout className="content__center--large" centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
-        { isConnected ? this.renderActionButtons() : this.renderNotConnected() }
+        { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() }
         <DebugInstall { ...this.state.debug } />
+      </ContentLayout>
+    )
+  }
+
+  renderManageConnectedPages = () => {
+    return (
+      <ContentLayout className="content__center--large" centered>
+        <h1>Manage Connected Pages</h1>
+        { this.renderConnectedPageActionButtons() }
+      </ContentLayout>
+    )
+  }
+
+  renderManageCustomForms = () => {
+    return (
+      <ContentLayout className="content__center--large" centered>
+        <h1>Manage Custom Forms</h1>
+        { this.renderCustomFormActionButtons() }
       </ContentLayout>
     )
   }
@@ -276,6 +335,9 @@ export class App extends React.Component<{}, IState> {
       return this.renderUnsupportedPlatform()
     }
 
+    const customFormBack = () => this.back(View.ManageCustomForms)
+    const connectedPageBack = () => this.back(View.ManageConnectedPages)
+
     switch (currentView) {
       case View.Home:
         return this.renderHome()
@@ -285,14 +347,24 @@ export class App extends React.Component<{}, IState> {
         return this.renderSSLHelp()
       case View.SetupSSLMarkdown:
         return this.renderSSLHelpFromMarkdown()
-      case View.SelectProject:
-        return <SelectProject back={ this.back } selectProject={ this.selectProject } errorMessage={ errorMessage } />
-      case View.ActiveProject:
-        return <ActiveProject back={ this.back } project={ selectedProject! } session={ session! } />
-      case View.CreateProject:
-        return <NewProject back={ this.back } selectProject={ this.selectProject } />
+      case View.ManageConnectedPages:
+        return this.renderManageConnectedPages()
+      case View.ManageCustomForms:
+        return this.renderManageCustomForms()
+      case View.SelectCPProject:
+        return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
+      case View.ActiveCPProject:
+        return <ActiveProject back={ connectedPageBack } projectType={ ProjectType.ConnectedPage } project={ selectedProject! } session={ session! } />
+      case View.CreateCPProject:
+        return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
+        case View.SelectCFProject:
+        return <SelectProject back={ customFormBack } selectProject={ this.selectCustomFormProject } errorMessage={ errorMessage } />
+      case View.ActiveCFProject:
+        return <ActiveProject back={ customFormBack } projectType={ ProjectType.CustomForm } project={ selectedProject! } session={ session! } />
+      case View.CreateCFProject:
+        return <NewCustomFormProject back={ customFormBack } selectProject={ this.selectCustomFormProject } />
       case View.ManageLegacyCustomForm:
-        return <ManageCustomForms back={ this.back } session={ session! } />
+        return <ManageCustomForms back={ customFormBack } session={ session! } />
     }
 
     return enumUnreachable(currentView)
