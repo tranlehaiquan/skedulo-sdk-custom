@@ -8,7 +8,16 @@ import { getPlatform } from '../../platform'
 
 export class SSLHelp extends React.PureComponent {
 
-  copyToClipboard = (command: string) => () => clipboard.writeText(command)
+  copyToClipboard = (command: string) => () => {
+    switch (getPlatform()) {
+      case 'win': {
+        clipboard.writeText(command.replace(/\n/g, '\r\n'))
+      }
+      default: {
+        clipboard.writeText(command)
+      }
+    }
+  }
 
   openHomeFolder = () => shell.openItem(sslDir)
 
