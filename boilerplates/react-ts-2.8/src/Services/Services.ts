@@ -18,6 +18,7 @@ export interface GraphQLMutationResult {
 
 interface GraphQLError {
   getErrors: () => string[]
+  // tslint:disable:no-misused-new
   new(): GraphQLError
 }
 
@@ -63,10 +64,28 @@ export interface Services {
   },
 }
 
+export interface Profile {
+  tenantId: string
+  userId: string
+  username: string
+  roles: string[]
+}
+
+export interface Credentials {
+  apiServer: string
+  apiAccessToken: string
+
+  vendor: { type: 'skedulo', url: string, token: null } | { type: 'salesforce', url: string, token: string }
+}
+
 declare const skedInjected: {
   Services: Services,
-  context?: string
+  context?: string,
+  profile: Profile,
+  credentials: Credentials
 }
 
 export const Services = skedInjected.Services
 export const context = skedInjected.context
+export const profile = skedInjected.profile
+export const credentials = skedInjected.credentials
