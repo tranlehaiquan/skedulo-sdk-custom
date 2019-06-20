@@ -1,4 +1,3 @@
-
 interface GraphQLRequest {
   query: string
   variables?: Record<string, any>
@@ -78,14 +77,23 @@ export interface Credentials {
   vendor: { type: 'skedulo', url: string, token: null } | { type: 'salesforce', url: string, token: string }
 }
 
+export interface Navigation {
+  registerRouteHandler: (routeHandler: (routeState: { routes: string | string[], params: { [paramName: string]: any } }) => void) => void
+  setParentRoute: (route: string) => void
+}
+
 declare const skedInjected: {
   Services: Services,
-  context?: string,
+  context?: string | string[],
+  params: { [paramName: string]: any }
   profile: Profile,
   credentials: Credentials
+  navigation: Navigation
 }
 
 export const Services = skedInjected.Services
 export const context = skedInjected.context
+export const params = skedInjected.params
 export const profile = skedInjected.profile
 export const credentials = skedInjected.credentials
+export const navigation = skedInjected.navigation
