@@ -139,3 +139,39 @@
     right: -$global-triangle-size + 2;
   }
 }
+
+// Dropdowns mixins
+@mixin basic-dropdown-item-style {
+  padding: $global-padding/2 $global-padding;
+  color: $slate-2;
+  display: flex;
+  position: relative;
+  line-height: 1.5;
+  text-align: left;
+  margin: 0;
+  cursor: pointer;
+  word-break: break-all; // non-webkit browsers
+  word-break: break-word;
+
+  &:hover,
+  &:focus {
+    color: $black-1;
+    text-decoration: none;
+    outline: 0;
+  }
+
+  &[disabled],
+  &.disabled,
+  &.disabled .dropdown-item__icon,
+  &[disabled] .dropdown-item__icon {
+    &,
+    &:hover {
+      color: $global-color-disabled;
+      cursor: not-allowed;
+    }
+  }
+
+  &.active {
+    color: $skedblue-1;
+  }
+}
