@@ -35,10 +35,13 @@ function createWindow() {
   // Create a "window", but don't show it
   win = new BrowserWindow({
     show: false,
-    minWidth: 1024,
+    minWidth: 1224,
     minHeight: 700,
-    width: 1024,
+    width: 1224,
     height: 700,
+    webPreferences: {
+      nodeIntegration: true
+    },
     icon: path.join(BASE_PATH, '/assets/icons/64x64.png')
   })
 
@@ -69,6 +72,8 @@ function createWindow() {
   // Prevent opening dev-tools
   // when dev tools is "opened", immediately close it
   if (process.env.NODE_ENV !== 'development') {
+    win.removeMenu()
+
     win.webContents.on('devtools-opened', () => {
       win!.webContents.closeDevTools()
     })

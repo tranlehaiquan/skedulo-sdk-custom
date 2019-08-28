@@ -24,10 +24,11 @@ export class SelectProject extends React.PureComponent<IProps, IState> {
     }
   }
 
-  selectDirectory = () => {
+  selectDirectory = async () => {
+    const directoryResult = await MainServices.selectDirectory()
 
     this.setState({
-      selectedDirectory: _.head(MainServices.selectDirectory()) || null
+      selectedDirectory: _.head(directoryResult.filePaths) || null
     })
   }
 

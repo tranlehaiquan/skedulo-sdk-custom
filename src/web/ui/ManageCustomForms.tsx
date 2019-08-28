@@ -88,8 +88,8 @@ export class ManageCustomForms extends React.PureComponent<IProps, IState> {
   }
 
   selectDirectory = async () => {
-
-    const selectedDirectory = _.head(MainServices.selectDirectory()) || null
+    const directoryResult = await MainServices.selectDirectory()
+    const selectedDirectory = _.head(directoryResult.filePaths) || ''
 
     if (!selectedDirectory) {
       this.reset()

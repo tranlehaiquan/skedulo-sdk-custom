@@ -21,7 +21,6 @@ export class FormHelper<T extends {}> {
   }
 
   setMap = <K extends keyof T>(key: K, map: (e: ReactFormTypes) => T[K] = e => e.currentTarget.value as any) => (e: ReactFormTypes) => this.set(key, map(e))
-
   isValid = () => {
     return Object.values(this.formObj).every(val => !!val)
   }

@@ -1,11 +1,11 @@
 import * as fs from 'fs'
-import * as os from 'os'
+import { homedir } from 'os'
 import * as path from 'path'
 
 import { getPlatform } from '../../platform'
 import { WEB_BASE_PATH } from '../web-base-path'
 
-export const sslDir = path.join(os.homedir(), '/.localhost-ssl/')
+export const sslDir = path.join(homedir(), '/.localhost-ssl/')
 
 export const setUpSSLDocLocation = path.resolve(WEB_BASE_PATH, './Setup-SSL.md')
 

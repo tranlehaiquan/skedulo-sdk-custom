@@ -1,5 +1,6 @@
 
 import * as React from 'react'
+import { EOL } from 'os'
 import { clipboard, shell } from 'electron'
 
 import { getCreateSSLCommands, sslDir } from '../utils/ssl'
@@ -9,14 +10,7 @@ import { getPlatform } from '../../platform'
 export class SSLHelp extends React.PureComponent {
 
   copyToClipboard = (command: string) => () => {
-    switch (getPlatform()) {
-      case 'win': {
-        clipboard.writeText(command.replace(/\n/g, '\r\n'))
-      }
-      default: {
-        clipboard.writeText(command)
-      }
-    }
+      clipboard.writeText(command.replace(/\n/g, EOL))
   }
 
   openHomeFolder = () => shell.openItem(sslDir)
@@ -42,6 +36,7 @@ export class SSLHelp extends React.PureComponent {
     return (
       <React.Fragment>
         <p>Add the rootCA.pem found in the .localhost-ssl folder to Chrome by going to Settings > Manage Certificates > Select the Trusted Root Certification Authorities tab and click Import.
+          Note that the .pem format is not available by default in the list of selectable formats, the file will need to be selected with All Files selected as the format in the file prompt.
           You will be asked if you want to use this certificate as a trusted Authority. Click Yes.</p>
       </React.Fragment>
     )

@@ -20,7 +20,7 @@ function streamToRx<T>(stream: NodeJS.ReadableStream) {
   })
 }
 
-export function shellExec(command: string, cwd?: string): Observable<LogItem> {
+export function shellExec(command: string, cwd?: string, env: { [key: string]: string } = {}): Observable<LogItem> {
 
   return new Observable<ChildProcess>(observer => {
 
@@ -29,9 +29,9 @@ export function shellExec(command: string, cwd?: string): Observable<LogItem> {
     let child: ChildProcess
 
     if (platform === 'win') {
-      child = windowsExec(command, cwd)
+      child = windowsExec(command, cwd, env)
     } else {
-      child = unixExec(command, cwd)
+      child = unixExec(command, cwd, env)
     }
 
     observer.next(child)
@@ -69,17 +69,17 @@ export function shellExec(command: string, cwd?: string): Observable<LogItem> {
     })
 }
 
-function windowsExec(command: string, cwd?: string) {
+function windowsExec(command: string, cwd?: string, env: { [key: string]: string } = {}) {
 
   // Change to "Current Working Directory"
   if (cwd) {
     shell.cd(cwd)
   }
 
-  return shell.exec(command, { async: true, silent: true }) as ChildProcess
+  return shell.exec(command, { async: true, silent: true, env }) as ChildProcess
 }
 
-function unixExec(command: string, cwd?: string) {
+function unixExec(command: string, cwd?: string, env: { [key: string]: string } = {}) {
 
   const shellEnv = process.env.SHELL || `/bin/bash`
 
@@ -96,7 +96,7 @@ function unixExec(command: string, cwd?: string) {
   const child = spawn(
     process.env.SHELL as string,
     ['-c', `${sourceRcCommand} ${command}`],
-    { stdio: 'pipe', cwd, env: _.omit(process.env, 'PREFIX'), detached: true }
+    { stdio: 'pipe', cwd, env: { ..._.omit(process.env, 'PREFIX'), ...env }, detached: true }
   )
 
   child.stderr.setEncoding('utf8')

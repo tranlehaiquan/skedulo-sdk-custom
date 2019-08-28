@@ -67,7 +67,13 @@ export class NewConnectedPageProject extends React.PureComponent<IProps, IState>
   }
 
   menuIdTransform = (e: React.ChangeEvent<HTMLInputElement>) => e.currentTarget.value.trim().substr(0, 2).toUpperCase()
-  selectDirectoryTransform = () => _.head(MainServices.selectDirectory()) || ''
+
+  selectDirectory = async () => {
+    const directoryResult = await MainServices.selectDirectory()
+    const selectedPath = _.head(directoryResult.filePaths) || ''
+
+    this.projectForm.set('selectedDirectory', selectedPath)
+  }
 
   createProject = () => {
 
@@ -89,7 +95,7 @@ export class NewConnectedPageProject extends React.PureComponent<IProps, IState>
 
   render() {
 
-    const { state, projectForm, projectMetadataForm, selectDirectoryTransform, urlBlurTransform, menuIdTransform, urlBasedOnTitleBlurTransform } = this
+    const { state, projectForm, projectMetadataForm, selectDirectory, urlBlurTransform, menuIdTransform, urlBasedOnTitleBlurTransform } = this
     const { projectMetadata, project } = state
 
     return (
@@ -131,7 +137,7 @@ export class NewConnectedPageProject extends React.PureComponent<IProps, IState>
             <input
               type="text"
               placeholder="Select project directory"
-              value={ project.selectedDirectory } onClick={ projectForm.setMap('selectedDirectory', selectDirectoryTransform) } />
+              value={ project.selectedDirectory } onClick={ selectDirectory } />
           </label>
         </div>
 

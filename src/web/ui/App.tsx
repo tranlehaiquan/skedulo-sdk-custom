@@ -398,8 +398,8 @@ export class DebugInstall extends React.PureComponent<IState['debug']> {
 
   render() {
     return (
-      <div className="text-left padding-top">
-        <h3>System Requirements</h3>
+      <div className="padding-top">
+        <h2>System Requirements</h2>
         <ul className="installation__steps">
           { this.renderItem('OpenSSL', this.props.openssl) }
           { this.renderItem('Yarn', this.props.yarn) }

@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "bootstrap": "yarn install --pure-lockfile && cd src && yarn install --pure-lockfile",
+    "bootstrap": "yarn install --pure-lockfile --ignore-engines && cd src && yarn install --pure-lockfile",
     "node-run": "node --turbo --ignition",
     "node-run-dev": "yarn node-run -r ts-node/register",
     "dev-node": "nodemon --watch src -e ts,js -x 'yarn node-run-dev' src/server/server.ts",
@@ -88,17 +88,18 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/jest": "^22.1.3",
-    "cross-env": "^5.1.5",
-    "electron": "^2.0.1",
-    "electron-builder": "^20.13.4",
+    "cross-env": "^5.2.0",
+    "electron": "^6.0.3",
+    "electron-builder": "^21.2.0",
     "jest": "^22.4.0",
-    "node-sass": "^4.7.2",
+    "node-sass": "^4.12.0",
     "nodemon": "^1.15.1",
-    "shelljs": "^0.8.1",
-    "shx": "^0.2.2",
+    "shelljs": "^0.8.3",
+    "shx": "^0.3.2",
     "ts-jest": "^22.0.4",
-    "ts-node": "^6.0.3",
-    "tslint": "^5.10.0",
-    "typescript": "^2.8.3"
-  }
+    "ts-node": "^8.3.0",
+    "tslint": "^5.19.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {}
 }
