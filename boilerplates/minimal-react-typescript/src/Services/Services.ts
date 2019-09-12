@@ -15,9 +15,9 @@ export interface GraphQLMutationResult {
   }[]
 }
 
+// tslint:disable:no-misused-new
 interface GraphQLError {
   getErrors: () => string[]
-  // tslint:disable:no-misused-new
   new(): GraphQLError
 }
 

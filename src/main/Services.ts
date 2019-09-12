@@ -1,11 +1,18 @@
+import * as _ from 'lodash'
 import { BrowserWindow, dialog } from 'electron'
-import { whenPlatformIs, getPlatform } from '../platform'
+import * as getPort from 'get-port'
+import * as os from 'os'
+
+import { getPlatform, whenPlatformIs } from '../platform'
+
+const SchemaJSON = require('../schema.definition.json')
 
 export class Services {
 
   private processIds: Set<number> = new Set()
 
   constructor(private win: BrowserWindow) {
+
     win.on('close', () => {
       console.info('Window is closing...')
       this.closeAllChildProcess()
@@ -36,6 +43,7 @@ export class Services {
   }
 
   selectDirectory() {
+
     return dialog.showOpenDialog(this.win, {
       properties: ['openDirectory', 'createDirectory']
     })
@@ -48,6 +56,22 @@ export class Services {
     whenPlatformIs('win', () => this.win.setAlwaysOnTop(false))
   }
 
+  getSchemaJSON() {
+    return SchemaJSON
+  }
+
+  async getPort(): Promise<number> {
+    return await getPort()
+  }
+
+  getLanIp(): string | null {
+    const externalInterface = _.flatten(Object.values(os.networkInterfaces()))
+      .filter(i => i.family === 'IPv4')
+      .find(i => i.internal === false)
+
+    return externalInterface ? externalInterface.address : null
+  }
+
   private killOrRemoveProcess(pid: number) {
 
     try {
@@ -56,7 +80,6 @@ export class Services {
       } else {
         process.kill(pid)
       }
-
     } catch (e) {
       console.error(e)
     }

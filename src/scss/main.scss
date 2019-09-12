@@ -17,3 +17,10 @@
 @import 'components/callout';
 @include skedulo-callout;
 @import 'components/app';
+
+// Temporal heading styles
+// To be replaced with sked-ui once available
+.h2 {
+  font-size: 20px;
+  font-weight: 600;
+}

@@ -18,7 +18,7 @@
     "no-var-requires": [false],
     "member-ordering": [false],
     "no-submodule-imports": [false],
-
+    "no-misused-new": [false],
     // JSX-Rules
     "jsx-space-before-trailing-slash": [true],
     "jsx-equals-spacing": [true, "never"],

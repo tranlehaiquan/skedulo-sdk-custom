@@ -5,26 +5,22 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { Observable } from 'rxjs'
 import * as tar from 'tar'
-import * as _ from 'lodash'
 import * as zlib from 'zlib'
-
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
-import { SessionData } from './types'
-import { MobileProjectData } from './types'
-import { Definition, LegacyCustomFormServices } from './LegacyCustomFormServices'
+import { CustomFormServices, Definition } from './CustomFormServices'
+
+import { MobileProjectData, SessionData } from './types'
+import { connectToNgrok } from '../server/ngrok'
 
 export { LogItem } from '../utils/shell'
 
-// Fix PATH! for OSX
-require('fix-path')()
-
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
-const RAW_COMPILED_ASSET_NAMES = ['node.js', 'main.js', 'native.js', 'node.js.map', 'main.js.map', 'native.js.map']
+const RAW_COMPILED_ASSET_NAMES = ['node.js', 'native.js', 'node.js.map', 'native.js.map']
 
 export class MobileProjectServices {
 
-  private customFormServices = new LegacyCustomFormServices(this.session)
+  private customFormServices = new CustomFormServices(this.session)
 
   constructor(private project: string, private session: SessionData) { }
 
@@ -32,8 +28,12 @@ export class MobileProjectServices {
 
     return [
       {
-        name: 'React | Typescript | SASS (Recommended)',
-        path: path.join(TEMPLATE_PATH, 'minimal-react-custom-form.tar.gz')
+        name: 'Job Products: React | Typescript | SASS (Recommended)',
+        path: path.join(TEMPLATE_PATH, 'job-products-mcp-react-typescript.tar.gz')
+      },
+      {
+        name: 'Attachments: React | Typescript | SASS (Recommended)',
+        path: path.join(TEMPLATE_PATH, 'attachments-mcp-react-typescript.tar.gz')
       }
     ]
   }
@@ -67,26 +67,8 @@ export class MobileProjectServices {
   }
 
   private createProjectFile(projectData: MobileProjectData) {
-    // Specific configuration used to set a forms display type
-    const resourceTypeDeployConfiguration = { deploy: { context: 'resource' } }
-
-    const definitionAdditions = Object.assign(
-      { projectName: projectData.projectName },
-      projectData.formType === 'resource' ? resourceTypeDeployConfiguration : {}
-    )
-
-    this.updateProjectDefinition(this.getProjectDataPath(), definitionAdditions)
-  }
-
-  private updateProjectDefinition(pathToDefinition: string, additionalProperties: _.Dictionary<any>) {
-    try {
-      const existingDefinition = JSON.parse(fs.readFileSync(pathToDefinition, { encoding: 'utf8'}))
-      const updatedDefinition = _.merge(existingDefinition, additionalProperties)
-
-      fs.writeFileSync(pathToDefinition, JSON.stringify(updatedDefinition))
-    } catch (error) {
-      throw new Error('Unable to parse definition.json file.')
-    }
+    const json = JSON.stringify(projectData)
+    fs.writeFileSync(this.getProjectDataPath(), json)
   }
 
   async bundleProject(singleBundleDestination?: string) {
@@ -112,11 +94,11 @@ export class MobileProjectServices {
 
       return gzipFile(sourceFile, destFile)
     })
+
     await Promise.all([...entryPointTarsP, viewSourcesTarP])
 
     // Append deployTime to definition and copy to asset folder
-    this.updateProjectDefinition(path.join(buildFolder, '/definition.json'), { meta: { deployTime: Date.now() } })
-    fs.copyFileSync(path.join(buildFolder, '/definition.json'), path.join(buildAssetsPath, '/definition.json'))
+    // fs.copyFileSync(path.join(buildFolder, '/definition.json'), path.join(buildAssetsPath, '/definition.json'))
 
     // Single Tarball Bundle requested, gzip all and output to requested directory (not currently used in UI)
     if (singleBundleDestination) {
@@ -135,16 +117,39 @@ export class MobileProjectServices {
     return shellExec('yarn bootstrap', this.project).share()
   }
 
-  startDev() {
-    // TODO: Initialize ID token to allow custom forms to make direct vendor calls
-    const command$ = shellExec(`__BASE_URL__=${this.session.API_SERVER} __ACCESS_TOKEN__=${this.session.token} __ID_TOKEN__=stub yarn start`, this.project).share()
+  startNgrokProxy = (): Observable<never> => {
 
-    return command$
-      .share() as Observable<LogItem>
+    return new Observable<never>(obs => {
+      let url: string | null = null
+
+      const ngrok$ = connectToNgrok(9050)
+        .subscribe(
+          ngrokUrl => {
+            url = ngrokUrl
+          },
+          err => obs.error(err)
+        )
+
+      return () => {
+        ngrok$.unsubscribe()
+        console.log(url)
+      }
+    })
+  }
+
+  getEnv = () => ({ SKED_BASE_URL: this.session.API_SERVER, SKED_API_TOKEN: this.session.token })
+
+  startDev(): Observable<LogItem> {
+
+    const command$ = shellExec(`yarn start`, this.project, this.getEnv()).share()
+
+    // Starting ngrok proxy after 3 seconds to account for errored starts in the source command
+    const startNgrokAfterThreeSeconds$ = Observable.timer(3000).switchMap(() => this.startNgrokProxy())
+    return command$.takeUntil(startNgrokAfterThreeSeconds$).share()
   }
 
   startBuild() {
-    return shellExec('yarn build', this.project).share()
+    return shellExec('yarn compile', this.project, this.getEnv()).share()
   }
 
   startDeploy() {

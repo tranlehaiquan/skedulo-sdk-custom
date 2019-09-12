@@ -15,9 +15,6 @@ import { NetworkingService } from './NetworkingService'
 
 export { LogItem } from '../utils/shell'
 
-// Fix PATH! for OSX
-require('fix-path')()
-
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
 const proxyServer = proxyTo({ port: 3000 }, { port: 1929 })
 
@@ -32,10 +29,6 @@ export class ProjectServices {
       {
         name: 'React | Typescript | SASS (Recommended)',
         path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
-      },
-      {
-        name: 'React | Typescript | CSS (CreateReactApp)',
-        path: path.join(TEMPLATE_PATH, '/react-ts-2.8.tar.gz')
       }
     ]
   }
@@ -192,7 +185,6 @@ export class ProjectServices {
       })
       .retry(15)
   }
-
 }
 
 function extractTarball(destFolder: string, tarball: string) {

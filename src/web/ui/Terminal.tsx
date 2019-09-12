@@ -3,8 +3,14 @@ import { Observable, Subscription } from 'rxjs'
 
 import { LogItem } from '../service-layer/ProjectServices'
 
+export enum TerminalSize {
+  FullViewHeight,
+  HalfViewHeight
+}
+
 export interface IProps {
   log$: Observable<LogItem>
+  size: TerminalSize
 }
 
 export interface IState {
@@ -50,7 +56,6 @@ export class Terminal extends React.PureComponent<IProps, IState> {
 
     return log$
       .do(logItem => {
-
         // We "slice" the log to only render the most recent 4000 items
         // The "key" to this function is actually always guaranteed to be unique
         // When the index goes higher than the 4000 item max, the "index" would still
@@ -74,8 +79,10 @@ export class Terminal extends React.PureComponent<IProps, IState> {
   }
 
   render() {
+    const terminalSizeClass = this.props.size === TerminalSize.FullViewHeight ? 'terminal--full-height' : 'terminal--half-height'
+
     return (
-      <code className="small-12 column terminal terminal--full-height" ref={ this.setCodeRef }>
+      <code className={ `small-12 column terminal ${terminalSizeClass}` } ref={ this.setCodeRef }>
         { this.state.logItems }
       </code>
     )

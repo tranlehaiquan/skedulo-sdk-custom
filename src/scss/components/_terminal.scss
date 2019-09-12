@@ -32,4 +32,8 @@
   &--full-height {
     height: calc(100vh - 250px);
   }
+
+  &--half-height {
+    height: calc(50vh - 175px);
+  }
 }

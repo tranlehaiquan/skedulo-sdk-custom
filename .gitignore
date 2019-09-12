@@ -1,2 +1,4 @@
 dist/
 app/
+schema.definition.json
+.cache/

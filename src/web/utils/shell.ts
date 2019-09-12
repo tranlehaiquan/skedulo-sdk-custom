@@ -1,18 +1,17 @@
 import { ChildProcess, spawn } from 'child_process'
+import * as crossSpawn from 'cross-spawn'
 import * as _ from 'lodash'
 import { Observable } from 'rxjs'
-import * as shell from 'shelljs'
 import * as semver from 'semver'
-import { MainServices } from '../service-layer/MainServices'
-
 import { getPlatform } from '../../platform'
+import { MainServices } from '../service-layer/MainServices'
 
 export interface LogItem {
   type: 'out' | 'err',
   value: string
 }
 
-function streamToRx<T>(stream: NodeJS.ReadableStream) {
+export function streamToRx<T>(stream: NodeJS.ReadableStream) {
   return new Observable<T>(observer => {
     stream.on('end', () => observer.complete())
     stream.on('error', (e: Error) => observer.error(e))
@@ -38,6 +37,10 @@ export function shellExec(command: string, cwd?: string, env: { [key: string]: s
     MainServices.addChildProcess(child.pid)
 
     let childClosed = false
+
+    child.on('error', err => {
+      observer.error(err)
+    })
 
     // Complete the "observable" when the child is "closed"
     child.on('close', () => {
@@ -71,12 +74,17 @@ export function shellExec(command: string, cwd?: string, env: { [key: string]: s
 
 function windowsExec(command: string, cwd?: string, env: { [key: string]: string } = {}) {
 
-  // Change to "Current Working Directory"
-  if (cwd) {
-    shell.cd(cwd)
-  }
+  const [cmd, ...rest] = command.split(/\s/g)
 
-  return shell.exec(command, { async: true, silent: true, env }) as ChildProcess
+  const child = crossSpawn(cmd,
+    rest,
+    { stdio: 'pipe', cwd, env: { ..._.omit(process.env, 'PREFIX'), ...env } }
+  )
+
+  child.stderr.setEncoding('utf8')
+  child.stdout.setEncoding('utf8')
+
+  return child
 }
 
 function unixExec(command: string, cwd?: string, env: { [key: string]: string } = {}) {
@@ -107,11 +115,22 @@ function unixExec(command: string, cwd?: string, env: { [key: string]: string } 
 
 export function debugDevStack() {
 
+  const errorHandler = (err: any): Observable<LogItem> => {
+
+    console.error(err)
+
+    return Observable.of({
+      type: 'err',
+      value: ''
+    })
+  }
+
   const yarnExists = shellExec('yarn --version')
     .last()
+    .catch(errorHandler)
     .map(notification => {
 
-      const versionRange = `>=1.3`
+      const versionRange = `>=1.17`
       const installLink = 'https://yarnpkg.com/lang/en/docs/install'
 
       if (notification.type === 'out') {
@@ -133,6 +152,7 @@ export function debugDevStack() {
 
   const nodeExists = shellExec('node --version')
     .last()
+    .catch(errorHandler)
     .map(notification => {
 
       const versionRange = `>=8.9`
@@ -157,6 +177,7 @@ export function debugDevStack() {
 
   const openSSLExists = shellExec('openssl version')
     .last()
+    .catch(errorHandler)
     .map(notification => {
 
       const versionRange = `>=1.1`

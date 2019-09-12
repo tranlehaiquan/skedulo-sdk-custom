@@ -9,24 +9,27 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "bootstrap": "yarn install --pure-lockfile --ignore-engines && cd src && yarn install --pure-lockfile",
+    "bootstrap": "cd src && yarn install --pure-lockfile && cd ../ && yarn install --pure-lockfile --ignore-engines",
     "node-run": "node --turbo --ignition",
     "node-run-dev": "yarn node-run -r ts-node/register",
     "dev-node": "nodemon --watch src -e ts,js -x 'yarn node-run-dev' src/server/server.ts",
-    "copy-static": "shx mkdir -p app && shx cp src/*.json app/ && shx cp src/*.{html,md} app/ && shx cp -R src/assets app/ && cd app && shx ln -sf ../src/node_modules ./node_modules",
+    "copy-ngrok": "shx cp -R .cache/osx/ngrok app/assets/ngrok-osx && shx cp -R .cache/win/ngrok.exe app/assets/ngrok-win.exe && shx cp -R .cache/linux/ngrok app/assets/ngrok-linux && shx chmod +x app/assets/ngrok-*",
+    "copy-static": "shx mkdir -p app/assets && yarn run copy-ngrok && shx cp src/*.json app/ && shx cp src/*.{html,md} app/ && shx cp -R src/assets app/ && cd app && shx ln -sf ../src/node_modules ./node_modules",
     "compile-scripts": "tsc",
     "compile-styles": "node-sass src/scss/main.scss app/scss/main.css",
     "watch-scripts": "tsc --watch",
     "watch-styles": "yarn compile-styles --watch",
-    "compile": "yarn compile-scripts && yarn compile-styles && yarn copy-static",
+    "compile": "yarn gen-schema && yarn compile-scripts && yarn compile-styles && yarn copy-static",
     "start-ui": "electron ./",
     "lint": "tslint --project ./",
     "start": "rm -rf app && rm -rf dist && yarn compile && electron ./",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "yarn compile && electron-builder",
     "expose": "shx mkdir -p ../frontend/public/apps/ && shx cp dist/skedulo-sdk-v1.zip ../frontend/public/apps/ && shx cp dist/skedulo-sdk-v1.exe ../frontend/public/apps/",
-    "dev": "yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
-    "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./"
+    "dev": "yarn gen-schema && yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
+    "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./",
+    "gen-schema": "typescript-json-schema ./tsconfig.json '*' --include='src/**/*.def.ts' --titles --required --excludePrivate --aliasRefs --validationKeywords --out=./src/schema.definition.json",
+    "postinstall": "ts-node ./download-ngrok-bins.ts && yarn compile && electron-builder install-app-deps"
   },
   "jest": {
     "testMatch": [
@@ -69,8 +72,12 @@
     "ext": "js"
   },
   "build": {
+    "directories": {
+      "app": "app"
+    },
     "appId": "com.skedulo.sdk",
     "artifactName": "skedulo-sdk-v1.${ext}",
+    "extraResources": ["app/assets/ngrok-*"],
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "zip"
@@ -89,17 +96,21 @@
   "devDependencies": {
     "@types/jest": "^22.1.3",
     "cross-env": "^5.2.0",
+    "decompress-zip": "^0.2.2",
     "electron": "^6.0.3",
     "electron-builder": "^21.2.0",
-    "jest": "^22.4.0",
+    "enzyme": "^3.10.0",
+    "enzyme-to-json": "^3.4.0",
+    "jest": "^24.9.0",
     "node-sass": "^4.12.0",
     "nodemon": "^1.15.1",
     "shelljs": "^0.8.3",
     "shx": "^0.3.2",
-    "ts-jest": "^22.0.4",
+    "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
     "tslint": "^5.19.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.6.2",
+    "typescript-json-schema": "^0.40.0"
   },
   "dependencies": {}
 }

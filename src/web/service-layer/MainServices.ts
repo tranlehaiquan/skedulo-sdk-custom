@@ -7,4 +7,18 @@ import { remote } from 'electron'
 import { Services } from '../../main/Services'
 const MainServicesClass = remote.require('./main/Services').Services as (typeof Services)
 
+// Fix PATH! for OSX
+require('fix-path')()
+
 export const MainServices = new MainServicesClass(remote.getCurrentWindow())
+
+/**
+ * JS Console Shortcut
+ */
+remote.globalShortcut.register('CommandOrControl+Shift+I', () => {
+  remote.BrowserWindow.getFocusedWindow()!.webContents.openDevTools()
+})
+
+window.addEventListener('beforeunload', () => {
+  remote.globalShortcut.unregisterAll()
+})

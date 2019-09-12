@@ -6,7 +6,7 @@ import { LogItem, ProjectServices } from '../service-layer/ProjectServices'
 import { ProjectData, MobileProjectData, SessionData } from '../service-layer/types'
 import { MobileProjectServices } from '../service-layer/MobileProjectServices'
 import { ContentLayout } from './Layout'
-import { Terminal } from './Terminal'
+import { Terminal, TerminalSize } from './Terminal'
 import { shell } from 'electron'
 import { ProjectType } from '../service-layer/types'
 
@@ -66,7 +66,7 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
 
     // Create a connectable HOT "Observable" that's shared to its children
     const log$ = sourceLog$
-      .do(_.noop, _.noop, this.resetState)
+      .do(_.noop, this.resetState, this.resetState)
       .publish()
 
     this.setState({
@@ -139,7 +139,7 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
           </div>
         </div>
         <hr />
-        { this.state.log$ ? <Terminal log$={ this.state.log$ } /> : null }
+        { this.state.log$ ? <Terminal size={ TerminalSize.FullViewHeight } log$={ this.state.log$ } /> : null }
       </ContentLayout>
     )
   }

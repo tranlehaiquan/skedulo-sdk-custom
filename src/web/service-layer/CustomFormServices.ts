@@ -37,11 +37,19 @@ export interface FormMetadata {
   jobTypes: string[]
 }
 
-export class LegacyCustomFormServices {
+export class CustomFormServices {
 
   private apiRequest = (new NetworkingService(this.session)).getAPIRequest()
 
   constructor(private session: SessionData) { }
+
+  startDevSession(url: string, name: string) {
+    return this.apiRequest.post('/pkgr/dev/start-session', { body: { url, name, type: 'mobilepage' }, json: true })
+  }
+
+  stopDevSession(url: string) {
+    return this.apiRequest.post('/pkgr/dev/stop-session', { body: { url }, json: true })
+  }
 
   createForm(name: string) {
     return this.apiRequest.post('/customform/form', {

@@ -20,6 +20,7 @@ import { SSLHelp } from './SSLHelp'
 import { ManageCustomForms } from './ManageCustomForms'
 import { debugDevStack } from '../utils/shell'
 import { ProjectType } from '../service-layer/types'
+import { SelectPackage } from './package/SelectPackage'
 
 function openUrl(url: string) {
   shell.openExternal(url)
@@ -29,6 +30,7 @@ export enum View {
   Home,
   ManageConnectedPages,
   ManageCustomForms,
+  ManagePackages,
   SSLNotSetPrompt,
   SetupSSL,
   SetupSSLMarkdown,
@@ -220,7 +222,8 @@ export class App extends React.Component<{}, IState> {
     return (
       <div>
         <p>To begin, select one of the following options.</p>
-        <button className="sk-button primary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</button>
+        <button className="sk-button primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</button>
+        <button className="sk-button secondary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</button>
         <button className="sk-button secondary" onClick={ this.setView(View.ManageCustomForms) }>Manage Custom Forms</button>
       </div>
     )
@@ -335,6 +338,7 @@ export class App extends React.Component<{}, IState> {
       return this.renderUnsupportedPlatform()
     }
 
+    const homeBack = () => this.back(View.Home)
     const customFormBack = () => this.back(View.ManageCustomForms)
     const connectedPageBack = () => this.back(View.ManageConnectedPages)
 
@@ -351,6 +355,8 @@ export class App extends React.Component<{}, IState> {
         return this.renderManageConnectedPages()
       case View.ManageCustomForms:
         return this.renderManageCustomForms()
+      case View.ManagePackages:
+        return <SelectPackage back={ homeBack } session={ session! }/>
       case View.SelectCPProject:
         return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
       case View.ActiveCPProject:
@@ -398,8 +404,8 @@ export class DebugInstall extends React.PureComponent<IState['debug']> {
 
   render() {
     return (
-      <div className="padding-top">
-        <h2>System Requirements</h2>
+      <div className="text-left padding-top">
+        <h3>System Requirements</h3>
         <ul className="installation__steps">
           { this.renderItem('OpenSSL', this.props.openssl) }
           { this.renderItem('Yarn', this.props.yarn) }

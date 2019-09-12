@@ -3,7 +3,7 @@ import { UserMetadata } from '../service-layer/types'
 
 export interface ILayoutProps {
   onHomeClick: () => void
-  userMetadata: UserMetadata | null
+  userMetadata?: UserMetadata | null
 }
 
 function getInitialsFromName(name: string) {
@@ -16,7 +16,7 @@ export const HeaderLayout: React.StatelessComponent<ILayoutProps> = props => {
     <div className="frame">
       <div className="header">
         <i className="ski ski-skedulo header__logo" onClick={ props.onHomeClick } />
-        <div className="header__text">Skedulo Connected Pages</div>
+        <div className="header__text">Skedulo SDK</div>
         {/* Harish: you might want to use this https://dev.phoenix.test.skl.io/ui/dropdowns */ }
         {
           props.userMetadata && <div className="header__actions">

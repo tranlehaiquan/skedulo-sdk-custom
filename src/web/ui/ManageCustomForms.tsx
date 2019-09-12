@@ -6,7 +6,7 @@ import * as React from 'react'
 import * as Joi from 'joi'
 
 import { MainServices } from '../service-layer/MainServices'
-import { LegacyCustomFormServices, Definition } from '../service-layer/LegacyCustomFormServices'
+import { CustomFormServices, Definition } from '../service-layer/CustomFormServices'
 import { SessionData } from '../service-layer/types'
 import { ContentLayout } from './Layout'
 import { LoadingIndicator } from './LoadingIndicator'
@@ -72,7 +72,7 @@ async function getPackageDefinition(directory: string) {
 
 export class ManageCustomForms extends React.PureComponent<IProps, IState> {
 
-  private customFormServices = new LegacyCustomFormServices(this.props.session)
+  private customFormServices = new CustomFormServices(this.props.session)
 
   constructor(props: IProps) {
     super(props)
@@ -88,6 +88,7 @@ export class ManageCustomForms extends React.PureComponent<IProps, IState> {
   }
 
   selectDirectory = async () => {
+
     const directoryResult = await MainServices.selectDirectory()
     const selectedDirectory = _.head(directoryResult.filePaths) || ''
 

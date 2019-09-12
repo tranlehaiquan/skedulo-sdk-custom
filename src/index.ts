@@ -67,15 +67,15 @@ function createWindow() {
   }))
 
   // Open dev-tools on launch
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   // Prevent opening dev-tools
   // when dev tools is "opened", immediately close it
-  if (process.env.NODE_ENV !== 'development') {
-    win.removeMenu()
+  // if (process.env.NODE_ENV !== 'development') {
+  //   win.removeMenu()
 
-    win.webContents.on('devtools-opened', () => {
-      win!.webContents.closeDevTools()
-    })
-  }
+  //   win.webContents.on('devtools-opened', () => {
+  //     win!.webContents.closeDevTools()
+  //   })
+  // }
 }
