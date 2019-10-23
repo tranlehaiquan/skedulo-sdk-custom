@@ -14,6 +14,7 @@ import { ActiveProject } from './ActiveProject'
 import { ContentLayout, HeaderLayout } from './Layout'
 import { Markdown } from './Markdown'
 import { NewConnectedPageProject } from './NewConnectedPageProject'
+import { CreateNewPackage } from './CreateNewPackage'
 import { NewCustomFormProject } from './NewCustomFormProject'
 import { SelectProject } from './SelectProject'
 import { SSLHelp } from './SSLHelp'
@@ -31,10 +32,12 @@ export enum View {
   ManageConnectedPages,
   ManageCustomForms,
   ManagePackages,
+  OpenPackage,
   SSLNotSetPrompt,
   SetupSSL,
   SetupSSLMarkdown,
   CreateCPProject,
+  CreatePackage,
   SelectCPProject,
   ActiveCPProject,
   CreateCFProject,
@@ -229,6 +232,16 @@ export class App extends React.Component<{}, IState> {
     )
   }
 
+  renderPackageActionButtons = () => {
+    return (
+      <div>
+        <p>Select an action to manage Packages.</p>
+        <button className="sk-button secondary" onClick={ this.setView(View.CreatePackage) }>Create new package</button>
+        <button className="sk-button primary" onClick={ this.setView(View.OpenPackage) }>Select existing package</button>
+      </div>
+    )
+  }
+
   renderConnectedPageActionButtons = () => {
     return (
       <div>
@@ -259,6 +272,15 @@ export class App extends React.Component<{}, IState> {
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
         { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() }
         <DebugInstall { ...this.state.debug } />
+      </ContentLayout>
+    )
+  }
+
+  renderManagePackages = () => {
+    return (
+      <ContentLayout className="content__center--large" centered>
+        <h1>Manage Packages</h1>
+        { this.renderPackageActionButtons() }
       </ContentLayout>
     )
   }
@@ -338,9 +360,9 @@ export class App extends React.Component<{}, IState> {
       return this.renderUnsupportedPlatform()
     }
 
-    const homeBack = () => this.back(View.Home)
     const customFormBack = () => this.back(View.ManageCustomForms)
     const connectedPageBack = () => this.back(View.ManageConnectedPages)
+    const managePackageBack = () => this.back(View.ManagePackages)
 
     switch (currentView) {
       case View.Home:
@@ -356,14 +378,18 @@ export class App extends React.Component<{}, IState> {
       case View.ManageCustomForms:
         return this.renderManageCustomForms()
       case View.ManagePackages:
-        return <SelectPackage back={ homeBack } session={ session! }/>
+        return this.renderManagePackages()
+      case View.OpenPackage:
+        return <SelectPackage back={ managePackageBack } session={ session! } />
       case View.SelectCPProject:
         return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
       case View.ActiveCPProject:
         return <ActiveProject back={ connectedPageBack } projectType={ ProjectType.ConnectedPage } project={ selectedProject! } session={ session! } />
       case View.CreateCPProject:
         return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
-        case View.SelectCFProject:
+      case View.CreatePackage:
+        return <CreateNewPackage back={ managePackageBack } session={ session! } />
+      case View.SelectCFProject:
         return <SelectProject back={ customFormBack } selectProject={ this.selectCustomFormProject } errorMessage={ errorMessage } />
       case View.ActiveCFProject:
         return <ActiveProject back={ customFormBack } projectType={ ProjectType.CustomForm } project={ selectedProject! } session={ session! } />

@@ -12,7 +12,7 @@ import { SessionData } from '../types'
 import { NetworkingService } from '../NetworkingService'
 import * as tar from 'tar'
 import * as crypto from 'crypto'
-import { SchemaProjectService } from './SchemaProjectService';
+import { SchemaProjectService } from './SchemaProjectService'
 
 const PACKAGE_FILE = `sked.pkg.json`
 
@@ -105,6 +105,17 @@ export class PackageService {
     }))
 
     return createSymlinks(linksWithAbsolutePath)
+  }
+
+  static createPackage(packagePath: string, packageData: Package) {
+    const packageMetadata = JSON.stringify(packageData)
+
+    try {
+      fs.writeFileSync(path.join(packagePath, 'sked.pkg.json'), packageMetadata)
+    } catch (error) {
+      console.error(`Cannot write sked.pkg.json file to ${packagePath}.`)
+      throw error
+    }
   }
 
   private resolveLinkDependenciesForProject(project: ProjectService<any>) {
