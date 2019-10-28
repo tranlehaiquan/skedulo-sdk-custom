@@ -9,11 +9,8 @@ import * as zlib from 'zlib'
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { CustomFormServices, Definition } from './CustomFormServices'
-
 import { MobileProjectData, SessionData } from './types'
 import { connectToNgrok } from '../server/ngrok'
-
-export { LogItem } from '../utils/shell'
 
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
 const RAW_COMPILED_ASSET_NAMES = ['node.js', 'native.js', 'node.js.map', 'native.js.map']
@@ -118,21 +115,15 @@ export class MobileProjectServices {
   }
 
   startNgrokProxy = (): Observable<never> => {
-
     return new Observable<never>(obs => {
-      let url: string | null = null
-
       const ngrok$ = connectToNgrok(9050)
         .subscribe(
-          ngrokUrl => {
-            url = ngrokUrl
-          },
+          _ => void 0,
           err => obs.error(err)
         )
 
       return () => {
         ngrok$.unsubscribe()
-        console.log(url)
       }
     })
   }

@@ -22,7 +22,6 @@ import {
   WebPageHook,
   ProjectType
 } from '@skedulo/sked-commons'
-
 import { ContentLayout } from './Layout'
 import { FormHelper } from './form-utils'
 import { ProjectServices } from '../service-layer/ProjectServices'

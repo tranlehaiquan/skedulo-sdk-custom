@@ -20,7 +20,6 @@ async function handleRequest(method, path, headers, body) {
     const response = await app.handler(method, path, headers, body)
     process.send(JSON.stringify({ type: 'response', data: response }))
   } catch (e) {
-    console.log("messagehere", e)
     process.send(JSON.stringify({ type: 'error', data: e.message }))
   }
 }

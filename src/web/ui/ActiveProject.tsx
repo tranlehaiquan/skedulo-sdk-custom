@@ -103,7 +103,7 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
 
     if (projectType === ProjectType.ConnectedPage) {
       if (devReady) {
-        const url = this.props.session.origin + '/c-dev'
+        const url = `${this.props.session.origin}/c-dev`
         return <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
       } else {
         return 'Select "start development" to begin building your connected page'

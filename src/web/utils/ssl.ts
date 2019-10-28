@@ -1,12 +1,10 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-
 import { getPlatform } from '../../platform'
 import { WEB_BASE_PATH } from '../web-base-path'
 
 export const sslDir = path.join(os.homedir(), '/.localhost-ssl/')
-
 export const setUpSSLDocLocation = path.resolve(WEB_BASE_PATH, './Setup-SSL.md')
 
 const key = path.join(sslDir, 'server.key')
@@ -24,7 +22,6 @@ export function getSSLOptions() {
 }
 
 export function getCreateSSLCommands() {
-
   const platform = getPlatform()
 
   switch (platform) {
@@ -39,7 +36,6 @@ export function getCreateSSLCommands() {
 }
 
 function getUnixCreateSSLCommands(destDir: string = sslDir) {
-
   const rootCAKeyPath = path.join(destDir, '/rootCA.key')
   const rootCACertPath = path.join(destDir, '/rootCA.pem')
   const csrPath = path.join(destDir, '/server.csr')

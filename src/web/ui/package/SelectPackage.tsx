@@ -35,11 +35,9 @@ export class SelectPackage extends React.PureComponent<Props, State> {
     errorMessage: null
   }
 
-  selectDirectory = async () => {
-    const directoryResult = await MainServices.selectDirectory()
-
-    this.setState({
-      selectedDirectory: _.head(directoryResult.filePaths) || null
+  selectDirectory = () => {
+    MainServices.selectDirectory().then(({ filePaths }) => {
+      this.setState({ selectedDirectory: _.head(filePaths) || null })
     })
   }
 

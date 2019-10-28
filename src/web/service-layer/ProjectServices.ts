@@ -46,7 +46,7 @@ export class ProjectServices {
   static getWebpageProjectTemplate() {
     return {
       name: 'Webpage project boilerplate',
-      path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
+      path: path.join(TEMPLATE_PATH, 'minimal-react-typescript-package.tar.gz')
     }
   }
 
@@ -104,7 +104,6 @@ export class ProjectServices {
   }
 
   bundleProject() {
-
     const { project: destFolder, filter } = this
 
     const buildAssetsPath = path.join(destFolder, '/pre_deploy_assets')
@@ -155,7 +154,6 @@ export class ProjectServices {
   }
 
   startDeploy() {
-
     const coverageP = this.startCoverage()
       .toPromise()
       .then(() => this.getCoverageSummary())
@@ -168,7 +166,6 @@ export class ProjectServices {
   }
 
   private uploadPackage(page: string, project: string, coverage: ICoverage) {
-
     const metadata = Object.assign(this.getProjectData(), { coverage: coverage.total })
 
     const formData = {
@@ -186,7 +183,6 @@ export class ProjectServices {
   }
 
   getPackages(active: boolean = false) {
-
     return this.apiRequest.get(`/packages`, {
       qs: { active }
     })
@@ -207,6 +203,11 @@ export class ProjectServices {
         )
       })
       .retry(15)
+      .catch(() => {
+        console.log('Failed to connect to SDK server')
+
+        return Observable.empty()
+      })
   }
 }
 

@@ -14,6 +14,7 @@ export function createSymlinks(linksToCreate: LinkDefinition[]) {
 function createLink(link: LinkDefinition) {
   const sourcePath = path.normalize(link.sourcePath).replace(RegExp(path.sep + '$'), '')
   const linkPath = path.normalize(link.linkPath).replace(RegExp(path.sep + '$'), '')
+  let linkType: fs.symlink.Type | null = null
 
   if (fs.existsSync(linkPath)) {
     // Attempt to unlink, this will identify if the link is in-fact a link and not an absolute path
@@ -21,7 +22,7 @@ function createLink(link: LinkDefinition) {
   }
 
   const isWindows = getPlatform() === 'win'
-  let linkType: fs.symlink.Type | null = isWindows ? 'file' : null
+  linkType = isWindows ? 'file' : null
 
   if (!fs.existsSync(sourcePath)) {
     throw new Error('Source path for link does not exist: ' + sourcePath)

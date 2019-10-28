@@ -16,7 +16,6 @@ const EnvSchema = Joi.compile({
 })
 
 export default function (eventChannel: Channel) {
-
   const router = new Router()
 
   router.get('/ping', ctx => ctx.body = 'pong')

@@ -61,8 +61,8 @@ export function connectToNgrok(port: number) {
     MainServices.addChildProcess(child.pid)
     observer.next(child)
 
-    child.stderr.setEncoding('utf8')
-    child.stdout.setEncoding('utf8')
+    child?.stderr?.setEncoding('utf8')
+    child?.stdout?.setEncoding('utf8')
 
     child.once('error', observer.error.bind(observer))
     child.once('close', () => {
@@ -79,8 +79,12 @@ export function connectToNgrok(port: number) {
     }
   })
     .switchMap(child => {
-      const stdout$ = streamToRx<string>(child.stdout)
-      const stderr$ = streamToRx<string>(child.stderr)
+      const stdout$ = child.stdout
+        ? streamToRx<string>(child.stdout)
+        : Observable.empty<string>()
+      const stderr$ = child.stderr
+        ? streamToRx<string>(child.stderr)
+        : Observable.empty<string>()
 
       return stdout$.merge(stderr$)
         .map(logline => logfmt.parse(logline) as NgrokLog)

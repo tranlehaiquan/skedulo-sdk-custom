@@ -10,7 +10,6 @@ const SchemaJSON = require('../schema.definition.json')
 export class Services {
 
   private processIds: Set<number> = new Set()
-
   constructor(private win: BrowserWindow) {
 
     win.on('close', () => {
@@ -43,7 +42,6 @@ export class Services {
   }
 
   selectDirectory() {
-
     return dialog.showOpenDialog(this.win, {
       properties: ['openDirectory', 'createDirectory']
     })

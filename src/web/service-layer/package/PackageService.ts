@@ -23,8 +23,7 @@ const DEFAULT_LINK_DESTINATION_PATH = 'src/__shared'
 enum Script {
   Bootstrap = 'bootstrap',
   Compile = 'compile',
-  Dev = 'dev',
-  Coverage = 'coverage'
+  Dev = 'dev'
 }
 
 export interface IPreDeployErrors {

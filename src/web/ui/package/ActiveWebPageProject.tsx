@@ -67,7 +67,6 @@ export class ActiveWebPageProject extends React.PureComponent<Props, State> {
   }
 
   startDev = async () => {
-
     const portNumber = await MainServices.getPort()
 
     const log$ = this.props.projectService.startDev(portNumber)

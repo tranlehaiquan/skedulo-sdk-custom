@@ -18,7 +18,7 @@ export class WebPageProjectService extends ProjectService<WebPageProject> {
   }
 
   getDevUrl() {
-    return this.session.origin + `/c-dev`
+    return `${this.session.origin}/c-dev/`
   }
 
   startDev(port: number) {
@@ -51,5 +51,10 @@ export class WebPageProjectService extends ProjectService<WebPageProject> {
         )
       })
       .retry(15)
+      .catch(() => {
+        console.log('Failed to connect to SDK server')
+
+        return Observable.empty()
+      })
   }
 }

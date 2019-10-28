@@ -16,7 +16,10 @@ export const MainServices = new MainServicesClass(remote.getCurrentWindow())
  * JS Console Shortcut
  */
 remote.globalShortcut.register('CommandOrControl+Shift+I', () => {
-  remote.BrowserWindow.getFocusedWindow()!.webContents.openDevTools()
+  const focusedWindow = remote.BrowserWindow.getFocusedWindow()
+  if (focusedWindow) {
+    focusedWindow.webContents.openDevTools()
+  }
 })
 
 window.addEventListener('beforeunload', () => {

@@ -82,16 +82,18 @@ export function startLambdaServer(port: number, lambdaProjectPath: string, execu
 }
 
 function runRequest(projectPath: string, fnPayload: FnPayload, executionTimeout: number, logCallback: (item: LogItem) => void): Promise<ResponseType['data']> {
-
   return new Promise((resolve, reject) => {
-
     const child = child_process.fork(path.join(WEB_BASE_PATH, '/assets/lambda-dev-wrapper'), [], {
       cwd: projectPath,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })
 
-    child.stdout.setEncoding('utf8')
-    child.stderr.setEncoding('utf8')
+    if (!child) {
+      return reject(new Error('Unable to fork new process to run request'))
+    }
+
+    child.stdout?.setEncoding('utf8')
+    child.stderr?.setEncoding('utf8')
 
     let timer: NodeJS.Timer | null = setTimeout(() => {
       killChildProcess()
@@ -106,12 +108,12 @@ function runRequest(projectPath: string, fnPayload: FnPayload, executionTimeout:
       }
 
       // Kill "child" process
-      child.kill()
+      child?.kill()
     }
 
     // Start "streaming" logs out via callback
-    child.stdout.on('data', (out: string) => logCallback({ type: 'out', value: out }))
-    child.stderr.on('data', (out: string) => logCallback({ type: 'err', value: out }))
+    child.stdout?.on('data', (out: string) => logCallback({ type: 'out', value: out }))
+    child.stderr?.on('data', (out: string) => logCallback({ type: 'err', value: out }))
 
     child.on('message', msg => {
 

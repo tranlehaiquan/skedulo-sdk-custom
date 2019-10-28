@@ -72,7 +72,7 @@ export interface IState {
   errorMessage?: string
   connectionError: string | null
   userMetadata: UserMetadata | null,
-  debug: {
+  environment: {
     node: DebugState | null,
     yarn: DebugState | null,
     openssl: DebugState | null
@@ -86,7 +86,6 @@ interface DebugState {
 }
 
 export class App extends React.Component<{}, IState> {
-
   state: IState = {
     currentView: View.Home,
     projectData: null,
@@ -98,7 +97,7 @@ export class App extends React.Component<{}, IState> {
     userMetadata: null,
     connectionError: null,
     packageService: null,
-    debug: {
+    environment: {
       node: null,
       yarn: null,
       openssl: null
@@ -109,29 +108,7 @@ export class App extends React.Component<{}, IState> {
   private eventChannel = new EventChannel()
 
   componentDidMount() {
-    // We test for the presence of SSL certs and proceed if they're set up.
-    // We don't verify the validity of the SSL certs at the moment.
-    // We also rely on the user re-starting the app after setting up their SSL certs
-    // correctly to keep things simple. We can automate that process down the line.
-    if (!this.state.sslCertsPresent) {
-      this.setState({ currentView: View.SSLNotSetPrompt })
-
-      this.subscription.add(
-        this.getDebugState().subscribe(void 0, error => console.error(error))
-      )
-
-    } else {
-
-      const newProjSub = this.eventChannel.onNewProject()
-        .do(() => this.setState({ currentView: View.CreateCPProject }))
-        .do(() => MainServices.focus())
-
-      this.subscription
-        .add(
-          Observable.merge(newProjSub, this.getDebugState(), this.maintainSession())
-            .subscribe(void 0, error => console.error(error))
-        )
-    }
+    this.appInitialize()
   }
 
   // Cleanup subscriptions when component unmounts
@@ -139,7 +116,34 @@ export class App extends React.Component<{}, IState> {
     this.subscription.unsubscribe()
   }
 
-  back = (view?: View) => this.setState({ currentView: view ? view : View.Home, selectedProject: null, projectData: null, errorMessage: '' })
+  appInitialize() {
+    // Test for existence of SSL certs, no checks on the certs are run currently.
+    if (!this.state.sslCertsPresent) {
+      this.setState({ currentView: View.SSLNotSetPrompt })
+
+      this.subscription.add(
+        this.checkDevelopmentEnvironment().subscribe(void 0, error => console.error(error))
+      )
+    } else {
+      const onNewProject$ = this.eventChannel.onNewProject()
+        .do(() => this.setState({ currentView: View.CreateCPProject }))
+        .do(() => MainServices.focus())
+
+      this.subscription
+        .add(
+          Observable
+            .merge(onNewProject$, this.checkDevelopmentEnvironment(), this.listenForDevelopmentSession())
+            .subscribe(void 0, error => console.error(error)) // emit on success, log errors.
+        )
+    }
+  }
+
+  back = (view?: View) => this.setState({
+    currentView: view ? view : View.Home,
+    selectedProject: null,
+    projectData: null,
+    errorMessage: ''
+  })
 
   setView = (currentView: IState['currentView']) => () => this.setState({ currentView })
 
@@ -164,10 +168,13 @@ export class App extends React.Component<{}, IState> {
     }
   }
 
-  goHome = () => this.setView(this.state.sslCertsPresent ? View.Home : View.SSLNotSetPrompt)
+  goHome = () => this.setView(
+    this.state.sslCertsPresent
+      ? View.Home
+      : View.SSLNotSetPrompt
+  )
 
   selectConnectedPageProject = (selectedProject: string) => {
-
     if (!fs.existsSync(path.join(selectedProject, '/sked.proj.json'))) {
       this.setState({
         errorMessage: 'The folder you have selected does not contain a valid Connected Pages project file. Please select another.'
@@ -197,10 +204,14 @@ export class App extends React.Component<{}, IState> {
     }
   }
 
-  getDebugState = () => {
-
+  checkDevelopmentEnvironment = () => {
     const { nodeExists, yarnExists, openSSLExists } = debugDevStack()
-    const setter = (namespace: keyof IState['debug']) => (status: DebugState) => this.setState({ debug: { ...this.state.debug, [namespace]: status } })
+    const setter = (namespace: keyof IState['environment']) => (status: DebugState) => this.setState({
+      environment: {
+        ...this.state.environment,
+        [namespace]: status
+      }
+    })
 
     return Observable.merge(
       nodeExists.do(setter('node')),
@@ -209,29 +220,27 @@ export class App extends React.Component<{}, IState> {
     )
   }
 
-  maintainSession = () => {
-
+  listenForDevelopmentSession = () => {
     return this.eventChannel.onSessionEvent()
       .do(session => {
-
         if (session) {
-
           this.setState({ session })
 
+          // We can now fetch metadata for this user, a
           fetch(session.API_SERVER + '/custom/usermetadata', {
             headers: { Authorization: `Bearer ${session.token}` }
           })
-            .then(response => {
-              if (response.status === 200) {
-                return response.json().then(res => res.result as UserMetadata)
-              } else if (response.status >= 400) {
-                return response.json().then(res => `Connection Error : ${res.errorType}: ${res.message}`).then(errMsg => Promise.reject(errMsg))
-              } else {
-                return Promise.reject('Could not connect to the server. Please try again later.')
-              }
-            })
-            .then(userMetadata => this.setState({ userMetadata, connectionError: null }))
-            .catch(connectionError => this.setState({ connectionError }))
+          .then(response => {
+            if (response.status === 200) {
+              return response.json().then(res => res.result as UserMetadata)
+            } else if (response.status >= 400) {
+              return response.json().then(res => `Connection Error : ${res.errorType}: ${res.message}`).then(errMsg => Promise.reject(errMsg))
+            } else {
+              return Promise.reject('Could not connect to the server. Please try again later.')
+            }
+          })
+          .then(userMetadata => this.setState({ userMetadata, connectionError: null }))
+          .catch(connectionError => this.setState({ connectionError }))
         } else {
           this.setState({ session: null, connectionError: null, userMetadata: null, currentView: View.Home })
         }
@@ -239,7 +248,6 @@ export class App extends React.Component<{}, IState> {
   }
 
   renderNotConnected = () => {
-
     const isConnecting = !!(this.state.session && !this.state.userMetadata)
     const connectionError = this.state.connectionError
 
@@ -316,7 +324,7 @@ export class App extends React.Component<{}, IState> {
       <ContentLayout className="content__center--large" centered>
         <h1>Welcome to Skedulo’s Connected Pages platform</h1>
         { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() }
-        <DebugInstall { ...this.state.debug } />
+        <DebugInstall { ...this.state.environment } />
       </ContentLayout>
     )
   }
@@ -355,7 +363,7 @@ export class App extends React.Component<{}, IState> {
         <p>
           You need to setup self-signed SSL certificates to continue. Click <a className="blue-link" onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
         </p>
-        <DebugInstall { ...this.state.debug } />
+        <DebugInstall { ...this.state.environment } />
       </ContentLayout>
     )
   }
@@ -468,7 +476,7 @@ export class App extends React.Component<{}, IState> {
   }
 }
 
-export class DebugInstall extends React.PureComponent<IState['debug']> {
+export class DebugInstall extends React.PureComponent<IState['environment']> {
 
   renderItem = (key: string, item: DebugState | null) => {
     if (!item) {

@@ -3,8 +3,8 @@ import * as crossSpawn from 'cross-spawn'
 import * as _ from 'lodash'
 import { Observable } from 'rxjs'
 import * as semver from 'semver'
-import { getPlatform } from '../../platform'
 import { MainServices } from '../service-layer/MainServices'
+import { getPlatform } from '../../platform'
 
 export interface LogItem {
   type: 'out' | 'err',
@@ -62,8 +62,12 @@ export function shellExec(command: string, cwd?: string, env: { [key: string]: s
     }
   })
     .switchMap(child => {
-      const stdout$ = streamToRx<string>(child.stdout)
-      const stderr$ = streamToRx<string>(child.stderr)
+      const stdout$ = child.stdout
+        ? streamToRx<string>(child.stdout)
+        : Observable.empty<string>()
+      const stderr$ = child.stderr
+        ? streamToRx<string>(child.stderr)
+        : Observable.empty<string>()
 
       return Observable.merge(
         stdout$.map((out): LogItem => ({ type: 'out', value: out })),
@@ -73,7 +77,6 @@ export function shellExec(command: string, cwd?: string, env: { [key: string]: s
 }
 
 function windowsExec(command: string, cwd?: string, env: { [key: string]: string } = {}) {
-
   const [cmd, ...rest] = command.split(/\s/g)
 
   const child = crossSpawn(cmd,
@@ -81,8 +84,8 @@ function windowsExec(command: string, cwd?: string, env: { [key: string]: string
     { stdio: 'pipe', cwd, env: { ..._.omit(process.env, 'PREFIX'), ...env } }
   )
 
-  child.stderr.setEncoding('utf8')
-  child.stdout.setEncoding('utf8')
+  child.stderr?.setEncoding('utf8')
+  child.stdout?.setEncoding('utf8')
 
   return child
 }

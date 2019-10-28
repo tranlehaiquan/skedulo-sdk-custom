@@ -59,7 +59,6 @@ export abstract class ProjectService<T> {
   }
 
   protected startNgrokAndProbe(port: number, name: string, type: string, metadata: T) {
-
     return new Observable<never>(obs => {
       let url: string | null = null
       let timeCode: NodeJS.Timer | null = null

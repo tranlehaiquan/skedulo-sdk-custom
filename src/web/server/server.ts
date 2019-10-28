@@ -27,7 +27,9 @@ export function start(eventChannel: Channel) {
   app.use(KJsonError(errJsonOptions))
 
   // Request Logging ( Only during "dev" )
-  // app.use(require('koa-logger')())
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(require('koa-logger')())
+  }
 
   // Enable Cross Origin Requests
   app.use(KCors())
