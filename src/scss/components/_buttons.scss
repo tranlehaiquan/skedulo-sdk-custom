@@ -365,6 +365,11 @@ $icon-button-transpatent-color-hover: $grey-1;
   cursor: pointer;
 }
 
+// default button group
+.sk-button-group {
+  margin-top: $global-margin;
+}
+
 // Normal button
 .sk-button {
   @include sk-button;

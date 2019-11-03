@@ -1,7 +1,18 @@
-import * as _ from 'lodash'
 import * as React from 'react'
+import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as util from 'util'
+import {
+  SkedFormValidation,
+  FormElementWrapper,
+  FormInputElement,
+  FormLabel,
+  // @ts-ignore - no idea why TS throws "module not found" error here. 'FormConfig' is referenced fine in Phoenix
+  FormConfig,
+  SkedFormChildren,
+  ButtonGroup,
+  Button
+} from '@skedulo/sked-ui'
 const readDirAsync = util.promisify(fs.readdir)
 
 import { ContentLayout } from './Layout'
@@ -26,13 +37,41 @@ export interface IState {
   errorMessage: string
 }
 
-export const NEW_PKG_METADATA = {
-  version: '1' as Package['version'],
+interface PackageForm {
+  name: string,
+  summary: string,
+  directory: string
+}
+
+export const NEW_PKG_METADATA: Package = {
+  version: '1',
   name: '',
   summary: '',
   components: {},
   relationships: [],
   linkedComponents: []
+}
+
+const FORM_CONFIG: FormConfig = {
+  name: {
+    isRequired: {
+      message: 'Please enter a package name'
+    },
+    isRegexMatch: {
+      regex: /^[a-z0-9]+$/i,
+      message: 'Please enter a valid alpha-numeric package name'
+    }
+  },
+  summary: {
+    isRequired: {
+      message: 'Please enter a package summary'
+    }
+  },
+  directory: {
+    isRequired: {
+      message: 'The directory you have selected is not empty. Please select an empty directory.'
+    }
+  }
 }
 
 export class CreateNewPackage extends React.PureComponent<IProps, IState> {
@@ -76,27 +115,90 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
     }
   }
 
-  selectDirectory = async () => {
+  selectDirectory = (fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => async () => {
+    const { setAndValidateDirectory } = this
     const directoryResult = await MainServices.selectDirectory()
     const selectedPath = _.head(directoryResult.filePaths) || ''
     const files = await readDirAsync(selectedPath)
     const filteredFiles = files.filter(file => !file.startsWith('.')) // filter hidden system files
 
     try {
-      if (!!filteredFiles.length) {
-        this.setState({ errorMessage: 'The directory you have selected is not empty. Please select an empty directory.' })
+      if (!filteredFiles.length) {
+        setAndValidateDirectory(fieldUpdate, selectedPath)
       } else {
-        this.packageForm.set('selectedDirectory', selectedPath)
-        this.setState({ errorMessage: '' })
+        setAndValidateDirectory(fieldUpdate, '')
       }
     } catch (err) {
-      this.setState({ errorMessage: err.message })
+      throw new Error(err.message)
     }
   }
 
+  setAndValidateDirectory = (fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate'], selectedPath: string) => {
+    this.packageForm.set('selectedDirectory', selectedPath)
+    fieldUpdate('directory')(selectedPath)
+  }
+
+  updateAndValidateField = (fieldName: 'name' | 'summary', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
+    this.packageMetadataForm.setMap(fieldName)(e)
+    fieldUpdate(fieldName)(e.currentTarget.value)
+  }
+
+  renderNewPackageForm = () => {
+    const { packageMetadataForm, selectDirectory, updateAndValidateField, createNewPackage } = this
+    const { packageMetadata, package: pkg } = this.state
+    const { back } = this.props
+    const initialFormValues: PackageForm = {
+      name: '',
+      summary: '',
+      directory: ''
+    }
+
+    return (
+      <SkedFormValidation
+        config={ FORM_CONFIG }
+        initialValues={ initialFormValues }
+        onSubmit={ createNewPackage }
+      >
+        {
+          ({ isValidAfterModified, customFieldUpdate, submit }) => {
+            return (
+              <React.Fragment>
+                <FormElementWrapper size="full" className="text-left" validation={ isValidAfterModified('name') }>
+                  <FormLabel className="span-label">Name</FormLabel>
+                    <FormInputElement type="text" value={ packageMetadata.name } onChange={ updateAndValidateField('name', customFieldUpdate) } onBlur={ packageMetadataForm.setMap('name') } />
+                </FormElementWrapper>
+
+                <FormElementWrapper size="full" className="text-left" validation={ isValidAfterModified('summary') }>
+                  <FormLabel className="span-label">Summary</FormLabel>
+                    <FormInputElement type="text" value={ packageMetadata.summary } onChange={ updateAndValidateField('summary', customFieldUpdate) } onBlur={ packageMetadataForm.setMap('summary') } />
+                </FormElementWrapper>
+
+                <FormElementWrapper size="full" className="text-left" validation={ isValidAfterModified('directory') }>
+                  <FormLabel className="span-label">Directory</FormLabel>
+                    <FormInputElement type="text" placeholder="Select package directory" value={ pkg.selectedDirectory } onClick={ selectDirectory(customFieldUpdate) } />
+                </FormElementWrapper>
+
+                <ButtonGroup className="sk-button-group">
+                  <Button buttonType="transparent" onClick={ back }>
+                    Cancel
+                  </Button>
+                  <Button buttonType="primary" onClick={ submit }>
+                    Create New Package
+                  </Button>
+                </ButtonGroup>
+              </React.Fragment>
+            )
+          }
+        }
+      </SkedFormValidation>
+    )
+
+    return null
+  }
+
   render() {
-    const { selectDirectory, packageMetadataForm, createNewPackage } = this
-    const { package: pkg, packageMetadata, selectedPackage, errorMessage } = this.state // since package is a reserved word in strict mode
+    const { renderNewPackageForm } = this
+    const { selectedPackage } = this.state
 
     return (
       selectedPackage ? (
@@ -105,33 +207,8 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
         <ContentLayout centered>
           <h1>Create New Package</h1>
           <div className="padding-top padding-bottom">
-            <label className="required">
-              <span className="span-label">Name</span>
-              <input type="text" value={ packageMetadata.name } onChange={ packageMetadataForm.setMap('name') } onBlur={ packageMetadataForm.setMap('name') } />
-            </label>
-            <label className="required">
-              <span className="span-label">Summary</span>
-              <input type="text" value={ packageMetadata.summary } onChange={ packageMetadataForm.setMap('summary') } onBlur={ packageMetadataForm.setMap('summary') } />
-            </label>
-            <label>
-              <span className="span-label">Directory</span>
-              { errorMessage && <div className="callout warning">{ errorMessage }</div> }
-              <input
-                type="text"
-                placeholder="Select package directory"
-                onChange={ _.noop }
-                value={ pkg.selectedDirectory }
-                onClick={ selectDirectory } />
-            </label>
+           { renderNewPackageForm() }
           </div>
-
-          <button className="sk-button transparent" onClick={ this.props.back }>Cancel</button>
-          <button
-            className="sk-button primary"
-            onClick={ createNewPackage }
-            disabled={ !(this.packageForm.isValid() && packageMetadataForm.isValid()) }>
-              Create New Package
-          </button>
         </ContentLayout>
       )
     )

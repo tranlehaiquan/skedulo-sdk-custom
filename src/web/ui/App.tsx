@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { shell } from 'electron'
+import { Button, ButtonGroup } from '@skedulo/sked-ui'
 import { Subscription, Observable } from 'rxjs'
 
 import { getPlatform, Platform } from '../../platform'
@@ -225,9 +226,11 @@ export class App extends React.Component<{}, IState> {
     return (
       <div>
         <p>To begin, select one of the following options.</p>
-        <button className="sk-button primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.ManageCustomForms) }>Manage Custom Forms</button>
+        <ButtonGroup>
+          <Button buttonType="primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.ManageCustomForms) }>Manage Custom Forms</Button>
+        </ButtonGroup>
       </div>
     )
   }
@@ -236,8 +239,10 @@ export class App extends React.Component<{}, IState> {
     return (
       <div>
         <p>Select an action to manage Packages.</p>
-        <button className="sk-button secondary" onClick={ this.setView(View.CreatePackage) }>Create new package</button>
-        <button className="sk-button primary" onClick={ this.setView(View.OpenPackage) }>Select existing package</button>
+        <ButtonGroup>
+          <Button buttonType="primary" onClick={ this.setView(View.CreatePackage) }>Create new package</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.OpenPackage) }>Select existing package</Button>
+        </ButtonGroup>
       </div>
     )
   }
@@ -246,8 +251,10 @@ export class App extends React.Component<{}, IState> {
     return (
       <div>
         <p>Select an action to manage Connected Pages.</p>
-        <button className="sk-button primary" onClick={ this.setView(View.CreateCPProject) }>Create new project</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.SelectCPProject) }>Select existing project</button>
+        <ButtonGroup>
+          <Button buttonType="primary" onClick={ this.setView(View.CreateCPProject) }>Create new project</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.SelectCPProject) }>Select existing project</Button>
+        </ButtonGroup>
       </div>
     )
   }
@@ -256,9 +263,11 @@ export class App extends React.Component<{}, IState> {
     return (
       <div>
         <p>Select an action to manage Custom Forms.</p>
-        <button className="sk-button primary" onClick={ this.setView(View.CreateCFProject) }>Create new project</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.SelectCFProject) }>Select existing project</button>
-        <button className="sk-button secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy an existing project</button>
+        <ButtonGroup>
+          <Button buttonType="primary" onClick={ this.setView(View.CreateCFProject) }>Create new project</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.SelectCFProject) }>Select existing project</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy an existing project</Button>
+        </ButtonGroup>
       </div>
     )
   }

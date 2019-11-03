@@ -77,7 +77,9 @@
     },
     "appId": "com.skedulo.sdk",
     "artifactName": "skedulo-sdk-v1.${ext}",
-    "extraResources": ["app/assets/ngrok-*"],
+    "extraResources": [
+      "app/assets/ngrok-*"
+    ],
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "zip"
