@@ -11,9 +11,12 @@ import { proxyTo } from '../utils/proxy'
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { ICoverage, ProjectData, SessionData } from './types'
+import { FunctionProject, WebPageProject } from './package/package-types.def'
 import { NetworkingService } from './NetworkingService'
 
 export { LogItem } from '../utils/shell'
+
+type ProjectDataType = ProjectData | FunctionProject | WebPageProject
 
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
 const proxyServer = proxyTo({ port: 3000 }, { port: 1929 })
@@ -31,6 +34,20 @@ export class ProjectServices {
         path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
       }
     ]
+  }
+
+  static getFunctionProjectTemplate() {
+    return {
+      name: 'Function project boilerplate',
+      path: path.join(TEMPLATE_PATH, 'function-boilerplate.tar.gz')
+    }
+  }
+
+  static getWebpageProjectTemplate() {
+    return {
+      name: 'Webpage project boilerplate',
+      path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
+    }
   }
 
   getProjectData(): ProjectData {
@@ -62,7 +79,13 @@ export class ProjectServices {
     return path.join(this.project, '/coverage/coverage-summary.json')
   }
 
-  static createProject(project: string, template: string, projectData: ProjectData, session: SessionData) {
+  static createProject(project: string, template: string, projectData: ProjectDataType, session: SessionData) {
+
+    if (!fs.existsSync(project)) {
+      fs.mkdirSync(project)
+    } else {
+      throw new Error(`The project path "${project}" already exists!`)
+    }
 
     const proj = new ProjectServices(project, session)
 
@@ -75,7 +98,7 @@ export class ProjectServices {
     return extractTarball(this.project, template)
   }
 
-  private createProjectFile(projectData: ProjectData) {
+  private createProjectFile(projectData: ProjectDataType) {
     const json = JSON.stringify(projectData)
     fs.writeFileSync(this.getProjectDataPath(), json)
   }

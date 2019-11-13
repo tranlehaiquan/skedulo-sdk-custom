@@ -8,9 +8,11 @@ import { ProjectService } from '../../service-layer/package/ProjectService'
 import { WebPageProjectService } from '../../service-layer/package/WebPageProjectService'
 import { ContentLayout } from '../Layout'
 import { ActiveProjectWrapper } from './ActiveProjectWrapper'
+import { View } from '../App'
 
 interface Props {
-  package: PackageService
+  package: PackageService,
+  setView: (view: View) => () => void
 }
 
 interface State {
@@ -117,7 +119,6 @@ export class ManagePackage extends React.PureComponent<Props, State> {
   }
 
   render() {
-
     const pkg = this.props.package.packageMetadata
     const { mobilepages, lambdas, webpages } = this.props.package
 
@@ -133,14 +134,14 @@ export class ManagePackage extends React.PureComponent<Props, State> {
         <div className="card">
           <div className="h2 title">
             Functions
-            <button className="sk-button secondary" disabled={ true }>Add Project</button>
+            <button className="sk-button secondary" onClick={ this.props.setView(View.CreateFunctionProject) } disabled={ false }>Add Project</button>
           </div>
           { this.renderFunctionList(lambdas) }
         </div>
         <div className="card">
           <div className="h2 title">
             Web Pages
-            <button className="sk-button secondary" disabled={ true }>Add Project</button>
+            <button className="sk-button secondary" onClick={ this.props.setView(View.CreateWebpageProject) } disabled={ false }>Add Project</button>
           </div>
           { this.renderWebpageList(webpages) }
         </div>

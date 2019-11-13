@@ -1,3 +1,4 @@
+import { ProjectType, NodeVersion, Version, BuildAction, BuildStatus, WebPageType, WebPageHook } from './enums'
 
 /**
  * Copied from SDK
@@ -34,7 +35,7 @@ interface PackageLink {
 }
 
 export interface Package {
-  version: '1',
+  version: Version.One,
 
   /**
    * @minLength 3
@@ -50,6 +51,11 @@ export interface Package {
   components: PackageComponents
   relationships: PackageRelationship[]
   linkedComponents: PackageLink[]
+}
+
+export interface  SelectedPackage {
+  directory: string,
+  metaData: Package
 }
 
 export interface BaseCodeProject {
@@ -84,27 +90,27 @@ export interface FunctionProject extends BaseCodeProject {
    */
   name: string
 
-  type: 'function'
+  type: ProjectType.Function
 
-  runtime: 'nodejs8.10'
+  runtime: NodeVersion.V810
 }
 
-export type WebPageRenderType = { type: 'embedded', hook: 'resource-details' | 'job-details', showInNavBar: boolean } | { type: 'page', showInNavBar: boolean }
+export type WebPageRenderType = { type: WebPageType.Embedded, hook: WebPageHook, showInNavBar: boolean } | { type: WebPageType.Page, showInNavBar: boolean }
 
 export interface WebPageProject extends BaseCodeProject {
-  type: 'webpage'
+  type: ProjectType.WebPage
   url: string
-  render: WebPageRenderType
+  render: WebPageRenderType | null
 }
 
 export interface MobilePageProject extends BaseCodeProject {
-  type: 'mobilepage'
+  type: ProjectType.MobilePage
   context: 'job' | 'resource'
   required: boolean
 }
 
 export interface SchemaProject extends Pick<BaseCodeProject, 'name' | 'description'> {
-  type: 'schema'
+  type: ProjectType.Schema
 }
 
 /**
@@ -156,7 +162,7 @@ export interface FinalPackage extends Package {
   }
 }
 
-export type BuildAction = 'test' | 'deploy'
+export type BuildAction = BuildAction
 
 export interface PackageSource {
   hash: string
@@ -176,7 +182,7 @@ export interface Build {
   metadata: BuildMetadata,
   created: string
   createdBy: string
-  status: 'Pending' | 'Running' | 'Passed' | 'Failed'
+  status: BuildStatus
 }
 
 export interface BuildMetadata {

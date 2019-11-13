@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": [
+      "es6", "scripthost"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist/"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -2,7 +2,8 @@ import { Subject } from 'rxjs/Subject'
 
 export enum ProjectType {
   ConnectedPage,
-  CustomForm
+  CustomForm,
+  Function
 }
 
 export interface ProjectData {

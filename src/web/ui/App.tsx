@@ -12,9 +12,12 @@ import { MainServices } from '../service-layer/MainServices'
 import { ProjectData, SessionData, UserMetadata } from '../service-layer/types'
 import { setUpSSLDocLocation, sslCertsPresent } from '../utils/ssl'
 import { ActiveProject } from './ActiveProject'
+import { SelectedPackage } from '../service-layer/package/package-types.def'
 import { ContentLayout, HeaderLayout } from './Layout'
 import { Markdown } from './Markdown'
 import { NewConnectedPageProject } from './NewConnectedPageProject'
+import { NewFunctionProject } from './NewFunctionProject'
+import { NewWebPageProject } from './NewWebPageProject'
 import { CreateNewPackage } from './CreateNewPackage'
 import { NewCustomFormProject } from './NewCustomFormProject'
 import { SelectProject } from './SelectProject'
@@ -38,12 +41,15 @@ export enum View {
   SetupSSL,
   SetupSSLMarkdown,
   CreateCPProject,
+  CreateFunctionProject,
+  CreateWebpageProject,
   CreatePackage,
   SelectCPProject,
   ActiveCPProject,
   CreateCFProject,
   SelectCFProject,
   ActiveCFProject,
+  ActiveFunctionProject,
   ManageLegacyCustomForm
 }
 
@@ -57,6 +63,7 @@ export interface IState {
   sslCertsPresent: boolean
   projectData: ProjectData | null
   selectedProject: string | null
+  selectedPackage: SelectedPackage | null
   session: SessionData | null
   errorMessage?: string
   connectionError: string | null
@@ -81,6 +88,7 @@ export class App extends React.Component<{}, IState> {
     projectData: null,
     session: null,
     selectedProject: null,
+    selectedPackage: null,
     platform: getPlatform(),
     sslCertsPresent: sslCertsPresent(),
     userMetadata: null,
@@ -128,6 +136,12 @@ export class App extends React.Component<{}, IState> {
 
   back = (view?: View) => this.setState({ currentView: view ? view : View.Home, selectedProject: null, projectData: null, errorMessage: '' })
   setView = (currentView: IState['currentView']) => () => this.setState({ currentView })
+  setPackage = (pkgDirectory: SelectedPackage['directory'], pkgMetaData: SelectedPackage['metaData']) => this.setState({
+    selectedPackage: {
+      directory: pkgDirectory,
+      metaData: pkgMetaData
+    }
+  })
   goHome = () => this.setView(this.state.sslCertsPresent ? View.Home : View.SSLNotSetPrompt)
 
   selectConnectedPageProject = (selectedProject: string) => {
@@ -362,8 +376,8 @@ export class App extends React.Component<{}, IState> {
   // This is a "type-safe" enum pattern match function.
   // Pulled this from Lin's implementation in Frontend UI
   renderView = () => {
-
-    const { selectedProject, errorMessage, platform, currentView, session } = this.state
+    const { setView, setPackage } = this
+    const { selectedProject, errorMessage, platform, currentView, session, selectedPackage } = this.state
 
     if (!platform) {
       return this.renderUnsupportedPlatform()
@@ -389,19 +403,25 @@ export class App extends React.Component<{}, IState> {
       case View.ManagePackages:
         return this.renderManagePackages()
       case View.OpenPackage:
-        return <SelectPackage back={ managePackageBack } session={ session! } />
+        return <SelectPackage back={ managePackageBack } session={ session! } setView={ setView } setPackage={ setPackage } />
       case View.SelectCPProject:
         return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
       case View.ActiveCPProject:
         return <ActiveProject back={ connectedPageBack } projectType={ ProjectType.ConnectedPage } project={ selectedProject! } session={ session! } />
       case View.CreateCPProject:
         return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
+      case View.CreateFunctionProject:
+        return <NewFunctionProject back={ managePackageBack } selectedPackage={ selectedPackage } setView={ setView } />
+      case View.CreateWebpageProject:
+        return <NewWebPageProject back={ managePackageBack } selectedPackage={ selectedPackage } setView={ setView } />
       case View.CreatePackage:
-        return <CreateNewPackage back={ managePackageBack } session={ session! } />
+        return <CreateNewPackage back={ managePackageBack } session={ session! } setView={ setView } setPackage={ setPackage } />
       case View.SelectCFProject:
         return <SelectProject back={ customFormBack } selectProject={ this.selectCustomFormProject } errorMessage={ errorMessage } />
       case View.ActiveCFProject:
         return <ActiveProject back={ customFormBack } projectType={ ProjectType.CustomForm } project={ selectedProject! } session={ session! } />
+      case View.ActiveFunctionProject:
+        return <ActiveProject back={ customFormBack } projectType={ ProjectType.Function } project={ selectedProject! } session={ session! } />
       case View.CreateCFProject:
         return <NewCustomFormProject back={ customFormBack } selectProject={ this.selectCustomFormProject } />
       case View.ManageLegacyCustomForm:

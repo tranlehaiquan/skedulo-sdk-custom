@@ -1,0 +1,21 @@
+{
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "dist/handler",
+  "scripts": {
+    "bootstrap": "yarn install --frozen-lockfile --audit --ignore-scripts",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "compile": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "8",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.144",
+    "@types/path-to-regexp": "^1.7.0",
+    "axios": "^0.19.0",
+    "lodash": "^4.17.11",
+    "path-to-regexp": "^3.0.0"
+  }
+}
