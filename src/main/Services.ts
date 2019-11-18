@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import { BrowserWindow, dialog } from 'electron'
+import { BrowserWindow, dialog, MessageBoxOptions } from 'electron'
 import * as getPort from 'get-port'
 import * as os from 'os'
 
@@ -47,6 +47,14 @@ export class Services {
     return dialog.showOpenDialog(this.win, {
       properties: ['openDirectory', 'createDirectory']
     })
+  }
+
+  showErrorMessage(title: string, content: string) {
+    return dialog.showErrorBox(title, content)
+  }
+
+  showMessageBox(options: MessageBoxOptions) {
+    return dialog.showMessageBox(this.win, options)
   }
 
   focus() {

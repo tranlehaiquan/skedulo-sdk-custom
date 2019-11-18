@@ -1,8 +1,8 @@
-
 import { Observable } from 'rxjs'
+import { MobilePageProject } from '@skedulo/sked-commons'
+
 import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
-import { MobilePageProject } from './package-types.def'
 import { ProjectService } from './ProjectService'
 
 export class MobilePageProjectService extends ProjectService<MobilePageProject> {

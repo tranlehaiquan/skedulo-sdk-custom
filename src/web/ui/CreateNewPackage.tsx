@@ -13,6 +13,7 @@ import {
   ButtonGroup,
   Button
 } from '@skedulo/sked-ui'
+import { Package, SelectedPackage, Version } from '@skedulo/sked-commons'
 const readDirAsync = util.promisify(fs.readdir)
 
 import { ContentLayout } from './Layout'
@@ -21,19 +22,17 @@ import { SessionData } from '../service-layer/types'
 import { ManagePackage } from './package/ManagePackage'
 import { FormHelper } from './form-utils'
 import { PackageService } from '../service-layer/package/PackageService'
-import { Package, SelectedPackage } from '../service-layer/package/package-types.def'
-import { Version } from '../service-layer/package/enums'
 import { View } from './App'
 
 export interface IProps {
   back: () => void
   session: SessionData
+  packageService: PackageService | null
   setView: (view: View) => () => void
-  setPackage: (pkgDirectory: SelectedPackage['directory'], pkgMetaData: SelectedPackage['metaData']) => void
+  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
 }
 
 export interface IState {
-  selectedPackage: PackageService | null,
   package: {
     selectedDirectory: string
   },
@@ -86,7 +85,6 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
     super(props)
 
     this.state = {
-      selectedPackage: null,
       package: {
         selectedDirectory: ''
       },
@@ -96,6 +94,7 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
 
     this.packageForm = new FormHelper(this.state.package, pkg => this.setState({ package: pkg }))
     this.packageMetadataForm = new FormHelper(this.state.packageMetadata, packageMetadata => this.setState({ packageMetadata }))
+    props.setPackage('')
   }
 
   createNewPackage = () => {
@@ -108,13 +107,10 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
 
   openNewPackage = () => {
     const { package: pkg } = this.state
-    const { session, setPackage } = this.props
+    const { setPackage } = this.props
 
     try {
-      const newPackage = PackageService.at(pkg.selectedDirectory, session)
-      this.setState({ selectedPackage: newPackage })
-      setPackage(pkg.selectedDirectory, newPackage.packageMetadata)
-
+      setPackage(pkg.selectedDirectory)
     } catch (e) {
       this.setState({ errorMessage: e.message })
     }
@@ -197,18 +193,15 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
         }
       </SkedFormValidation>
     )
-
-    return null
   }
 
   render() {
     const { renderNewPackageForm } = this
-    const { selectedPackage } = this.state
-    const { setView } = this.props
+    const { setView, packageService } = this.props
 
     return (
-      selectedPackage ? (
-        <ManagePackage package={ selectedPackage! } setView={ setView } />
+      packageService ? (
+        <ManagePackage package={ packageService! } setView={ setView } />
       ) : (
         <ContentLayout centered>
           <h1>Create New Package</h1>

@@ -9,17 +9,24 @@ import {
   FormConfig,
   SkedFormChildren,
   ButtonGroup,
-  Button
+  Button,
+  ValidationProps
 } from '@skedulo/sked-ui'
+import {
+  Lens,
+  Option,
+  WebPageProject,
+  SelectedPackage,
+  Package,
+  WebPageType,
+  WebPageHook,
+  ProjectType
+} from '@skedulo/sked-commons'
 
 import { ContentLayout } from './Layout'
 import { FormHelper } from './form-utils'
-import { Option, Lens } from '../utils'
 import { ProjectServices } from '../service-layer/ProjectServices'
 import { PackageService } from '../service-layer/package/PackageService'
-import { WebPageProject, SelectedPackage, Package } from '../service-layer/package/package-types.def'
-import { WebPageType, WebPageHook } from '../service-layer/package/enums'
-import { ProjectType } from '../service-layer/package/enums'
 import { NEW_PKG_METADATA } from './CreateNewPackage'
 import { View } from './App'
 
@@ -27,6 +34,7 @@ export interface IProps {
   back: () => void
   selectedPackage: SelectedPackage | null
   setView: (view: View) => () => void
+  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
 }
 
 export interface IState {
@@ -91,6 +99,27 @@ const VALIDATION_CONFIG: FormConfig = {
     isRequired: {
       message: 'Please enter a project description'
     }
+  },
+  url: {
+    isRequired: {
+      message: 'Please enter a project url'
+    },
+    isRegexMatch: {
+      regex: /^[a-z0-9-_]+$/i,
+      message: 'Please enter a valid project url'
+    }
+  },
+  renderType: {
+    isRequired: {
+      message: 'Please select the render type'
+    }
+  },
+  embeddedHook: {
+    // @ts-ignore
+    isRequired: ({ fields }) => ({
+      message: 'Please select the embedded hook',
+      validateIf: fields.renderType === WebPageType.Embedded
+    })
   }
 }
 
@@ -157,7 +186,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
   createProject = () => {
     const { getUpdatedProjectMetadata, getUpdatedPackageMetadata } = this
     const { project } = this.state
-    const { selectedPackage, setView } = this.props
+    const { selectedPackage, setView, setPackage } = this.props
     const { defaultTemplate } = project
     const pkgDirectory = Option.of(selectedPackage).next('directory').getOrElse('')
 
@@ -170,8 +199,9 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
         .createProject(webpageProjectDirectory, defaultTemplate.path, getUpdatedProjectMetadata(), {} as any)
         .then(() => {
           PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())
+          setPackage(pkgDirectory)
           this.setState({ progress: false, errorMsg: '' })
-          setView(View.ManagePackages)()
+          setView(View.ConfigurePackage)()
         })
     } catch (error) {
       this.setState({
@@ -181,28 +211,32 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     }
   }
 
-  updateAndValidateField = (fieldName: 'name' | 'description', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
+  updateAndValidateField = (fieldName: 'name' | 'description' | 'url', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
     this.projectMetadataForm.setMap(fieldName)(e)
     fieldUpdate(fieldName)(e.currentTarget.value)
   }
 
-  renderWebpageTypes = () => (
+  renderWebpageTypes = (isValidAfterModified: (fieldName: string) => ValidationProps['validation']) => (
     <label>
       <span className="span-label">Render type</span>
-      <select onChange={ this.projectForm.setMap('renderType') } disabled={ this.state.progress }>
-        <option key="blank">Select render type</option>
-        {renderTypes.map(item => <option key={ item.type } value={ item.type }>{ item.name }</option>)}
-      </select>
+      <FormElementWrapper validation={ isValidAfterModified('renderType')}>
+        <select className="sked-form-element__outline" name="renderType" onChange={ this.projectForm.setMap('renderType') } disabled={ this.state.progress }>
+          <option value="" key="blank">Select render type</option>
+          {renderTypes.map(item => <option key={ item.type } value={ item.type }>{ item.name }</option>)}
+        </select>
+      </FormElementWrapper>
     </label>
   )
 
-  renderEmbeddedHooks = () => (
+  renderEmbeddedHooks = (isValidAfterModified: (fieldName: string) => ValidationProps['validation']) => (
     <label>
       <span className="span-label">Embedded hook</span>
-      <select onChange={ this.projectForm.setMap('embeddedHook') } disabled={ this.state.progress }>
-        <option key="blank">Select embedded hook</option>
-        {embeddedHooks.map(item => <option key={ item.hook } value={ item.hook }>{ item.name }</option>)}
-      </select>
+      <FormElementWrapper validation={ isValidAfterModified('embeddedHook')}>
+        <select className="sked-form-element__outline" name="embeddedHook" onChange={ this.projectForm.setMap('embeddedHook') } disabled={ this.state.progress }>
+          <option value="" key="blank">Select embedded hook</option>
+          {embeddedHooks.map(item => <option key={ item.hook } value={ item.hook }>{ item.name }</option>)}
+        </select>
+      </FormElementWrapper>
     </label>
   )
 
@@ -239,15 +273,19 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
                 <FormLabel className="span-label">Description</FormLabel>
                 <FormInputElement type="text" value={ projectMetadata.description } onChange={ updateAndValidateField('description', customFieldUpdate) } onBlur={ projectMetadataForm.setMap('description') } />
               </FormElementWrapper>
-              { renderWebpageTypes() }
-              { project.renderType && project.renderType === WebPageType.Embedded && renderEmbeddedHooks() }
+              <FormElementWrapper size="full" className="text-left" validation={ isValidAfterModified('url') }>
+                <FormLabel className="span-label">URL</FormLabel>
+                <FormInputElement type="text" value={ projectMetadata.url } onChange={ updateAndValidateField('url', customFieldUpdate) } onBlur={ projectMetadataForm.setMap('url') } />
+              </FormElementWrapper>
+              { renderWebpageTypes(isValidAfterModified) }
+              { project.renderType && project.renderType === WebPageType.Embedded && renderEmbeddedHooks(isValidAfterModified) }
               { renderShowInNavBar() }
               <ButtonGroup className="sk-button-group">
                 <Button buttonType="transparent" onClick={ back }>
                   Cancel
                   </Button>
                 <Button buttonType="primary" onClick={ submit }>
-                  {progress ? 'Please wait...' : 'Create Function Project'}
+                  { progress ? 'Creating Project. Please wait...' : 'Create Webpage Project' }
                 </Button>
               </ButtonGroup>
             </React.Fragment>

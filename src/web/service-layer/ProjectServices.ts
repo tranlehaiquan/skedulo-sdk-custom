@@ -6,12 +6,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { Observable } from 'rxjs'
 import * as tar from 'tar'
+import { FunctionProject, WebPageProject } from '@skedulo/sked-commons'
 
 import { proxyTo } from '../utils/proxy'
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { ICoverage, ProjectData, SessionData } from './types'
-import { FunctionProject, WebPageProject } from './package/package-types.def'
 import { NetworkingService } from './NetworkingService'
 
 export { LogItem } from '../utils/shell'

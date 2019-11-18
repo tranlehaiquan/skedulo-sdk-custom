@@ -9,6 +9,13 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
+"@skedulo/sked-commons@^0.4.7":
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/@skedulo/sked-commons/-/sked-commons-0.4.7.tgz#01120bf1b96b2283d802b849d50a46dcb9cacab2"
+  integrity sha512-LNE7UBErAeYKD28rkO3uAWw62Vk5Fq8NplPIMNJ6gVAtCUNXrhwDTYd5hCyvq+HFKzV1tTSTO1IRq2dZ/7yi5A==
+  dependencies:
+    lodash "^4.17.15"
+
 "@skedulo/sked-ui@^7.4.0":
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/@skedulo/sked-ui/-/sked-ui-7.4.1.tgz#76d59b145e2ff2ad15f88abc77b84de97a6398c6"
@@ -249,9 +256,9 @@
     "@types/node" "*"
 
 "@types/node@*":
-  version "12.12.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.9.tgz#0b5ae05516b757cbff2e82c04500190aef986c7b"
-  integrity sha512-kV3w4KeLsRBW+O2rKhktBwENNJuqAUQHS3kf4ia2wIaF/MN6U7ANgTsx7tGremcA0Pk3Yh0Hl0iKiLPuBdIgmw==
+  version "12.12.11"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.11.tgz#bec2961975888d964196bf0016a2f984d793d3ce"
+  integrity sha512-O+x6uIpa6oMNTkPuHDa9MhMMehlxLAd5QcOvKRjAFsBVpeFWTOPnXbDvILvFgFFZfQ1xh1EZi1FbXxUix+zpsQ==
 
 "@types/prop-types@*":
   version "15.7.3"
@@ -658,9 +665,9 @@ date-fns@^1.30.1:
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
 
 date-fns@^2.0.0-alpha.23:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.7.0.tgz#8271d943cc4636a1f27698f1b8d6a9f1ceb74026"
-  integrity sha512-wxYp2PGoUDN5ZEACc61aOtYFvSsJUylIvCjpjDOqM1UDaKIIuMJ9fAnMYFHV3TQaDpfTVxhwNK/GiCaHKuemTA==
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.8.0.tgz#628d865367e30e45747ed1e8b0c1572090b04f55"
+  integrity sha512-nbZMIMsoD7QiIKipZ5+XRTCtHZad1ch8OEkLaJxjGL6ThAK2IWAdjmAUAS7Fdz5fCaVWtqc+c8pAsN/MX8eaew==
 
 debug@^2.6.3:
   version "2.6.9"

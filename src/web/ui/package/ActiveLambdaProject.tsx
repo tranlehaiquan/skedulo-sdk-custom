@@ -85,8 +85,8 @@ export class ActiveLambdaProject extends React.PureComponent<Props, State> {
       return (
         <React.Fragment>
           <p>Function exposed at: <br />
-            Local: <a className="blue-link">{ `http://localhost:${this.state.portNumber}` }</a><br />
-            Remote: <a className="blue-link">{ this.props.projectService.getRemoteDevUrl() }</a>
+            <p>Local: <b>{ `http://localhost:${this.state.portNumber}` }</b></p>
+            <p>Remote: <b>{ this.props.projectService.getRemoteDevUrl() }</b></p>
           </p>
         </React.Fragment>)
     } else {

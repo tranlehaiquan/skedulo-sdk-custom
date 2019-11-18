@@ -1,10 +1,10 @@
 import * as _ from 'lodash'
 import * as React from 'react'
+import { SelectedPackage } from '@skedulo/sked-commons'
 
 import { MainServices } from '../../service-layer/MainServices'
 import { SessionData } from '../../service-layer/types'
 import { ContentLayout } from '../Layout'
-import { SelectedPackage } from '../../service-layer/package/package-types.def'
 import { PackageService } from '../../service-layer/package/PackageService'
 import { ManagePackage } from './ManagePackage'
 import { View } from '../App'
@@ -12,21 +12,26 @@ import { View } from '../App'
 interface Props {
   back: () => void
   session: SessionData
+  packageService: PackageService | null
   setView: (view: View) => () => void
-  setPackage: (pkgDirectory: SelectedPackage['directory'], pkgMetaData: SelectedPackage['metaData']) => void
+  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
 }
 
 interface State {
   selectedDirectory: string | null
-  selectedPackage: PackageService | null
   errorMessage: string | null
 }
 
 export class SelectPackage extends React.PureComponent<Props, State> {
 
+  constructor(props: Props) {
+    super(props)
+
+    props.setPackage('')
+  }
+
   state: State = {
     selectedDirectory: null,
-    selectedPackage: null,
     errorMessage: null
   }
 
@@ -40,14 +45,11 @@ export class SelectPackage extends React.PureComponent<Props, State> {
 
   openPackage = () => {
     const { selectedDirectory } = this.state
-    const { session, setPackage } = this.props
+    const { setPackage } = this.props
 
     if (selectedDirectory) {
       try {
-        const pkg = PackageService.at(selectedDirectory, session)
-        this.setState({ selectedPackage: pkg })
-        setPackage(selectedDirectory, pkg.packageMetadata)
-
+        setPackage(selectedDirectory)
       } catch (e) {
         this.setState({ errorMessage: e.message })
       }
@@ -55,10 +57,10 @@ export class SelectPackage extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { setView } = this.props
+    const { setView, packageService } = this.props
 
-    return this.state.selectedPackage
-      ? (<ManagePackage package={ this.state.selectedPackage! } setView={ setView } />)
+    return packageService
+      ? (<ManagePackage package={ packageService! } setView={ setView } />)
       : (
         <ContentLayout centered>
 

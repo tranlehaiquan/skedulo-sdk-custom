@@ -11,14 +11,20 @@ import {
   ButtonGroup,
   Button
 } from '@skedulo/sked-ui'
+import {
+  Option,
+  Lens,
+  FunctionProject,
+  SelectedPackage,
+  Package,
+  ProjectType,
+  NodeVersion
+} from '@skedulo/sked-commons'
 
 import { ContentLayout } from './Layout'
 import { FormHelper } from './form-utils'
-import { Option, Lens } from '../utils'
 import { ProjectServices } from '../service-layer/ProjectServices'
 import { PackageService } from '../service-layer/package/PackageService'
-import { FunctionProject, SelectedPackage, Package } from '../service-layer/package/package-types.def'
-import { ProjectType, NodeVersion } from '../service-layer/package/enums'
 import { NEW_PKG_METADATA } from './CreateNewPackage'
 import { View } from './App'
 
@@ -26,6 +32,7 @@ export interface IProps {
   back: () => void
   selectedPackage: SelectedPackage | null
   setView: (view: View) => () => void
+  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
 }
 
 export interface IState {
@@ -102,7 +109,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
   createProject = () => {
     const { getUpdatedPackageMetadata } = this
     const { projectMetadata, project } = this.state
-    const { selectedPackage, setView } = this.props
+    const { selectedPackage, setView, setPackage } = this.props
     const { defaultTemplate } = project
     const pkgDirectory = Option.of(selectedPackage).next('directory').getOrElse('')
 
@@ -116,8 +123,9 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
         .createProject(functionProjectDirectory, defaultTemplate.path, projectMetadata, {} as any)
         .then(() => {
           PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())
+          setPackage(pkgDirectory)
           this.setState({ progress: false, errorMsg: '' })
-          setView(View.ManagePackages)()
+          setView(View.ConfigurePackage)()
         })
     } catch (error) {
       this.setState({
@@ -166,7 +174,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
                     Cancel
                   </Button>
                   <Button buttonType="primary" onClick={ submit }>
-                    { progress ? 'Please wait...' : 'Create Function Project' }
+                    { progress ? 'Creating project. Please wait...' : 'Create Function Project' }
                   </Button>
                 </ButtonGroup>
               </React.Fragment>

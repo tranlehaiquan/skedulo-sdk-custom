@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs'
+import { WebPageProject } from '@skedulo/sked-commons'
 
 import { LogItem } from '../../utils/shell'
 import { proxyTo } from '../../utils/proxy'
 import { ProjectService } from './ProjectService'
-import { WebPageProject } from './package-types.def'
 import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
 

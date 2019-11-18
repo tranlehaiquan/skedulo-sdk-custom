@@ -1,12 +1,13 @@
 import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as path from 'path'
+import { Package, Option, Lens } from '@skedulo/sked-commons'
+
 import { createSymlinks } from '../../utils/symlink'
 import { validateFor } from '../schema-validation'
 import { FunctionProjectService } from './FunctionProjectService'
 import { MobilePageProjectService } from './MobilePageProjectService'
 import { ProjectService } from './ProjectService'
-import { Package } from './package-types.def'
 import { WebPageProjectService } from './WebPageProjectService'
 import { SessionData } from '../types'
 import { NetworkingService } from '../NetworkingService'
@@ -19,6 +20,17 @@ const PACKAGE_FILE = `sked.pkg.json`
 const DEFAULT_LINK_SOURCE_PATH = 'src/shared'
 const DEFAULT_LINK_DESTINATION_PATH = 'src/__shared'
 
+enum Script {
+  Bootstrap = 'bootstrap',
+  Compile = 'compile',
+  Dev = 'dev',
+  Coverage = 'coverage'
+}
+
+export interface IPreDeployErrors {
+  [key: string]: string[]
+}
+
 interface SourceUploaded {
   name: string
   hash: string
@@ -27,6 +39,8 @@ interface SourceUploaded {
   createdBy: string
   revisionCount: number
 }
+
+const REQUIRED_PROJECT_SCRIPTS = [Script.Bootstrap, Script.Compile, Script.Dev, Script.Coverage]
 
 export class InvalidPackage extends Error { }
 
@@ -58,6 +72,10 @@ export class PackageService {
     } catch (e) {
       throw new InvalidPackage(`InvalidPackage: ${e.message}`)
     }
+  }
+
+  getPackageMetadata() {
+    return this.packageMetadata
   }
 
   evaluate(data: any) {
@@ -136,7 +154,6 @@ export class PackageService {
   }
 
   private bundlePackage() {
-
     const buildAssetsPath = path.join(this.packagePath, '/pre_deploy_assets')
 
     if (!fs.existsSync(buildAssetsPath)) {
@@ -148,7 +165,6 @@ export class PackageService {
   }
 
   private async uploadPackage(bundlePath: string, pkg: Package): Promise<SourceUploaded> {
-
     const metadata = pkg
 
     const formData = {
@@ -175,13 +191,68 @@ export class PackageService {
     })
   }
 
-  async deploy() {
+  private getAllProjectNames() {
+    const components = this.packageMetadata.components
+
+    return _.flatten(Object
+      .keys(components)
+      .map((key: keyof Package['components']) => components[key])
+      .filter(list => !!list!['items'])
+      .map(list => list!['items']))
+  }
+
+  private checkForRequiredScripts(projectNames: string[], deployErrors: IPreDeployErrors) {
+    let errors = deployErrors
+
+    projectNames
+      .map(name => {
+        const projectPackageFile = path.join(this.packagePath, name, 'package.json')
+        const currentProjectErrors = Option.of(errors).next(name).getOrElse([])
+        const errorSet = new Set()
+
+        try {
+          const packageData = JSON.parse(fs.readFileSync(projectPackageFile, 'utf8'))
+          const currentScripts = Object.keys(Option.of(packageData).next('scripts').getOrElse({}))
+          const currentScriptSet = new Set(currentScripts) as Set<string>
+
+          REQUIRED_PROJECT_SCRIPTS.map(script => {
+            if (!currentScriptSet.has(script)) {
+              errorSet.add(`Does not have the ${script} script in package.json. Please add the script.`)
+            }
+          })
+
+        } catch (_error) {
+          errorSet.add(`No package.json file found in ${name} project`)
+        }
+
+        errors = Lens(name).over(_item => [ ...currentProjectErrors, ...errorSet ])(errors) as IPreDeployErrors
+      })
+
+    return errors
+  }
+
+  preDeployChecks() {
+    const projectNames = this.getAllProjectNames()
+    const defaultDeployErrors = projectNames.reduce((acc, cur) => ({ ...acc, [cur]: [] }), {})
+
+    return this.checkForRequiredScripts(projectNames, defaultDeployErrors) as IPreDeployErrors
+  }
+
+  async deploy(setDeployStatus: (status: string | null) => void) {
     const pkg = this.evaluate(this.packageMetadata)
 
-    const bundlePath = await this.bundlePackage()
-    const deployedPackage = await this.uploadPackage(bundlePath, pkg)
+    try {
+      const bundlePath = await this.bundlePackage()
+      if (bundlePath) { setDeployStatus('Bundle success!') }
 
-    await this.startBuild(deployedPackage.name, deployedPackage.hash)
+      const deployedPackage = await this.uploadPackage(bundlePath, pkg)
+      const { name, hash } = deployedPackage
+      if (name && hash) { setDeployStatus('Upload success!') }
+
+      await this.startBuild(name, hash)
+    } catch (error) {
+      throw new Error(error)
+    }
   }
 }
 
@@ -206,5 +277,6 @@ function getFileHash(file: string) {
   const hash = crypto.createHash('sha256')
   const f = fs.readFileSync(file)
   hash.update(f)
+
   return hash.digest('hex')
 }

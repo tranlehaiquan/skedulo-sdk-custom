@@ -5,7 +5,8 @@
   "scripts": {
     "bootstrap": "yarn install --frozen-lockfile --audit --ignore-scripts",
     "dev": "tsc --watch --preserveWatchOutput",
-    "compile": "tsc"
+    "compile": "tsc",
+    "coverage": "node scripts/test.js --env=jsdom --coverage"
   },
   "devDependencies": {
     "@types/node": "8",

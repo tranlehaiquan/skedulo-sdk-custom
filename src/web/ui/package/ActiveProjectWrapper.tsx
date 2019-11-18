@@ -1,7 +1,6 @@
-
 import * as React from 'react'
+import { WebPageProject, MobilePageProject, FunctionProject } from '@skedulo/sked-commons'
 
-import { WebPageProject, MobilePageProject, FunctionProject } from '../../service-layer/package/package-types.def'
 import { ProjectService } from '../../service-layer/package/ProjectService'
 import { FunctionProjectService } from '../../service-layer/package/FunctionProjectService'
 import { MobilePageProjectService } from '../../service-layer/package/MobilePageProjectService'

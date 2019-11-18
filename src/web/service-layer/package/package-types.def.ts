@@ -1,4 +1,4 @@
-import { ProjectType, NodeVersion, Version, BuildType, BuildStatus, WebPageType, WebPageHook } from './enums'
+import { ProjectType, NodeVersion, Version, BuildAction, BuildStatus, WebPageType, WebPageHook } from '@skedulo/sked-commons'
 
 /**
  * Copied from SDK

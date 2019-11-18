@@ -7,6 +7,7 @@
   "private": true,
   "author": "Skedulo <support@skedulo.com>",
   "dependencies": {
+    "@skedulo/sked-commons": "^0.4.7",
     "@skedulo/sked-ui": "^7.4.0",
     "@types/classnames": "^2.2.3",
     "@types/cross-spawn": "^6.0.0",

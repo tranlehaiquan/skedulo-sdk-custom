@@ -1,8 +1,9 @@
 import * as ms from 'ms'
+import { FunctionProject } from '@skedulo/sked-commons'
+
 import { startLambdaServer } from '../../server/lambda-server'
 import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
-import { FunctionProject } from './package-types.def'
 import { ProjectService } from './ProjectService'
 
 export class FunctionProjectService extends ProjectService<FunctionProject> {

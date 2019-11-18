@@ -28,6 +28,7 @@
     "webpack-dev-server": "^3.8.0"
   },
   "dependencies": {
+    "@types/node": "^12.12.5",
     "@types/react": "^16.3.14",
     "@types/react-dom": "^16.0.5",
     "react": "^16.3.2",
@@ -35,9 +36,10 @@
   },
   "scripts": {
     "bootstrap": "yarn install --pure-lockfile",
-    "start": "webpack-dev-server --config ./config/webpack.config.js",
+    "dev": "webpack-dev-server --config ./config/webpack.config.js",
     "build": "webpack --config ./config/webpack.config.js --env.production",
     "test": "node scripts/test.js --env=jsdom",
+    "compile": "tsc",
     "coverage": "node scripts/test.js --env=jsdom --coverage"
   },
   "jest": {
