@@ -1,4 +1,4 @@
-import { ProjectType, NodeVersion, Version, BuildAction, BuildStatus, WebPageType, WebPageHook } from './enums'
+import { ProjectType, NodeVersion, Version, BuildType, BuildStatus, WebPageType, WebPageHook } from './enums'
 
 /**
  * Copied from SDK
@@ -162,7 +162,7 @@ export interface FinalPackage extends Package {
   }
 }
 
-export type BuildAction = BuildAction
+export type BuildAction = BuildType
 
 export interface PackageSource {
   hash: string
@@ -186,7 +186,7 @@ export interface Build {
 }
 
 export interface BuildMetadata {
-  action: BuildAction
+  action: BuildType
   packageMetadata: Package
   tasks: string[] | null
 }

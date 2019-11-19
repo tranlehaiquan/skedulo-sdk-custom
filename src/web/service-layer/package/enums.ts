@@ -23,7 +23,7 @@ export enum NodeVersion {
   V810 = 'nodejs8.10'
 }
 
-export enum BuildAction {
+export enum BuildType {
   Test = 'test',
   Deploy = 'deploy'
 }
