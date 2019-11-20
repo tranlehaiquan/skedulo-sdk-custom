@@ -9,10 +9,10 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@skedulo/sked-commons@^0.4.7":
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/@skedulo/sked-commons/-/sked-commons-0.4.7.tgz#01120bf1b96b2283d802b849d50a46dcb9cacab2"
-  integrity sha512-LNE7UBErAeYKD28rkO3uAWw62Vk5Fq8NplPIMNJ6gVAtCUNXrhwDTYd5hCyvq+HFKzV1tTSTO1IRq2dZ/7yi5A==
+"@skedulo/sked-commons@^0.4.8":
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/@skedulo/sked-commons/-/sked-commons-0.4.8.tgz#699365f135072ced0542a36bd5e1eda8798d8c11"
+  integrity sha512-INX95L3qcb7z66RCZPlpKIrijeEw63CCyzOMc2VYLzKdHUfFgjq7GeUoQ5NF59nez5BCF+hzjrtkMnyA8U/fKA==
   dependencies:
     lodash "^4.17.15"
 
