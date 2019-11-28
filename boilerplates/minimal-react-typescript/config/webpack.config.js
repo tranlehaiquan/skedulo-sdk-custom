@@ -175,7 +175,7 @@ module.exports = function (env) {
       contentBase: paths.appPublic,
       compress: true,
       host: 'localhost',
-      port: 3000,
+      port: process.env.SKED_PORT,
       clientLogLevel: 'none',
       hot: false,
       inline: false,
