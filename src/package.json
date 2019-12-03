@@ -8,7 +8,7 @@
   "author": "Skedulo <support@skedulo.com>",
   "dependencies": {
     "@skedulo/sked-ui": "^8.1.1",
-    "@skedulo/sked-commons": "^0.4.7",
+    "@skedulo/sked-commons": "^0.5.2",
     "ajv": "^6.10.2",
     "bourbon": "^4.3.4",
     "classnames": "^2.2.5",
