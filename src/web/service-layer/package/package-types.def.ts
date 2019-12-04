@@ -92,7 +92,7 @@ export interface FunctionProject extends BaseCodeProject {
 
   type: ProjectType.Function
 
-  runtime: NodeVersion.V810
+  runtime: NodeVersion.nodejs12
 }
 
 export type WebPageRenderType = { type: WebPageType.Embedded, hook: WebPageHook, showInNavBar: boolean } | { type: WebPageType.Page, showInNavBar: boolean }

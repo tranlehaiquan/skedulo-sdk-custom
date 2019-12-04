@@ -51,7 +51,7 @@ interface FunctionProjectForm {
 
 export const NEW_FUNCTION_PRJ_METADATA: FunctionProject = {
   type: ProjectType.Function,
-  runtime: NodeVersion.V810,
+  runtime: NodeVersion.nodejs12,
   genTypes: false,
   name: '',
   description: ''
