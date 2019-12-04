@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "bootstrap": "yarn install --pure-lockfile --ignore-engines && cd src && yarn install --pure-lockfile",
+    "bootstrap": "cd src && yarn install --pure-lockfile && cd ../ && yarn install --pure-lockfile --ignore-engines",
     "node-run": "node --turbo --ignition",
     "node-run-dev": "yarn node-run -r ts-node/register",
     "dev-node": "nodemon --watch src -e ts,js -x 'yarn node-run-dev' src/server/server.ts",

@@ -39,7 +39,7 @@ interface SourceUploaded {
   revisionCount: number
 }
 
-const REQUIRED_PROJECT_SCRIPTS = [Script.Bootstrap, Script.Compile, Script.Dev, Script.Coverage]
+const REQUIRED_PROJECT_SCRIPTS = [Script.Bootstrap, Script.Compile, Script.Dev]
 
 export class InvalidPackage extends Error { }
 
