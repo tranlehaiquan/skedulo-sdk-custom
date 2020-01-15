@@ -2,13 +2,11 @@ import * as _ from 'lodash'
 import * as React from 'react'
 import { Observable, Subscription } from 'rxjs'
 
-import { LogItem, ProjectServices } from '../service-layer/ProjectServices'
-import { ProjectData, MobileProjectData, SessionData } from '../service-layer/types'
-import { MobileProjectServices } from '../service-layer/MobileProjectServices'
-import { ContentLayout } from './Layout'
-import { Terminal, TerminalSize } from './Terminal'
+import { LogItem, LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+import { ProjectData, SessionData } from '../../service-layer/types'
+import { ContentLayout } from '../Layout'
+import { Terminal, TerminalSize } from '../Terminal'
 import { shell } from 'electron'
-import { ProjectType } from '../service-layer/types'
 
 function openUrl(url: string) {
   shell.openExternal(url)
@@ -18,21 +16,18 @@ export interface IProps {
   project: string
   back: () => void
   session: SessionData
-  projectType: ProjectType
 }
 
 export interface IState {
   log$: Observable<LogItem> | null
   inProgress: boolean
   devReady: boolean
-  projectData: ProjectData | MobileProjectData | null
+  projectData: ProjectData | null
 }
 
-export class ActiveProject extends React.PureComponent<IProps, IState> {
+export class ActiveLegacyProject extends React.PureComponent<IProps, IState> {
 
-  private prjServices = this.props.projectType === ProjectType.ConnectedPage
-    ? new ProjectServices(this.props.project, this.props.session)
-    : new MobileProjectServices(this.props.project, this.props.session)
+  private prjServices = new LegacyProjectServices(this.props.project, this.props.session)
 
   private subscriptions = new Subscription()
 
@@ -94,34 +89,24 @@ export class ActiveProject extends React.PureComponent<IProps, IState> {
   }
 
   renderDevReady = () => {
-    const { projectType } = this.props
     const { devReady, inProgress } = this.state
 
     if (!devReady && inProgress) {
       return 'Preparing ...'
     }
 
-    if (projectType === ProjectType.ConnectedPage) {
-      if (devReady) {
-        const url = `${this.props.session.origin}/c-dev`
-        return <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
-      } else {
-        return 'Select "start development" to begin building your connected page'
-      }
+    if (devReady) {
+      const url = `${this.props.session.origin}/c-dev`
+      return <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
     } else {
-      if (devReady) {
-        return <React.Fragment><p>Use the following url template to view custom forms:<br /><a className="blue-link">http://localhost:9050/form/index.html#/[context id]/[form index]</a></p></React.Fragment>
-      } else {
-        return 'Select "start development" to begin building your custom page'
-      }
+      return 'Select "start development" to begin building your connected page'
     }
   }
 
   render() {
-    const { projectType } = this.props
     const { projectData } = this.state
 
-    const projectTitle = projectType === ProjectType.ConnectedPage ? (projectData! as ProjectData).title : (projectData! as MobileProjectData).projectName
+    const projectTitle = projectData ? '' : projectData!.title
 
     return (
       <ContentLayout>

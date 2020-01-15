@@ -22,12 +22,12 @@ import {
   WebPageHook,
   ProjectType
 } from '@skedulo/sked-commons'
-import { ContentLayout } from './Layout'
-import { FormHelper } from './form-utils'
-import { ProjectServices } from '../service-layer/ProjectServices'
-import { PackageService } from '../service-layer/package/PackageService'
+import { ContentLayout } from '../Layout'
+import { FormHelper } from '../form-utils'
+import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+import { PackageService } from '../../service-layer/package/PackageService'
 import { NEW_PKG_METADATA } from './CreateNewPackage'
-import { View } from './App'
+import { View } from '../App'
 
 export interface IProps {
   back: () => void
@@ -136,7 +136,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
         renderType: null,
         embeddedHook: WebPageHook.JobDetails,
         showInNavBar: false,
-        defaultTemplate: ProjectServices.getWebpageProjectTemplate()
+        defaultTemplate: LegacyProjectServices.getWebpageProjectTemplate()
       },
       projectMetadata: NEW_WEBPAGE_PRJ_METADATA
     }
@@ -194,7 +194,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     try {
       const webpageProjectDirectory = `${pkgDirectory}/${getUpdatedProjectMetadata().name}`
 
-      return ProjectServices
+      return LegacyProjectServices
         .createProject(webpageProjectDirectory, defaultTemplate.path, getUpdatedProjectMetadata(), {} as any)
         .then(() => {
           PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())

@@ -1,12 +1,12 @@
 import * as _ from 'lodash'
 import * as React from 'react'
 
-import { ContentLayout } from './Layout'
-import { MobileProjectData } from '../service-layer/types'
-import { MobileProjectServices } from '../service-layer/MobileProjectServices'
-import { MainServices } from '../service-layer/MainServices'
+import { ContentLayout } from '../Layout'
+import { ProjectData } from '../../service-layer/types'
+import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+import { MainServices } from '../../service-layer/MainServices'
 
-import { FormHelper } from './form-utils'
+import { FormHelper, slugify } from '../form-utils'
 
 export interface IProps {
   back: () => void
@@ -22,10 +22,10 @@ export interface IState {
     selectedDirectory: string
   },
 
-  projectMetadata: MobileProjectData
+  projectMetadata: ProjectData
 }
 
-export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
+export class NewConnectedPageProject extends React.PureComponent<IProps, IState> {
 
   private projectMetadataForm: FormHelper<IState['projectMetadata']>
   private projectForm: FormHelper<IState['project']>
@@ -34,7 +34,7 @@ export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
 
     super(props)
 
-    const templates = MobileProjectServices.getTemplates()
+    const templates = LegacyProjectServices.getTemplates()
 
     this.state = {
       templates,
@@ -46,14 +46,27 @@ export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
       },
 
       projectMetadata: {
-        projectName: '',
-        formType: 'job'
+        version: 1,
+        url: '',
+        title: '',
+        description: '',
+        menuID: '',
+        showInNavBar: true
       }
     }
 
     this.projectForm = new FormHelper(this.state.project, project => this.setState({ project }))
     this.projectMetadataForm = new FormHelper(this.state.projectMetadata, projectMetadata => this.setState({ projectMetadata }))
   }
+
+  urlBlurTransform = (e: React.ChangeEvent<HTMLInputElement>) => slugify(e.currentTarget.value)
+
+  urlBasedOnTitleBlurTransform = () => {
+    const { title, url } = this.state.projectMetadata
+    return title && !url ? slugify(title) : url
+  }
+
+  menuIdTransform = (e: React.ChangeEvent<HTMLInputElement>) => e.currentTarget.value.trim().substr(0, 2).toUpperCase()
 
   selectDirectory = async () => {
     const directoryResult = await MainServices.selectDirectory()
@@ -69,7 +82,7 @@ export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
 
     this.setState({ progress: true })
 
-    return MobileProjectServices
+    return LegacyProjectServices
       .createProject(selectedDirectory, selectedTemplate, projectMetadata, {} as any)
       .then(() => this.props.selectProject(selectedDirectory!))
   }
@@ -82,42 +95,35 @@ export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
 
   render() {
 
-    const { state, projectForm, projectMetadataForm, selectDirectory } = this
+    const { state, projectForm, projectMetadataForm, selectDirectory, urlBlurTransform, menuIdTransform, urlBasedOnTitleBlurTransform } = this
     const { projectMetadata, project } = state
 
     return (
       <ContentLayout centered>
 
-        <h1>Create Custom Form</h1>
+        <h1>Create Connected Page</h1>
 
         <div className="padding-top padding-bottom">
           <label className="required">
-            <span className="span-label">Project Name</span>
-            <input type="text" value={ projectMetadata.projectName } onChange={ projectMetadataForm.setMap('projectName') } />
+            <span className="span-label">Title</span>
+            <input type="text" value={ projectMetadata.title } onChange={ projectMetadataForm.setMap('title') } onBlur={ projectMetadataForm.setMap('url', urlBasedOnTitleBlurTransform) } />
           </label>
-          <div>
-            <span className="span-label small-3">Display Type</span>
-            <div>
-              <label className="small-4">
-                <input
-                  type="radio"
-                  className="sk-radio"
-                  name="job-display"
-                  checked={ projectMetadata.formType === 'job' }
-                  onChange={ () => projectMetadataForm.set('formType', 'job') }
-                />Job Details
-              </label>
-              <label className="small-4">
-                <input
-                  type="radio"
-                  className="sk-radio"
-                  name="resource-display"
-                  checked={ projectMetadata.formType === 'resource' }
-                  onChange={ () => projectMetadataForm.set('formType', 'resource') }
-                />Resource Menu
-              </label>
-            </div>
-          </div>
+          <label className="required">
+            <span className="span-label">Description</span>
+            <input type="text" value={ projectMetadata.description } onChange={ projectMetadataForm.setMap('description') } onBlur={ projectMetadataForm.setMap('description') } />
+          </label>
+          <label className="required">
+            <span className="span-label">Page URL</span>
+            <input type="text" value={ projectMetadata.url } onChange={ projectMetadataForm.setMap('url') } onBlur={ projectMetadataForm.setMap('url', urlBlurTransform) } />
+          </label>
+          <label className="required">
+            <span className="span-label">Menu I.D.</span>
+            <input type="text" value={ projectMetadata.menuID } onChange={ projectMetadataForm.setMap('menuID', menuIdTransform) } />
+          </label>
+          <label className="required">
+            <span className="span-label">Show In Nav Bar?</span>
+            <input type="checkbox" checked={ projectMetadata.showInNavBar } onChange={ projectMetadataForm.setMap('showInNavBar', e => (e.target as HTMLInputElement).checked) } />
+          </label>
           <hr />
           <label>
             <span className="span-label">Base template</span>
@@ -142,9 +148,9 @@ export class NewCustomFormProject extends React.PureComponent<IProps, IState> {
               className="sk-button primary"
               onClick={ this.createProject }
               disabled={ !(projectForm.isValid() && projectMetadataForm.isValid()) }>
-              Create form</button>
+              Create page</button>
           </div>
-          : <p>Preparing form. Please wait...</p>
+          : <p>Preparing page. Please wait...</p>
         }
 
       </ContentLayout>

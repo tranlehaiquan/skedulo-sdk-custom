@@ -2,3 +2,4 @@ dist/
 app/
 schema.definition.json
 .cache/
+node_modules

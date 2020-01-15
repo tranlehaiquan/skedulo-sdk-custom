@@ -1,8 +1,8 @@
 import * as _ from 'lodash'
 import * as React from 'react'
 
-import { MainServices } from '../service-layer/MainServices'
-import { ContentLayout } from './Layout'
+import { MainServices } from '../../service-layer/MainServices'
+import { ContentLayout } from '../Layout'
 
 export interface IProps {
   back: () => void

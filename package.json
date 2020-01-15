@@ -1,5 +1,5 @@
 {
-  "name": "skedulo-sdk",
+  "name": "skedulo-packaging-sdk",
   "version": "1.0.0",
   "description": "",
   "main": "./app/index.js",
@@ -25,7 +25,6 @@
     "start": "rm -rf app && rm -rf dist && yarn compile && electron ./",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "yarn compile && electron-builder",
-    "expose": "shx mkdir -p ../frontend/public/apps/ && shx cp dist/skedulo-sdk-v1.zip ../frontend/public/apps/ && shx cp dist/skedulo-sdk-v1.exe ../frontend/public/apps/",
     "dev": "yarn gen-schema && yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
     "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./",
     "gen-schema": "typescript-json-schema ./tsconfig.json '*' --include='src/**/*.def.ts' --titles --required --excludePrivate --aliasRefs --validationKeywords --out=./src/schema.definition.json",

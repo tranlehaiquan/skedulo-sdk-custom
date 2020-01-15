@@ -1,10 +1,108 @@
 {
   "extends": [
-    "../frontend/tslint.json"
+    "tslint:recommended",
+    "tslint-react"
+  ],
+  "rulesDirectory": [
+    "node_modules/tslint-microsoft-contrib"
   ],
   "rules": {
     "interface-name": [false, "never-prefix"],
     "no-console": [false],
-    "member-ordering": [false]
+    "member-ordering": [false],
+    "mocha-avoid-only": [false],
+    "jsx-alignment": false,
+    "jsx-no-string-ref": true,
+    "jsx-self-close": true,
+    "jsx-curly-spacing": [
+      true,
+      "always"
+    ],
+    "space-before-function-paren": true,
+    "no-unused-expression": false,
+    "jsx-no-multiline-js": false,
+    "jsx-boolean-value": false,
+    // Turn on
+    "jsx-no-lambda": false,
+    "align": [
+      true,
+      "parameters",
+      "statements"
+    ],
+    "semicolon": [
+      true,
+      "never"
+    ],
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "max-line-length": [
+      true,
+      240
+    ],
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-operator",
+      "check-typecast",
+      "check-preblock",
+      "check-decl",
+      "check-type"
+    ],
+    "indent": [
+      true,
+      "spaces"
+    ],
+    "class-name": false,
+    "eofline": true,
+    "triple-equals": true,
+    "member-access": false,
+    "no-angle-bracket-type-assertion": true,
+    "no-empty": true,
+    "no-var-requires": false,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore",
+      "allow-pascal-case"
+    ],
+    "object-literal-sort-keys": false,
+    "ordered-imports": false,
+    "arrow-parens": [
+      true,
+      "ban-single-arg-parens"
+    ],
+    "array-type": [
+      true,
+      "array"
+    ],
+    "object-literal-shorthand": true,
+    "no-consecutive-blank-lines": [
+      true,
+      2
+    ],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
+    "object-literal-key-quotes": [
+      true,
+      "as-needed"
+    ],
+    "prefer-const": true,
+    "no-string-literal": false,
+    "max-classes-per-file": false,
+    "mocha-unneeded-done": true,
+    "no-unnecessary-override": true,
+    "no-unnecessary-semicolons": true,
+    "non-literal-require": true,
+    "no-unnecessary-local-variable": true,
+    "mocha-no-side-effect-code": false
   }
 }
