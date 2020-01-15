@@ -1,11 +1,5 @@
 import { Subject } from 'rxjs/Subject'
 
-export enum ProjectType {
-  ConnectedPage,
-  CustomForm,
-  Function
-}
-
 export interface ProjectData {
   version: number
 
@@ -15,11 +9,6 @@ export interface ProjectData {
   url: string
   menuID: string
   showInNavBar: boolean
-}
-
-export interface MobileProjectData {
-  projectName: string,
-  formType: 'resource' | 'job'
 }
 
 export interface SessionData {

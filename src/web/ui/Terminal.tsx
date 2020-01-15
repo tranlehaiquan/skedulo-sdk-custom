@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Observable, Subscription } from 'rxjs'
 
-import { LogItem } from '../service-layer/ProjectServices'
+import { LogItem } from '../service-layer/LegacyProjectServices'
 
 export enum TerminalSize {
   FullViewHeight,

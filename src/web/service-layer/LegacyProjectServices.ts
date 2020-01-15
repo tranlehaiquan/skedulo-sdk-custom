@@ -21,7 +21,7 @@ type ProjectDataType = ProjectData | FunctionProject | WebPageProject
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
 const proxyServer = proxyTo({ port: 3000 }, { port: 1929 })
 
-export class ProjectServices {
+export class LegacyProjectServices {
 
   private apiRequest = (new NetworkingService(this.session)).getAPIRequest()
   constructor(private project: string, private session: SessionData) { }
@@ -87,7 +87,7 @@ export class ProjectServices {
       throw new Error(`The project path "${project}" already exists!`)
     }
 
-    const proj = new ProjectServices(project, session)
+    const proj = new LegacyProjectServices(project, session)
 
     return proj.extractTemplate(template)
       .then(() => proj.startBootstrap().toPromise())

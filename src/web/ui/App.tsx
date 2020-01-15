@@ -6,27 +6,24 @@ import { shell } from 'electron'
 import { Button, ButtonGroup } from '@skedulo/sked-ui'
 import { SelectedPackage } from '@skedulo/sked-commons'
 import { Subscription, Observable } from 'rxjs'
-
 import { getPlatform, Platform } from '../../platform'
 import { EventChannel } from '../service-layer/EventChannel'
 import { MainServices } from '../service-layer/MainServices'
 import { ProjectData, SessionData, UserMetadata } from '../service-layer/types'
 import { setUpSSLDocLocation, sslCertsPresent } from '../utils/ssl'
 import { PackageService } from '../service-layer/package/PackageService'
-import { ActiveProject } from './ActiveProject'
+import { debugDevStack } from '../utils/shell'
+import { ActiveLegacyProject } from './legacy/ActiveLegacyProject'
 import { ContentLayout, HeaderLayout } from './Layout'
 import { Markdown } from './Markdown'
-import { NewConnectedPageProject } from './NewConnectedPageProject'
-import { NewFunctionProject } from './NewFunctionProject'
-import { NewWebPageProject } from './NewWebPageProject'
-import { CreateNewPackage } from './CreateNewPackage'
-import { NewCustomFormProject } from './NewCustomFormProject'
+import { NewConnectedPageProject } from './legacy/NewConnectedPageProject'
+import { NewFunctionProject } from './package/NewFunctionProject'
+import { NewWebPageProject } from './package/NewWebPageProject'
+import { CreateNewPackage } from './package/CreateNewPackage'
 import { ManagePackage } from './package/ManagePackage'
-import { SelectProject } from './SelectProject'
+import { SelectProject } from './legacy/SelectProject'
 import { SSLHelp } from './SSLHelp'
-import { ManageCustomForms } from './ManageCustomForms'
-import { debugDevStack } from '../utils/shell'
-import { ProjectType } from '../service-layer/types'
+
 import { SelectPackage } from './package/SelectPackage'
 
 function openUrl(url: string) {
@@ -34,26 +31,25 @@ function openUrl(url: string) {
 }
 
 export enum View {
+  // Setup Views
   Home,
-  ManageConnectedPages,
-  ManageCustomForms,
-  ManagePackages,
-  OpenPackage,
   SSLNotSetPrompt,
   SetupSSL,
   SetupSSLMarkdown,
-  CreateCPProject,
-  ConfigurePackage,
+
+  // Package Views
+  ManagePackages,
+  OpenPackage,
   CreateFunctionProject,
   CreateWebpageProject,
   CreatePackage,
+  ConfigurePackage,
+
+  // Legacy Views (Connected Pages)
+  ManageConnectedPages,
+  CreateCPProject,
   SelectCPProject,
-  ActiveCPProject,
-  CreateCFProject,
-  SelectCFProject,
-  ActiveCFProject,
-  ActiveFunctionProject,
-  ManageLegacyCustomForm
+  ActiveCPProject
 }
 
 function enumUnreachable(_x: never): never {
@@ -189,21 +185,6 @@ export class App extends React.Component<{}, IState> {
     }
   }
 
-  selectCustomFormProject = (selectedProject: string) => {
-    if (!fs.existsSync(path.join(selectedProject, '/definition.json'))) {
-      this.setState({
-        errorMessage: 'The folder you have selected does not contain a valid Custom Form project file. Please select another.'
-      })
-    } else {
-      this.setState({
-        currentView: View.ActiveCFProject,
-        selectedProject,
-        projectData: null,
-        errorMessage: ''
-      })
-    }
-  }
-
   checkDevelopmentEnvironment = () => {
     const { nodeExists, yarnExists, openSSLExists } = debugDevStack()
     const setter = (namespace: keyof IState['environment']) => (status: DebugState) => this.setState({
@@ -273,7 +254,6 @@ export class App extends React.Component<{}, IState> {
         <ButtonGroup>
           <Button buttonType="primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</Button>
           <Button buttonType="secondary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.ManageCustomForms) }>Manage Custom Forms</Button>
         </ButtonGroup>
       </div>
     )
@@ -298,19 +278,6 @@ export class App extends React.Component<{}, IState> {
         <ButtonGroup>
           <Button buttonType="primary" onClick={ this.setView(View.CreateCPProject) }>Create new project</Button>
           <Button buttonType="secondary" onClick={ this.setView(View.SelectCPProject) }>Select existing project</Button>
-        </ButtonGroup>
-      </div>
-    )
-  }
-
-  renderCustomFormActionButtons = () => {
-    return (
-      <div>
-        <p>Select an action to manage Custom Forms.</p>
-        <ButtonGroup>
-          <Button buttonType="primary" onClick={ this.setView(View.CreateCFProject) }>Create new project</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.SelectCFProject) }>Select existing project</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.ManageLegacyCustomForm) }>Deploy an existing project</Button>
         </ButtonGroup>
       </div>
     )
@@ -343,15 +310,6 @@ export class App extends React.Component<{}, IState> {
       <ContentLayout className="content__center--large" centered>
         <h1>Manage Connected Pages</h1>
         { this.renderConnectedPageActionButtons() }
-      </ContentLayout>
-    )
-  }
-
-  renderManageCustomForms = () => {
-    return (
-      <ContentLayout className="content__center--large" centered>
-        <h1>Manage Custom Forms</h1>
-        { this.renderCustomFormActionButtons() }
       </ContentLayout>
     )
   }
@@ -413,7 +371,6 @@ export class App extends React.Component<{}, IState> {
       return this.renderUnsupportedPlatform()
     }
 
-    const customFormBack = () => this.back(View.ManageCustomForms)
     const connectedPageBack = () => this.back(View.ManageConnectedPages)
     const managePackageBack = () => this.back(View.ManagePackages)
     const manageProjectBack = () => this.back(View.ConfigurePackage)
@@ -429,8 +386,6 @@ export class App extends React.Component<{}, IState> {
         return this.renderSSLHelpFromMarkdown()
       case View.ManageConnectedPages:
         return this.renderManageConnectedPages()
-      case View.ManageCustomForms:
-        return this.renderManageCustomForms()
       case View.ManagePackages:
         return this.renderManagePackages()
       case View.OpenPackage:
@@ -440,7 +395,7 @@ export class App extends React.Component<{}, IState> {
       case View.SelectCPProject:
         return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
       case View.ActiveCPProject:
-        return <ActiveProject back={ connectedPageBack } projectType={ ProjectType.ConnectedPage } project={ selectedProject! } session={ session! } />
+        return <ActiveLegacyProject back={ connectedPageBack } project={ selectedProject! } session={ session! } />
       case View.CreateCPProject:
         return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
       case View.CreateFunctionProject:
@@ -449,16 +404,6 @@ export class App extends React.Component<{}, IState> {
         return <NewWebPageProject back={ manageProjectBack } selectedPackage={ selectedPackage } setView={ setView } setPackage={ setPackage } />
       case View.CreatePackage:
         return <CreateNewPackage back={ managePackageBack } session={ session! } setView={ setView } setPackage={ setPackage } packageService={ packageService } />
-      case View.SelectCFProject:
-        return <SelectProject back={ customFormBack } selectProject={ this.selectCustomFormProject } errorMessage={ errorMessage } />
-      case View.ActiveCFProject:
-        return <ActiveProject back={ customFormBack } projectType={ ProjectType.CustomForm } project={ selectedProject! } session={ session! } />
-      case View.ActiveFunctionProject:
-        return <ActiveProject back={ customFormBack } projectType={ ProjectType.Function } project={ selectedProject! } session={ session! } />
-      case View.CreateCFProject:
-        return <NewCustomFormProject back={ customFormBack } selectProject={ this.selectCustomFormProject } />
-      case View.ManageLegacyCustomForm:
-        return <ManageCustomForms back={ customFormBack } session={ session! } />
     }
 
     return enumUnreachable(currentView)
@@ -492,8 +437,8 @@ export class DebugInstall extends React.PureComponent<IState['environment']> {
 
   render() {
     return (
-      <div className="text-left padding-top">
-        <h3>System Requirements</h3>
+      <div className="text-left padding-top installation__container">
+        <h2>System Requirements</h2>
         <ul className="installation__steps">
           { this.renderItem('OpenSSL', this.props.openssl) }
           { this.renderItem('Yarn', this.props.yarn) }

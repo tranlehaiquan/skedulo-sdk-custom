@@ -21,12 +21,12 @@ import {
   NodeVersion
 } from '@skedulo/sked-commons'
 
-import { ContentLayout } from './Layout'
-import { FormHelper } from './form-utils'
-import { ProjectServices } from '../service-layer/ProjectServices'
-import { PackageService } from '../service-layer/package/PackageService'
+import { ContentLayout } from '../Layout'
+import { FormHelper } from '../form-utils'
+import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+import { PackageService } from '../../service-layer/package/PackageService'
 import { NEW_PKG_METADATA } from './CreateNewPackage'
-import { View } from './App'
+import { View } from '../App'
 
 export interface IProps {
   back: () => void
@@ -84,7 +84,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
       progress: false,
       errorMsg: '',
       project: {
-        defaultTemplate: ProjectServices.getFunctionProjectTemplate()
+        defaultTemplate: LegacyProjectServices.getFunctionProjectTemplate()
       },
       projectMetadata: NEW_FUNCTION_PRJ_METADATA
     }
@@ -119,7 +119,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
     try {
       const functionProjectDirectory = `${pkgDirectory}/${projectMetadata.name}`
 
-      return ProjectServices
+      return LegacyProjectServices
         .createProject(functionProjectDirectory, defaultTemplate.path, projectMetadata, {} as any)
         .then(() => {
           PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())

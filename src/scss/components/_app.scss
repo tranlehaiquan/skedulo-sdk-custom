@@ -1,4 +1,9 @@
 .installation {
+  &__container {
+    display: inline-block;
+    text-align: center;
+  }
+
   &__steps {
     list-style-type: none;
     text-align: left;

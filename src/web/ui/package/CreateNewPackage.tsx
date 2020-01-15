@@ -14,13 +14,13 @@ import {
   Button
 } from '@skedulo/sked-ui'
 import { Package, SelectedPackage, Version } from '@skedulo/sked-commons'
-import { ContentLayout } from './Layout'
-import { MainServices } from '../service-layer/MainServices'
-import { SessionData } from '../service-layer/types'
-import { ManagePackage } from './package/ManagePackage'
-import { FormHelper } from './form-utils'
-import { PackageService } from '../service-layer/package/PackageService'
-import { View } from './App'
+import { ContentLayout } from '../Layout'
+import { MainServices } from '../../service-layer/MainServices'
+import { SessionData } from '../../service-layer/types'
+import { ManagePackage } from './ManagePackage'
+import { FormHelper } from '../form-utils'
+import { PackageService } from '../../service-layer/package/PackageService'
+import { View } from '../App'
 
 const readDirAsync = util.promisify(fs.readdir)
 
