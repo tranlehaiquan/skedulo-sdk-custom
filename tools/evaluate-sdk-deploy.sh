@@ -5,6 +5,7 @@ set -eou pipefail
 [[ -z "$1" ]] && { echo "Error: No deploy type given"; exit 1; }
 [[ -z "$2" ]] && { echo "Error: No branch name given"; exit 1; }
 [[ -z "$3" ]] && { echo "Error: No asset path given"; exit 1; }
+[[ -z "$4" ]] && { echo "Error: No tool path given"; exit 1; }
 
 DEPLOY_TYPE=$1
 BRANCH_NAME=$2
