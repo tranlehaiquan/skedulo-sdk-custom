@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -eoxu pipefail
+set -euxo pipefail
 
-[[ -z "$1" ]] && { echo "Error: No SDK filename given"; exit 1; }
-[[ -z "$2" ]] && { echo "Error: No Dist path given"; exit 1; }
-[[ -z "$3" ]] && { echo "Error: No AWS Bucket given"; exit 1; }
+[ $# -lt 1 ] && { echo "Error: No SDK filename given"; exit 1; }
+[ $# -lt 2 ] && { echo "Error: No Dist path given"; exit 1; }
+[ $# -lt 3 ] && { echo "Error: No AWS Bucket given"; exit 1; }
 
 SDK_FILENAME=$1
 SDK_DIST_PATH=$2

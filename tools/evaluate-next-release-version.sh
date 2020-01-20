@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -eoux pipefail
+set -euxo pipefail
 
-[[ -z "$1" ]] && { echo "Error: No AWS Bucket given"; exit 1; }
+[ $# -lt 1 ] && { echo "Error: No AWS Bucket given"; exit 1; }
 
 AWS_BUCKET=$1
 
@@ -10,7 +10,7 @@ AWS_BUCKET=$1
 CURRENT_YEAR=$( date '+%y' )
 
 # 2 character week format
-CURRENT_WEEK=$( date '+%U' | sed 's/^0*//' )
+CURRENT_WEEK=$( date '+%U' )
 
 # Get all versions with the same CalVer time components to find the next patch version
 VERSION_TIME_COMPONENT="v${CURRENT_YEAR}.${CURRENT_WEEK}"
