@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -eoxu pipefail
 
 [[ -z "$1" ]] && { echo "Error: No SDK filename given"; exit 1; }
 [[ -z "$2" ]] && { echo "Error: No Dist path given"; exit 1; }

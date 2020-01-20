@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -eoux pipefail
 
 [[ -z "$1" ]] && { echo "Error: No deploy type given"; exit 1; }
 [[ -z "$2" ]] && { echo "Error: No branch name given"; exit 1; }
@@ -43,4 +43,4 @@ case $DEPLOY_TYPE in
       exit 1
 esac
 
-./upload-sdk-to-s3.sh $SDK_FILENAME_PREFIX $SDK_ASSET_PATH $AWS_BUCKET
+$($TOOLS_PATH/upload-sdk-to-s3.sh $SDK_FILENAME_PREFIX $SDK_ASSET_PATH $AWS_BUCKET)

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -eoux pipefail
 
 SOURCE_BRANCH=$1
 BRANCH=${SOURCE_BRANCH//[\/,.]/-}

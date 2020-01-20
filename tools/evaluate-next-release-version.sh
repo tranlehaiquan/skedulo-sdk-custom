@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -eoux pipefail
 
 [[ -z "$1" ]] && { echo "Error: No AWS Bucket given"; exit 1; }
 
