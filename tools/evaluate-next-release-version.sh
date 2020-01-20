@@ -6,14 +6,10 @@ set -euxo pipefail
 
 AWS_BUCKET=$1
 
-# 2 character year format
-CURRENT_YEAR=$( date '+%y' )
-
-# 2 character week format
-CURRENT_WEEK=$( date '+%U' )
-
 # Get all versions with the same CalVer time components to find the next patch version
-VERSION_TIME_COMPONENT="v${CURRENT_YEAR}.${CURRENT_WEEK}"
+# This produces a string in the format of v{2 char year}.{week number} which is used to match on existing patch versions
+VERSION_TIME_COMPONENT="v$(date +%y.%U)"
+
 VERSIONS_COUNT_MATCHING_TIME=$(aws s3api list-objects --bucket $AWS_BUCKET | jq ".Contents | .[] | .Key | select(.|test(\"$VERSION_TIME_COMPONENT\"))" | jq -s . | jq length)
 
 # Return time component and patch version (index starts at 0)
