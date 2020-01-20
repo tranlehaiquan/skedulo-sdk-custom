@@ -21,5 +21,5 @@ done
 if [ -d $SDK_DIST_PATH/mac/skedulo-sdk.app ] ; then
   cd $SDK_DIST_PATH/mac
   zip -r skedulo-sdk-fix.zip skedulo-sdk.app
-  aws s3api put-object --bucket $AWS_BUCKET --key $SDK_FILENAME.zip --body $SDK_DIST_PATH/mac/skedulo-sdk.zip --acl public-read
+  aws s3api put-object --bucket $AWS_BUCKET --key $SDK_FILENAME.zip --body $SDK_DIST_PATH/mac/skedulo-sdk-fix.zip --acl public-read
 fi
