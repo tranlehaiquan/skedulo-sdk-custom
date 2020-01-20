@@ -72,7 +72,7 @@ jobs:
       - aws-cli-setup
       - attach_workspace:
           at: ./
-      - run: ~/project/tools/evaluate-sdk-deploy.sh << parameters.deploy_type >> $CIRCLE_BRANCH ~/dist
+      - run: ~/project/tools/evaluate-sdk-deploy.sh << parameters.deploy_type >> $CIRCLE_BRANCH ~/dist ~/project/tools
 
 workflows:
   everything:

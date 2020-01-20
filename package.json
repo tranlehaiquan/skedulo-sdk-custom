@@ -75,7 +75,7 @@
       "app": "app"
     },
     "appId": "com.skedulo.sdk",
-    "artifactName": "skedulo-sdk-v1.${ext}",
+    "artifactName": "skedulo-sdk.${ext}",
     "extraResources": [
       "app/assets/ngrok-*"
     ],

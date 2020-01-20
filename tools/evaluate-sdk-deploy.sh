@@ -8,7 +8,10 @@ set -eou pipefail
 
 DEPLOY_TYPE=$1
 BRANCH_NAME=$2
-SDK_ASSET_PATH=$3
+
+# Remove traling slash from path
+SDK_ASSET_PATH=$(echo $3 | sed 's:/*$::')
+TOOLS_PATH=$(echo $4 | sed 's:/*$::')
 
 # Master is the only branch we ever want to use to deploy to AWS production, deal with credentials here
 if [ "$BRANCH_NAME" = "master" ]
@@ -29,10 +32,10 @@ case $DEPLOY_TYPE in
       SDK_FILENAME_PREFIX='latest'
       ;;
   release)
-      SDK_FILENAME_PREFIX=$(./evaluate-next-release-version.sh $AWS_BUCKET)
+      SDK_FILENAME_PREFIX=$($TOOLS_PATH/evaluate-next-release-version.sh $AWS_BUCKET)
       ;;
   branch)
-      SDK_FILENAME_PREFIX=$(./sanitize-branch-name.sh $BRANCH_NAME)
+      SDK_FILENAME_PREFIX=$($TOOLS_PATH/sanitize-branch-name.sh $BRANCH_NAME)
       ;;
   *)
       echo $"Invalid deploy_type specified: $DEPLOY_TYPE"
