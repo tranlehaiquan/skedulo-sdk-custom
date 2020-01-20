@@ -1,0 +1,112 @@
+version: 2.1
+
+electron: &electron
+  resource_class: medium
+  environment:
+    TZ: "/usr/share/zoneinfo/Australia/Brisbane"
+  docker:
+    - image: electronuserland/builder:wine
+
+defaults: &defaults
+  docker:
+    - image: circleci/node:10.16.3-buster
+  environment:
+    TZ: "/usr/share/zoneinfo/Australia/Brisbane"
+  resource_class: medium
+
+commands:
+  aws-cli-setup:
+    steps:
+      - run:
+          name: Install aws-cli
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y python3-pip
+            sudo pip3 install --upgrade awscli
+
+  build-sdk:
+    description: Bootstrap, Test and Compile Custom Page SDK
+    steps:
+      # Restore Custom Page node_modules
+      - restore_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
+
+      - run:
+          command: |
+            yarn bootstrap
+            # https://github.com/electron-userland/electron-builder/issues/3179
+            USE_HARD_LINKS=false yarn dist -wml
+
+      - save_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
+          paths:
+            - node_modules
+            - src/node_modules
+
+  authenticate-with-npm:
+    steps:
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+
+jobs:
+  build-custom-page-sdk:
+    <<: *electron
+
+    steps:
+      - checkout
+      - authenticate-with-npm
+      - build-sdk
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - ./dist
+
+  deploy-sdk-to-s3:
+    <<: *defaults
+
+    parameters:
+      deploy_type:
+        type: string
+
+    steps:
+      - checkout
+      - aws-cli-setup
+      - attach_workspace:
+          at: ./
+      - run: ~/project/tools/evaluate-sdk-deploy.sh << parameters.deploy_type >> $CIRCLE_BRANCH ~/dist
+
+workflows:
+  everything:
+    jobs:
+      - build-custom-page-sdk
+
+      - deploy-sdk-to-s3:
+          name: deploy-latest-file
+          deploy_type: "latest"
+          requires:
+            - build-custom-page-sdk
+          filters:
+            branches:
+              only:
+                  - master
+                  - dev
+      
+      - deploy-sdk-to-s3:
+          name: deploy-release-file
+          deploy_type: "release"
+          requires:
+            - build-custom-page-sdk
+          filters:
+            branches:
+              only:
+                  - master
+
+      - deploy-sdk-to-s3:
+          name: deploy-branch-file
+          deploy_type: "branch"
+          requires:
+            - build-custom-page-sdk
+          filters:
+            branches:
+              ignore:
+                  - master
+                  - dev
