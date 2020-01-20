@@ -18,9 +18,10 @@ TOOLS_PATH=$(echo $4 | sed 's:/*$::')
 if [ "$BRANCH_NAME" = "master" ]
 then
   # Overwrite dev credentials for AWS with production credentials
+  set +x
   export AWS_ACCESS_KEY_ID="$SKEDPKG_PROD_ACCESS_KEY"
   export AWS_SECRET_ACCESS_KEY="$SKEDPKG_PROD_SECRET_KEY"
-  export AWS_DEFAULT_REGION="$SKEDPKG_PROD_AWS_REGION"
+  set -x
 
   AWS_BUCKET="$SKEDSDK_PROD_AWS_BUCKET"
 else
@@ -43,4 +44,4 @@ case $DEPLOY_TYPE in
       exit 1
 esac
 
-$($TOOLS_PATH/upload-sdk-to-s3.sh $SDK_FILENAME_PREFIX $SDK_ASSET_PATH $AWS_BUCKET)
+exec $TOOLS_PATH/upload-sdk-to-s3.sh $SDK_FILENAME_PREFIX $SDK_ASSET_PATH $AWS_BUCKET
