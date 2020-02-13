@@ -36,9 +36,9 @@
   },
   "scripts": {
     "bootstrap": "yarn install --pure-lockfile",
-    "dev": "webpack-dev-server --config ./config/webpack.config.js",
-    "test": "node scripts/test.js --env=jsdom",
-    "compile": "webpack --config ./config/webpack.config.js --env.production"
+    "start": "webpack-dev-server --config ./config/webpack.config.js",
+    "coverage": "node scripts/test.js --env=jsdom",
+    "build": "webpack --config ./config/webpack.config.js --env.production"
   },
   "jest": {
     "coverageReporters": [
