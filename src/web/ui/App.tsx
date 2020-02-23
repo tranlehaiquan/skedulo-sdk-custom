@@ -2,9 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { shell } from 'electron'
-import { Button, ButtonGroup } from '@skedulo/sked-ui'
-import { SelectedPackage } from '@skedulo/sked-commons'
+import { Button, ButtonGroup, IconButton, LoadingSpinner } from '@skedulo/sked-ui'
 import { Subscription, Observable } from 'rxjs'
 import { getPlatform, Platform } from '../../platform'
 import { EventChannel } from '../service-layer/EventChannel'
@@ -20,15 +18,14 @@ import { NewConnectedPageProject } from './legacy/NewConnectedPageProject'
 import { NewFunctionProject } from './package/NewFunctionProject'
 import { NewWebPageProject } from './package/NewWebPageProject'
 import { CreateNewPackage } from './package/CreateNewPackage'
-import { ManagePackage } from './package/ManagePackage'
+import { ConfigurePackage } from './package/ConfigurePackage'
 import { SelectProject } from './legacy/SelectProject'
 import { SSLHelp } from './SSLHelp'
 
 import { SelectPackage } from './package/SelectPackage'
+import { NewLibraryProject } from './package/NewLibraryProject'
+import { DebugState, DebugInstall } from './DebugInstall'
 
-function openUrl(url: string) {
-  shell.openExternal(url)
-}
 
 export enum View {
   // Setup Views
@@ -36,20 +33,23 @@ export enum View {
   SSLNotSetPrompt,
   SetupSSL,
   SetupSSLMarkdown,
+  Diagnostics,
 
   // Package Views
   ManagePackages,
   OpenPackage,
   CreateFunctionProject,
   CreateWebpageProject,
+  CreateLibraryProject,
   CreatePackage,
   ConfigurePackage,
+  LoadingPackage,
 
   // Legacy Views (Connected Pages)
-  ManageConnectedPages,
-  CreateCPProject,
-  SelectCPProject,
-  ActiveCPProject
+  LegacyManageConnectedPages,
+  LegacyCreateCPProject,
+  LegacySelectCPProject,
+  LegacyActiveCPProject
 }
 
 function enumUnreachable(_x: never): never {
@@ -61,38 +61,32 @@ export interface IState {
   platform: Platform | null
   sslCertsPresent: boolean
   projectData: ProjectData | null
-  selectedProject: string | null
-  selectedPackage: SelectedPackage | null
-  packageService: PackageService | null
+  selectedLegacyProject: string | null
+  selectedPackage: PackageService | null
   session: SessionData | null
   errorMessage?: string
   connectionError: string | null
-  userMetadata: UserMetadata | null,
+  userMetadata: UserMetadata | null
   environment: {
-    node: DebugState | null,
-    yarn: DebugState | null,
+    node: DebugState | null
+    yarn: DebugState | null
     openssl: DebugState | null
   }
 }
 
-interface DebugState {
-  valid: boolean,
-  reason: string | null
-  link: string | null
-}
+const SKEDULO_WELCOME_MESSAGE = 'Welcome to Skedulo’s Packages platform'
 
 export class App extends React.Component<{}, IState> {
   state: IState = {
     currentView: View.Home,
     projectData: null,
     session: null,
-    selectedProject: null,
-    selectedPackage: null,
+    selectedLegacyProject: null,
     platform: getPlatform(),
     sslCertsPresent: sslCertsPresent(),
     userMetadata: null,
     connectionError: null,
-    packageService: null,
+    selectedPackage: null,
     environment: {
       node: null,
       yarn: null,
@@ -122,7 +116,7 @@ export class App extends React.Component<{}, IState> {
       )
     } else {
       const onNewProject$ = this.eventChannel.onNewProject()
-        .do(() => this.setState({ currentView: View.CreateCPProject }))
+        .do(() => this.setState({ currentView: View.LegacyCreateCPProject }))
         .do(() => MainServices.focus())
 
       this.subscription
@@ -136,30 +130,69 @@ export class App extends React.Component<{}, IState> {
 
   back = (view?: View) => this.setState({
     currentView: view ? view : View.Home,
-    selectedProject: null,
+    selectedLegacyProject: null,
     projectData: null,
     errorMessage: ''
   })
 
   setView = (currentView: IState['currentView']) => () => this.setState({ currentView })
 
-  setPackage = (pkgDirectory: SelectedPackage['directory']) => {
+  refreshPackage = (goToConfiguration: boolean) => {
+    const { selectedPackage, session, currentView: view } = this.state
+    if (!!selectedPackage) {
+      try {
+        // Re-evaluate package metadata
+        const refreshedPackage = PackageService.at(selectedPackage.packagePath, session!)
+
+        this.setState({
+          currentView: goToConfiguration ? View.ConfigurePackage : view,
+          selectedPackage: refreshedPackage
+        })
+      } catch(error) {
+        MainServices.showErrorMessage('Package Error', error)
+
+        this.setState({ currentView: View.ManagePackages })
+      }
+    }
+  }
+
+  setPackage = async (pkgDirectory: string) => {
+    try {
+      await this.trySetPackage(pkgDirectory)
+    } catch(error) {
+      MainServices.showErrorMessage('Package Error', error)
+
+      this.setState({ currentView: View.ManagePackages })
+    }
+  }
+
+  trySetPackage = async (pkgDirectory: string) => {
     const { session } = this.state
 
     if (!pkgDirectory.length) {
       this.setState({
-        selectedPackage: null,
-        packageService: null
+        selectedPackage: null
       })
     } else {
       const newPackage = PackageService.at(pkgDirectory, session!)
 
+      this.setState({ currentView: View.LoadingPackage })
+
+      // Load package (this can fail and it's not necessarily fatal, still allow user to view package)
+      try {
+        await newPackage.load()
+      } catch (error) {
+        MainServices.showErrorMessage(
+          'Failed to load package.',
+`Something went wrong when loading package.
+This may be an environment issue and therefore is not fatal however \
+some features of package development may not work as expected.  Error: ${error}`
+        )
+      }
+
       this.setState({
-        selectedPackage: {
-          directory: pkgDirectory,
-          metaData: newPackage.packageMetadata
-        },
-        packageService: newPackage
+        selectedPackage: newPackage,
+        currentView: View.ConfigurePackage
       })
     }
   }
@@ -177,8 +210,8 @@ export class App extends React.Component<{}, IState> {
       })
     } else {
       this.setState({
-        currentView: View.ActiveCPProject,
-        selectedProject,
+        currentView: View.LegacyActiveCPProject,
+        selectedLegacyProject: selectedProject,
         projectData: null,
         errorMessage: ''
       })
@@ -253,7 +286,7 @@ export class App extends React.Component<{}, IState> {
         <p>To begin, select one of the following options.</p>
         <ButtonGroup>
           <Button buttonType="primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.ManageConnectedPages) }>Manage Connected Pages</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.LegacyManageConnectedPages) }>Manage Connected Pages</Button>
         </ButtonGroup>
       </div>
     )
@@ -276,23 +309,35 @@ export class App extends React.Component<{}, IState> {
       <div>
         <p>Select an action to manage Connected Pages.</p>
         <ButtonGroup>
-          <Button buttonType="primary" onClick={ this.setView(View.CreateCPProject) }>Create new project</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.SelectCPProject) }>Select existing project</Button>
+          <Button buttonType="primary" onClick={ this.setView(View.LegacyCreateCPProject) }>Create new project</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.LegacySelectCPProject) }>Select existing project</Button>
         </ButtonGroup>
       </div>
     )
   }
 
-  renderHome = () => {
+  renderDiagnostics = () => {
+    return (
+      <ContentLayout className="content__center--large" centered>
+        <DebugInstall { ...this.state.environment } />
+      </ContentLayout>
+    )
+  }
 
+  renderHome = () => {
     const isConnected = !!(this.state.session && this.state.userMetadata)
 
     return (
-      <ContentLayout className="content__center--large" centered>
-        <h1>Welcome to Skedulo’s Connected Pages platform</h1>
-        { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() }
-        <DebugInstall { ...this.state.environment } />
-      </ContentLayout>
+      <>
+        <ContentLayout className="content__center--large" centered>
+          <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
+          { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() } 
+        </ContentLayout>
+
+        <div className="diagnostics-button">
+          <IconButton className="diagnostics-button" icon="settings" onClick={ this.setView(View.Diagnostics) } buttonType="secondary" tooltipContent="Diagnostics" />
+        </div>
+      </>
     )
   }
 
@@ -317,7 +362,7 @@ export class App extends React.Component<{}, IState> {
   renderSSLHelpPrompt = () => {
     return (
       <ContentLayout centered>
-        <h1>Welcome to Skedulo’s Connected Pages platform</h1>
+        <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
         <p>
           You need to setup self-signed SSL certificates to continue. Click <a className="blue-link" onClick={ this.setView(View.SetupSSL) }>here</a>&nbsp; for instructions on how to do this.
         </p>
@@ -338,7 +383,7 @@ export class App extends React.Component<{}, IState> {
     return (
       <ContentLayout>
 
-        <h1>Welcome to Skedulo’s Connected Pages platform</h1>
+        <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
 
         <p>
           In order to run the Connected Pages SDK, you will need to set up your dev environment with a self-signed SSL Certificate (must be X.509 v3) and
@@ -355,8 +400,17 @@ export class App extends React.Component<{}, IState> {
   renderUnsupportedPlatform = () => {
     return (
       <ContentLayout>
-        <h1>Welcome to Skedulo’s Connected Pages platform</h1>
+        <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
         <p>Unfortunately, We do not support your platform at this time. We only support <b>OSX</b> and <b>Windows</b></p>
+      </ContentLayout>
+    )
+  }
+
+  renderLoadingPackageView = () => {
+    return (
+      <ContentLayout centered>
+        <LoadingSpinner size={ 50 } className="color-blue" />
+        <p className="padding">Loading package...</p>
       </ContentLayout>
     )
   }
@@ -364,14 +418,14 @@ export class App extends React.Component<{}, IState> {
   // This is a "type-safe" enum pattern match function.
   // Pulled this from Lin's implementation in Frontend UI
   renderView = () => {
-    const { setView, setPackage } = this
-    const { selectedProject, errorMessage, platform, currentView, session, selectedPackage, packageService } = this.state
+    const { setView, setPackage, refreshPackage, trySetPackage } = this
+    const { selectedLegacyProject, errorMessage, platform, currentView, session, selectedPackage } = this.state
 
     if (!platform) {
       return this.renderUnsupportedPlatform()
     }
 
-    const connectedPageBack = () => this.back(View.ManageConnectedPages)
+    const connectedPageBack = () => this.back(View.LegacyManageConnectedPages)
     const managePackageBack = () => this.back(View.ManagePackages)
     const manageProjectBack = () => this.back(View.ConfigurePackage)
 
@@ -384,67 +438,52 @@ export class App extends React.Component<{}, IState> {
         return this.renderSSLHelp()
       case View.SetupSSLMarkdown:
         return this.renderSSLHelpFromMarkdown()
-      case View.ManageConnectedPages:
-        return this.renderManageConnectedPages()
+      case View.Diagnostics:
+        return this.renderDiagnostics()
       case View.ManagePackages:
         return this.renderManagePackages()
+      case View.LoadingPackage:
+        return this.renderLoadingPackageView()
       case View.OpenPackage:
-        return <SelectPackage back={ managePackageBack } session={ session! } setView={ setView } setPackage={ setPackage } packageService={ packageService } />
-      case View.ConfigurePackage:
-        return <ManagePackage package={ packageService! } setView={ setView } />
-      case View.SelectCPProject:
-        return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
-      case View.ActiveCPProject:
-        return <ActiveLegacyProject back={ connectedPageBack } project={ selectedProject! } session={ session! } />
-      case View.CreateCPProject:
-        return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
-      case View.CreateFunctionProject:
-        return <NewFunctionProject back={ manageProjectBack } selectedPackage={ selectedPackage } setView={ setView } setPackage={ setPackage } />
-      case View.CreateWebpageProject:
-        return <NewWebPageProject back={ manageProjectBack } selectedPackage={ selectedPackage } setView={ setView } setPackage={ setPackage } />
+        // Select Package is capable of handling package errors, give it the unsafe variant
+        return <SelectPackage back={ managePackageBack } session={ session! } setPackage={ trySetPackage } />
       case View.CreatePackage:
-        return <CreateNewPackage back={ managePackageBack } session={ session! } setView={ setView } setPackage={ setPackage } packageService={ packageService } />
+        return <CreateNewPackage back={ managePackageBack } session={ session! } setPackage={ setPackage } />
+      case View.ConfigurePackage:
+        return <ConfigurePackage package={ selectedPackage! } refreshPackage={ refreshPackage } setView={ setView } />
+      case View.CreateFunctionProject:
+        return <NewFunctionProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
+      case View.CreateWebpageProject:
+        return <NewWebPageProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
+      case View.CreateLibraryProject:
+        return <NewLibraryProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
+
+      
+      // Legacy Pages
+      case View.LegacyManageConnectedPages:
+        return this.renderManageConnectedPages()
+      case View.LegacySelectCPProject:
+        return <SelectProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } errorMessage={ errorMessage } />
+      case View.LegacyActiveCPProject:
+        return <ActiveLegacyProject back={ connectedPageBack } project={ selectedLegacyProject! } session={ session! } />
+      case View.LegacyCreateCPProject:
+        return <NewConnectedPageProject back={ connectedPageBack } selectProject={ this.selectConnectedPageProject } />
     }
 
     return enumUnreachable(currentView)
   }
 
   render() {
-
     const child = this.renderView()
 
     return (
-      <HeaderLayout key={ this.state.session ? this.state.session.token : '_default' } onHomeClick={ this.goHome() } userMetadata={ this.state.userMetadata }>
+      <HeaderLayout
+        key={ this.state.session ? this.state.session.token : '_default' }
+        onHomeClick={ this.goHome() }
+        userMetadata={ this.state.userMetadata }
+      >
         { child }
       </HeaderLayout>
-    )
-  }
-}
-
-export class DebugInstall extends React.PureComponent<IState['environment']> {
-
-  renderItem = (key: string, item: DebugState | null) => {
-    if (!item) {
-      return <li><i className="icon sk-loader-small" />{ key }</li>
-    }
-
-    if (item.valid) {
-      return <li><i className="icon color-green ski ski-tick" />{ key }</li>
-    } else {
-      return <li><i className="icon color-red ski ski-remove" />{ key } { item.reason }. { item.link && <span><br /><a className="blue-link" onClick={ () => openUrl(item.link!) }>Install Now</a></span> }</li>
-    }
-  }
-
-  render() {
-    return (
-      <div className="text-left padding-top installation__container">
-        <h2>System Requirements</h2>
-        <ul className="installation__steps">
-          { this.renderItem('OpenSSL', this.props.openssl) }
-          { this.renderItem('Yarn', this.props.yarn) }
-          { this.renderItem('Node', this.props.node) }
-        </ul>
-      </div>
     )
   }
 }

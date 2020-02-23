@@ -12,28 +12,24 @@ import {
   Button,
   ValidationProps
 } from '@skedulo/sked-ui'
+import { Lens, Option } from '@skedulo/sked-commons'
 import {
-  Lens,
-  Option,
   WebPageProject,
-  SelectedPackage,
   Package,
   WebPageType,
   WebPageHook,
   ProjectType
-} from '@skedulo/sked-commons'
+} from '@skedulo/packaging-internal-commons'
 import { ContentLayout } from '../Layout'
 import { FormHelper } from '../form-utils'
 import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+import { WebPageProjectService } from '../../service-layer/package/WebPageProjectService'
 import { PackageService } from '../../service-layer/package/PackageService'
-import { NEW_PKG_METADATA } from './CreateNewPackage'
-import { View } from '../App'
 
 export interface IProps {
   back: () => void
-  selectedPackage: SelectedPackage | null
-  setView: (view: View) => () => void
-  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
+  selectedPackage: PackageService
+  refreshPackage: (goToConfiguration: boolean) => void
 }
 
 export interface IState {
@@ -55,7 +51,6 @@ interface WebpageProjectForm {
 
 export const NEW_WEBPAGE_PRJ_METADATA: WebPageProject = {
   type: ProjectType.WebPage,
-  genTypes: false,
   name: '',
   description: '',
   url: '',
@@ -175,8 +170,8 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     const { selectedPackage } = this.props
     const { projectMetadata } = this.state
 
-    const metadata = Option.of(selectedPackage).next('metaData').getOrElse(NEW_PKG_METADATA)
-    const existingWebpageProjects = Option.of(selectedPackage).next('metaData').next('components').next('webpages').getOrElse({ items: [] }) as { items: string[] }
+    const metadata = selectedPackage.packageMetadata
+    const existingWebpageProjects = Option.of(metadata.components.webpages).getOrElse({ items: [] }) as { items: string[] }
     const { items } = existingWebpageProjects
 
     return Lens('components', 'webpages', 'items').over(_items => [ ...items, projectMetadata.name ])(metadata) as Package
@@ -185,22 +180,24 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
   createProject = () => {
     const { getUpdatedProjectMetadata, getUpdatedPackageMetadata } = this
     const { project } = this.state
-    const { selectedPackage, setView, setPackage } = this.props
+    const { selectedPackage, refreshPackage } = this.props
     const { defaultTemplate } = project
-    const pkgDirectory = Option.of(selectedPackage).next('directory').getOrElse('')
+
+    const pkgDirectory = selectedPackage.packagePath
 
     this.setState({ progress: true })
 
-    try {
-      const webpageProjectDirectory = `${pkgDirectory}/${getUpdatedProjectMetadata().name}`
+    const currentProjectMetadata = getUpdatedProjectMetadata()
 
-      return LegacyProjectServices
-        .createProject(webpageProjectDirectory, defaultTemplate.path, getUpdatedProjectMetadata(), {} as any)
+    try {
+      return WebPageProjectService
+        .create(pkgDirectory, currentProjectMetadata.name, defaultTemplate.path, currentProjectMetadata, {} as any)
         .then(() => {
-          PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())
-          setPackage(pkgDirectory)
-          this.setState({ progress: false, errorMsg: '' })
-          setView(View.ConfigurePackage)()
+          // Update the package metadata file
+          PackageService.createPackageMetadata(pkgDirectory, getUpdatedPackageMetadata())
+
+          // Refresh package in state (this will also refresh the view)
+          refreshPackage(true)
         })
     } catch (error) {
       this.setState({

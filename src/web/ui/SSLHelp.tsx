@@ -78,16 +78,16 @@ export class SSLHelp extends React.PureComponent {
           information before completing.
         </p>
 
-        <h2>Make SSL Directory</h2>
+        <h2 className="h2">Make SSL Directory</h2>
         <CommandSegment command={ makeDir } onClick={ this.copyToClipboard(makeDir) } />
 
-        <h2>Create Root CA</h2>
+        <h2 className="h2">Create Root CA</h2>
         { rootCACerts.map((command, index) => <CommandSegment key={ index } command={ command } onClick={ this.copyToClipboard(command) } />) }
 
-        <h2>Create Self-Signed Cert</h2>
+        <h2 className="h2">Create Self-Signed Cert</h2>
         { selfSignedCerts.map((command, index) => <CommandSegment key={ index } command={ command } onClick={ this.copyToClipboard(command) } />) }
 
-        <h2>Trusting your self-signed cert</h2>
+        <h2 className="h2">Trusting your self-signed cert</h2>
 
         { getPlatform() === 'osx' && this.renderOSXSetupInstructions() }
         { getPlatform() === 'win' && this.renderWindowsSetupInstructions() }

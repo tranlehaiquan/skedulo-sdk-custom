@@ -19,13 +19,16 @@ export function streamToRx<T>(stream: NodeJS.ReadableStream) {
   })
 }
 
-export function shellExec(command: string, cwd?: string, env: { [key: string]: string } = {}): Observable<LogItem> {
+export function shellExec(command: string, cwd?: string, env: { [key: string]: string } = {}, errorOnNonZeroExit: boolean = false): Observable<LogItem> {
 
   return new Observable<ChildProcess>(observer => {
 
     const platform = getPlatform()
 
     let child: ChildProcess
+
+    let exitCode: number | null
+    let lastErrorOutput: string
 
     if (platform === 'win') {
       child = windowsExec(command, cwd, env)
@@ -42,10 +45,28 @@ export function shellExec(command: string, cwd?: string, env: { [key: string]: s
       observer.error(err)
     })
 
+    // This is used to provide context to non-zero exit errors where stderr logs might not be visible
+    if (errorOnNonZeroExit) {
+      child.stderr?.on('data', (data: string) => {
+        lastErrorOutput = data
+      })
+    }
+
+    // Do not trigger teardown, the close event is responsible for triggering completion of the observable
+    child.on('exit', code => {
+      exitCode = code
+    })
+
     // Complete the "observable" when the child is "closed"
     child.on('close', () => {
       childClosed = true
-      observer.complete()
+
+      // Check if exitCode is set AND non-zero
+      if (errorOnNonZeroExit && exitCode != null && exitCode > 0 ) {
+        observer.error(`Non-zero exit (${exitCode}): ${lastErrorOutput || ''}`)
+      } else {
+        observer.complete()
+      }
     })
 
     return () => {

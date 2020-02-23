@@ -7,6 +7,7 @@ import { PackageService } from '../../service-layer/package/PackageService'
 import { WebPageProjectService } from '../../service-layer/package/WebPageProjectService'
 import { LogItem } from '../../utils/shell'
 import { Terminal, TerminalSize } from '../Terminal'
+import { Button, ButtonGroup } from '@skedulo/sked-ui'
 
 interface Props {
   back?: () => void
@@ -40,23 +41,6 @@ export class ActiveWebPageProject extends React.PureComponent<Props, State> {
   }
 
   bootstrap = () => {
-    const { packageService, projectService } = this.props
-
-    if (packageService.packageProjectRequiresLink(projectService)) {
-      try {
-        packageService.createPackageLinksForProject(projectService)
-      } catch (err) {
-        // To ensure that the error makes it to the mock terminal, create stream of just the error event, once consumed the session status will be reset
-        const errorLog$ = Observable.of({ type: 'err', value: `Failed to linked necessary projects: ${err.message}` } as LogItem)
-          .finally(() => this.resetState())
-
-        this.subscriptions.add(errorLog$.subscribe())
-        this.setState({ inProgress: true, log$: errorLog$ })
-
-        return
-      }
-    }
-
     const log$ = this.props.projectService.bootstrap()
       .concat(Observable.of({ type: 'out', value: 'Bootstrap completed' } as LogItem))
       .finally(() => this.resetState())
@@ -99,16 +83,18 @@ export class ActiveWebPageProject extends React.PureComponent<Props, State> {
     return (
       <React.Fragment>
         <div className="flex-row new-project clear">
-          { !!this.props.back &&  <button className="sk-button-icon transparent" onClick={ this.props.back }><i className="ski ski-arrow-left" /></button> }
+          { !!this.props.back &&  <Button buttonType="transparent" onClick={ this.props.back }><i className="ski ski-arrow-left" /></Button> }
           <div className="new-project-title">{ this.props.projectService.project.name }</div>
           <div className="flex-expanded-cell">{ this.renderDevReady() }</div>
           <div>
-            { this.state.inProgress
-              ? <button className="sk-button primary" onClick={ this.cancel }>Cancel</button>
-              : null
-            }
-            <button className="sk-button primary" onClick={ this.bootstrap } disabled={ this.state.inProgress } >Bootstrap</button>
-            <button className="sk-button primary" onClick={ this.startDev } disabled={ this.state.inProgress } >Start Development</button>
+            <ButtonGroup>
+              { this.state.inProgress
+                ? <Button buttonType="primary" onClick={ this.cancel }>Cancel</Button>
+                : null
+              }
+              <Button buttonType="secondary" onClick={ this.bootstrap } disabled={ this.state.inProgress } >Bootstrap</Button>
+              <Button buttonType="primary" onClick={ this.startDev } disabled={ this.state.inProgress } >Start Development</Button>
+            </ButtonGroup>
           </div>
         </div>
         <hr />

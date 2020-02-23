@@ -8,20 +8,29 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
+"@skedulo/packaging-internal-commons@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@skedulo/packaging-internal-commons/-/packaging-internal-commons-0.0.4.tgz#826ba4ef519915a03b42bfc61957ee803264e6f8"
+  dependencies:
+    ajv "^6.11.0"
+
 "@skedulo/sked-commons@^0.5.2":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@skedulo/sked-commons/-/sked-commons-0.5.2.tgz#5f1f5d4783859b748a29380347ff6d39f55a3f55"
   dependencies:
     lodash "^4.17.15"
 
-"@skedulo/sked-ui@^8.1.1":
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/@skedulo/sked-ui/-/sked-ui-8.3.0.tgz#b7329d2d1406dba0babd4190ce1a284f34ed8bf2"
+"@skedulo/sked-ui@^10.7.1":
+  version "10.7.1"
+  resolved "https://registry.yarnpkg.com/@skedulo/sked-ui/-/sked-ui-10.7.1.tgz#96661f456983115ead8bbe2321952049b13a73f2"
   dependencies:
+    "@types/react-table" "^7.0.3"
     date-fns "^1.30.1"
     react-datepicker "2.7.0"
     react-fast-compare "^2.0.4"
     react-popper "^1.3.3"
+    react-resize-detector "^4.2.1"
+    react-table "^7.0.0-rc.15"
 
 "@types/accepts@*":
   version "1.3.5"
@@ -226,6 +235,12 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-table@^7.0.3":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@types/react-table/-/react-table-7.0.5.tgz#7f5973ff7046b9823c9a8a7014a275b4c33884d7"
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-test-renderer@^16.9.0":
   version "16.9.1"
   resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-16.9.1.tgz#9d432c46c515ebe50c45fa92c6fb5acdc22e39c4"
@@ -303,7 +318,16 @@ airbnb-prop-types@^2.15.0:
     prop-types-exact "^1.2.0"
     react-is "^16.9.0"
 
-ajv@^6.10.2, ajv@^6.5.5:
+ajv@^6.11.0:
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.11.0.tgz#c3607cbc8ae392d8a5a536f25b21f8e5f3f87fe9"
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
+ajv@^6.5.5:
   version "6.10.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.2.tgz#d3cea04d6b017b2894ad69040fec8b623eb4bd52"
   dependencies:
@@ -808,6 +832,10 @@ fast-deep-equal@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
 
+fast-deep-equal@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.1.tgz#545145077c501491e33b15ec408c294376e94ae4"
+
 fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
@@ -1248,6 +1276,10 @@ koa@^2.3.0:
     type-is "^1.6.16"
     vary "^1.1.2"
 
+lodash-es@^4.17.15:
+  version "4.17.15"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.15.tgz#21bd96839354412f23d7a10340e5eac6ee455d78"
+
 lodash.compact@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/lodash.compact/-/lodash.compact-3.0.1.tgz#540ce3837745975807471e16b4a2ba21e7256ca5"
@@ -1571,6 +1603,10 @@ qs@~6.5.2:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
 
+raf-schd@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/raf-schd/-/raf-schd-4.0.2.tgz#bd44c708188f2e84c810bf55fcea9231bcaed8a0"
+
 raf@^3.4.0:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.1.tgz#0742e99a4a6552f445d73e3ee0328af0ff1ede39"
@@ -1639,12 +1675,26 @@ react-popper@^1.0.2, react-popper@^1.3.3:
     typed-styles "^0.0.7"
     warning "^4.0.2"
 
+react-resize-detector@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/react-resize-detector/-/react-resize-detector-4.2.1.tgz#8982b74c3e1cf949afaa3c41050458c87b033982"
+  dependencies:
+    lodash "^4.17.15"
+    lodash-es "^4.17.15"
+    prop-types "^15.7.2"
+    raf-schd "^4.0.2"
+    resize-observer-polyfill "^1.5.1"
+
 react-split@^2.0.4:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/react-split/-/react-split-2.0.7.tgz#083b26edf208daefdc9a6638f1e0836be727acb2"
   dependencies:
     prop-types "^15.5.7"
     split.js "^1.5.9"
+
+react-table@^7.0.0-rc.15:
+  version "7.0.0-rc.15"
+  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.0.0-rc.15.tgz#bb855e4e2abbb4aaf0ed2334404a41f3ada8e13a"
 
 react-test-renderer@^16.0.0-0, react-test-renderer@^16.2.0:
   version "16.12.0"
@@ -1722,6 +1772,10 @@ request@^2.83.0:
 requires-port@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
+
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
 
 resolve-path@^1.4.0:
   version "1.4.0"

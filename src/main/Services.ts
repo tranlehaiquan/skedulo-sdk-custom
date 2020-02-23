@@ -5,8 +5,6 @@ import * as os from 'os'
 
 import { getPlatform, whenPlatformIs } from '../platform'
 
-const SchemaJSON = require('../schema.definition.json')
-
 export class Services {
 
   private processIds: Set<number> = new Set()
@@ -60,10 +58,6 @@ export class Services {
     whenPlatformIs('win', () => this.win.setAlwaysOnTop(true))
     this.win.focus()
     whenPlatformIs('win', () => this.win.setAlwaysOnTop(false))
-  }
-
-  getSchemaJSON() {
-    return SchemaJSON
   }
 
   async getPort(): Promise<number> {

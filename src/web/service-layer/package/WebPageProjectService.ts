@@ -1,17 +1,24 @@
 import { Observable } from 'rxjs'
-import { WebPageProject } from '@skedulo/sked-commons'
+import { validateFor, WebPageProject } from '@skedulo/packaging-internal-commons'
 
 import { LogItem } from '../../utils/shell'
 import { proxyTo } from '../../utils/proxy'
-import { ProjectService } from './ProjectService'
-import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
+import { ProjectService } from './ProjectService'
+
 
 export class WebPageProjectService extends ProjectService<WebPageProject> {
 
   static at(packagePath: string, projectName: string, session: SessionData): WebPageProjectService {
     return new WebPageProjectService(packagePath, projectName, session)
   }
+
+  static async create(packagePath: string, projectName: string, template: string, projectData: WebPageProject, session: SessionData): Promise<WebPageProjectService> {
+    await this.setupProject(packagePath, projectName, template, projectData)
+
+    return this.at(packagePath, projectName, session)
+  }
+
 
   evaluate(data: any) {
     return validateFor<WebPageProject>('WebPageProject', data)

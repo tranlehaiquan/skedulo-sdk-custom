@@ -2,13 +2,16 @@
 import * as fs from 'fs'
 import * as ms from 'ms'
 import * as path from 'path'
+
+import { BaseCodeProject } from '@skedulo/packaging-internal-commons'
+
 import { Observable } from 'rxjs'
 import { shellExec } from '../../utils/shell'
+import { extractTarball } from '../../utils/tar'
+import { connectToNgrok } from '../../server/ngrok'
 import { NetworkingService } from '../NetworkingService'
 import { SessionData } from '../types'
-import { connectToNgrok } from '../../server/ngrok'
-
-const PROJECT_FILE = 'sked.proj.json'
+import { PROJECT_FILE } from './constants'
 
 export class InvalidProject extends Error { }
 
@@ -40,8 +43,34 @@ export abstract class ProjectService<T> {
 
   abstract evaluate(data: any): T
 
+  static async setupProject<U extends BaseCodeProject>(packagePath: string, projectName: string, template: string, projectData: U) {
+    const projectPath = path.join(packagePath, '/', projectName)
+
+    // Create directory for project
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath )
+    } else {
+      throw new Error(`The project path "${projectPath}" already exists!`)
+    }
+
+    // Extract template into directory
+    await extractTarball(projectPath, template)
+
+    // Create project metadata file
+    this.createProjectFile(projectPath, projectData)
+  }
+
+  static getProjectMetadataPath(projectPath: string) {
+    return path.join(projectPath, '/sked.proj.json')
+  }
+
+  static createProjectFile(projectPath: string, projectData: BaseCodeProject) {
+    const json = JSON.stringify(projectData)
+    fs.writeFileSync(this.getProjectMetadataPath(projectPath), json)
+  }
+
   bootstrap() {
-    return shellExec('yarn bootstrap', this.projectPath)
+    return shellExec('yarn bootstrap', this.projectPath, this.getEnv())
   }
 
   getEnv = () => ({ SKED_BASE_URL: this.session.API_SERVER, SKED_API_TOKEN: this.session.token })

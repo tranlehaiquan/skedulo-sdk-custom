@@ -11,28 +11,23 @@ import {
   ButtonGroup,
   Button
 } from '@skedulo/sked-ui'
+import { Option, Lens } from '@skedulo/sked-commons'
 import {
-  Option,
-  Lens,
   FunctionProject,
-  SelectedPackage,
   Package,
   ProjectType,
   NodeVersion
-} from '@skedulo/sked-commons'
-
+} from '@skedulo/packaging-internal-commons'
+import { FunctionProjectService } from '../../service-layer/package/FunctionProjectService'
 import { ContentLayout } from '../Layout'
 import { FormHelper } from '../form-utils'
 import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
 import { PackageService } from '../../service-layer/package/PackageService'
-import { NEW_PKG_METADATA } from './CreateNewPackage'
-import { View } from '../App'
 
 export interface IProps {
   back: () => void
-  selectedPackage: SelectedPackage | null
-  setView: (view: View) => () => void
-  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
+  selectedPackage: PackageService
+  refreshPackage: (goToConfiguration: boolean) => void
 }
 
 export interface IState {
@@ -52,7 +47,6 @@ interface FunctionProjectForm {
 export const NEW_FUNCTION_PRJ_METADATA: FunctionProject = {
   type: ProjectType.Function,
   runtime: NodeVersion.nodejs12,
-  genTypes: false,
   name: '',
   description: ''
 }
@@ -99,8 +93,8 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
     const { selectedPackage } = this.props
     const { projectMetadata } = this.state
 
-    const metadata = Option.of(selectedPackage).next('metaData').getOrElse(NEW_PKG_METADATA)
-    const existingFunctionProjects = Option.of(selectedPackage).next('metaData').next('components').next('functions').getOrElse({ items: [] }) as { items: string[] }
+    const metadata = selectedPackage.packageMetadata
+    const existingFunctionProjects = Option.of(metadata.components.functions).getOrElse({ items: [] }) as { items: string[] }
     const { items } = existingFunctionProjects
 
     return Lens('components', 'functions', 'items').over(_items => [ ...items, projectMetadata.name ])(metadata) as Package
@@ -109,23 +103,22 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
   createProject = () => {
     const { getUpdatedPackageMetadata } = this
     const { projectMetadata, project } = this.state
-    const { selectedPackage, setView, setPackage } = this.props
+    const { selectedPackage, refreshPackage } = this.props
     const { defaultTemplate } = project
-    const pkgDirectory = Option.of(selectedPackage).next('directory').getOrElse('')
 
+    const pkgDirectory = selectedPackage.packagePath
 
     this.setState({ progress: true })
 
     try {
-      const functionProjectDirectory = `${pkgDirectory}/${projectMetadata.name}`
-
-      return LegacyProjectServices
-        .createProject(functionProjectDirectory, defaultTemplate.path, projectMetadata, {} as any)
+      return FunctionProjectService
+        .create(pkgDirectory, projectMetadata.name, defaultTemplate.path, projectMetadata, {} as any)
         .then(() => {
-          PackageService.createPackage(pkgDirectory, getUpdatedPackageMetadata())
-          setPackage(pkgDirectory)
-          this.setState({ progress: false, errorMsg: '' })
-          setView(View.ConfigurePackage)()
+          // Update the package metadata file
+          PackageService.createPackageMetadata(pkgDirectory, getUpdatedPackageMetadata())
+
+          // Refresh package in state (this will also refresh the view)
+          refreshPackage(true)
         })
     } catch (error) {
       this.setState({

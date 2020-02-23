@@ -191,6 +191,10 @@
   }
 }
 
+.flow-root {
+  display: flow-root;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -233,3 +237,14 @@ pre {
   @include thumbnail;
   @include thumbnail-size($global-thumbnail-size);
 }
+
+.h2 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.h3 {
+  font-size: 14px;
+  font-weight: 500;
+}
+

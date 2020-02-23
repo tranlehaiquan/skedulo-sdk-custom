@@ -1,14 +1,13 @@
 /**
  * "Web" side services
  */
-import * as crypto from 'crypto'
+
 import * as fs from 'fs'
 import * as path from 'path'
 import { Observable } from 'rxjs'
-import * as tar from 'tar'
-import { FunctionProject, WebPageProject } from '@skedulo/sked-commons'
 
 import { proxyTo } from '../utils/proxy'
+import { extractTarball, createTarBall, getFileHash } from '../utils/tar'
 import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { ICoverage, ProjectData, SessionData } from './types'
@@ -16,7 +15,7 @@ import { NetworkingService } from './NetworkingService'
 
 export { LogItem } from '../utils/shell'
 
-type ProjectDataType = ProjectData | FunctionProject | WebPageProject
+type ProjectDataType = ProjectData
 
 const TEMPLATE_PATH = path.join(WEB_BASE_PATH, '/assets/templates/')
 const proxyServer = proxyTo({ port: 3000 }, { port: 1929 })
@@ -31,7 +30,7 @@ export class LegacyProjectServices {
     return [
       {
         name: 'React | Typescript | SASS (Recommended)',
-        path: path.join(TEMPLATE_PATH, 'minimal-react-typescript.tar.gz')
+        path: path.join(TEMPLATE_PATH, 'legacy-minimal-react-typescript.tar.gz')
       }
     ]
   }
@@ -47,6 +46,13 @@ export class LegacyProjectServices {
     return {
       name: 'Webpage project boilerplate',
       path: path.join(TEMPLATE_PATH, 'minimal-react-typescript-package.tar.gz')
+    }
+  }
+
+  static getLibraryProjectTemplate() {
+    return {
+      name: 'Library project boilerplate',
+      path: path.join(TEMPLATE_PATH, 'type-generation.tar.gz')
     }
   }
 
@@ -83,8 +89,6 @@ export class LegacyProjectServices {
 
     if (!fs.existsSync(project)) {
       fs.mkdirSync(project)
-    } else {
-      throw new Error(`The project path "${project}" already exists!`)
     }
 
     const proj = new LegacyProjectServices(project, session)
@@ -209,31 +213,4 @@ export class LegacyProjectServices {
         return Observable.empty()
       })
   }
-}
-
-function extractTarball(destFolder: string, tarball: string) {
-
-  return tar.x({
-    cwd: destFolder,
-    file: tarball
-  })
-}
-
-function createTarBall(destFolder: string, destFile: string, filter: (path: string) => boolean) {
-
-  return tar
-    .c({
-      file: destFile,
-      cwd: destFolder,
-      gzip: true,
-      filter
-    }, ['.'])
-    .then(() => destFile)
-}
-
-function getFileHash(file: string) {
-  const hash = crypto.createHash('sha256')
-  const f = fs.readFileSync(file)
-  hash.update(f)
-  return hash.digest('hex')
 }

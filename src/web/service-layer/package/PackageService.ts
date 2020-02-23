@@ -1,30 +1,22 @@
 import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as path from 'path'
-import { Package, Option, Lens } from '@skedulo/sked-commons'
-
-import { createSymlinks } from '../../utils/symlink'
-import { validateFor } from '../schema-validation'
-import { FunctionProjectService } from './FunctionProjectService'
-import { MobilePageProjectService } from './MobilePageProjectService'
-import { ProjectService } from './ProjectService'
-import { WebPageProjectService } from './WebPageProjectService'
-import { SessionData } from '../types'
-import { NetworkingService } from '../NetworkingService'
 import * as tar from 'tar'
 import * as crypto from 'crypto'
-import { SchemaProjectService } from './SchemaProjectService'
+import { mapValues, keyBy, omitBy, flatten } from 'lodash'
 
-const PACKAGE_FILE = `sked.pkg.json`
+import { Option, Lens } from '@skedulo/sked-commons'
+import { Package, validateFor, ProjectDependency, FunctionProject, MobilePageProject, WebPageProject, LibraryProject } from '@skedulo/packaging-internal-commons'
 
-const DEFAULT_LINK_SOURCE_PATH = 'src/shared'
-const DEFAULT_LINK_DESTINATION_PATH = 'src/__shared'
-
-enum Script {
-  Bootstrap = 'bootstrap',
-  Compile = 'compile',
-  Dev = 'dev'
-}
+import { SessionData } from '../types'
+import { NetworkingService } from '../NetworkingService'
+import { FunctionProjectService } from './FunctionProjectService'
+import { MobilePageProjectService } from './MobilePageProjectService'
+import { WebPageProjectService } from './WebPageProjectService'
+import { LibraryProjectService } from './LibraryProjectService'
+import { registerNodeDependencyLink, registerLocalNodeDependency, isNodeDependency } from './dependency-utils'
+import { PACKAGE_FILE, REQUIRED_PROJECT_SCRIPTS } from './constants'
+import { ProjectService } from './ProjectService'
 
 export interface IPreDeployErrors {
   [key: string]: string[]
@@ -39,7 +31,7 @@ interface SourceUploaded {
   revisionCount: number
 }
 
-const REQUIRED_PROJECT_SCRIPTS = [Script.Bootstrap, Script.Compile, Script.Dev]
+export type AllProjectService = ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject>
 
 export class InvalidPackage extends Error { }
 
@@ -51,13 +43,13 @@ export class PackageService {
   webpages: WebPageProjectService[] = []
   mobilepages: MobilePageProjectService[] = []
   lambdas: FunctionProjectService[] = []
-  schemas: SchemaProjectService[] = []
+  libraries: LibraryProjectService[] = []
 
   static at(packagePath: string, session: SessionData) {
     return new PackageService(packagePath, session)
   }
 
-  private constructor(private packagePath: string, private session: SessionData) {
+  private constructor(public packagePath: string, private session: SessionData) {
 
     const pkgFile = path.join(this.packagePath, '/', PACKAGE_FILE)
 
@@ -73,6 +65,40 @@ export class PackageService {
     }
   }
 
+  load() {
+    // Link all dependencies.  All linking should be idempotent, if previously done this will have no effect
+    // however this will ensure that the package is ready for development each time it's opened.
+    return this.linkDependencies()
+  }
+
+  async linkDependencies() {
+    const projectDependencies = this.getDependenciesForPackage()
+
+    // Register all libraries for linking
+    const libraryPaths = this.libraries.map(l => path.join(this.packagePath, l.pathName))
+    await registerNodeDependencyLink(libraryPaths)
+
+    const allNodeDependencyLinks = flatten(Object.keys(projectDependencies).map(key => {
+      const { dependencies, dependantPathName } = projectDependencies[key]
+      const fullDependantPath = path.join(this.packagePath, dependantPathName)
+
+      const nodeDependencies = dependencies.filter(isNodeDependency)
+
+      return nodeDependencies.map(dep => { 
+        const fullDependencyPath = path.join(this.packagePath, dep.dependencyPathName)
+
+        return {
+          ...dep,
+          dependantPath: fullDependantPath,
+          dependencyPath: fullDependencyPath
+        }
+      })
+    }))
+
+    // Apply each local node link
+    await Promise.all(allNodeDependencyLinks.map(registerLocalNodeDependency))
+  }
+
   getPackageMetadata() {
     return this.packageMetadata
   }
@@ -81,50 +107,65 @@ export class PackageService {
 
     const packageMetadata = validateFor<Package>('Package', data)
 
-    const { webpages, mobilepages, functions, schemas } = packageMetadata.components
+    const { webpages, mobilepages, functions, libraries } = packageMetadata.components
 
     this.webpages = webpages ? webpages.items.map(c => WebPageProjectService.at(this.packagePath, c, this.session)) : []
     this.mobilepages = mobilepages ? mobilepages.items.map(c => MobilePageProjectService.at(this.packagePath, c, this.session)) : []
     this.lambdas = functions ? functions.items.map(c => FunctionProjectService.at(this.packagePath, c, this.session)) : []
-    this.schemas = schemas ? schemas.items.map(c => SchemaProjectService.at(this.packagePath, c, this.session)) : []
+    this.libraries = libraries? libraries.items.map(c => LibraryProjectService.at(this.packagePath, c, this.session)) : []
 
-    const allComponentIdentifiers = _.flatten(_.compact([webpages, mobilepages, functions, schemas]).map(c => c.items))
-
-    // Validate items used in links and relationships
-    const allRelationshipComponents = _.flatMap(packageMetadata.relationships, relationship => [relationship.primaryComponent, ...relationship.dependencies])
-    const allLinkComponents = _.flatMap(packageMetadata.linkedComponents, link => [link.source, ...link.dependants.map(l => l.item)])
-
-    _.uniq([...allRelationshipComponents, ...allLinkComponents]).forEach(component => {
-      if (!allComponentIdentifiers.includes(component)) {
-        throw new Error(`${component} is not defined as a component but is used as a link or relationship`)
-      }
-    })
-
+    // Validate dependencies
+    this.evaluatePackageDependencies()
+    
     return packageMetadata
   }
 
-  getRelatedProjectsForProject(project: ProjectService<any>) {
-    const allProjects = [...this.lambdas, ...this.mobilepages, ...this.webpages]
+  private getDependenciesForPackage = () => {
+    const allProjectsByName = keyBy([...this.webpages, ...this.mobilepages, ...this.lambdas, ...this.libraries], x => x.project.name)
 
-    const relatedProjectMetadata = this.packageMetadata.relationships.find(r => r.primaryComponent === project.pathName)
-    return (!!relatedProjectMetadata ? relatedProjectMetadata.dependencies : []).map(projectName => allProjects.find(p => p.pathName === projectName)!)
+    return omitBy(mapValues(allProjectsByName, service => ({
+        dependantPathName: service.pathName,
+        dependencies: (service.project.dependencies || []).map(dep => {
+          if (!allProjectsByName[dep.dependencyName]) {
+            throw new Error(`Unable to find library dependency ${dep.dependencyName} for project ${service.project.name}`)
+          }
+
+          return {
+            ...dep,
+            dependencyPathName: allProjectsByName[dep.dependencyName].pathName
+          }
+        })
+    })), x => !x.dependencies.length)
   }
 
-  packageProjectRequiresLink(project: ProjectService<any>) {
-    return !!this.resolveLinkDependenciesForProject(project).length
+  evaluatePackageDependencies() {
+    const projectsWithDependencies = [...this.webpages, ...this.mobilepages, ...this.lambdas, ...this.libraries]
+      .reduce((result, currService) => ({
+        ...result,
+        [currService.project.name]: currService.project.dependencies || []
+      }), {} as { [projectName: string]: ProjectDependency[] })
+
+    const allLibraryNames = this.libraries.map(x => x.project.name)
+
+    mapValues(projectsWithDependencies, (dependencies, projectName) => {
+      const projectDeps = dependencies.map(x => x.dependencyName)
+
+      projectDeps.forEach(depName => {
+        if (!allLibraryNames.includes(depName)) {
+          // Dependency does not exist within the package
+          throw new Error(`Library dependency ${depName} for project ${projectName} does not exist.`)
+        } else {
+          const dependenciesForDep = projectsWithDependencies[depName]
+          if (dependenciesForDep.some(d => d.dependencyName === projectName)) {
+            // Circuler reference of dependency
+            throw new Error(`Dependency ${depName} for project ${projectName} is a circular reference.`)
+          }
+        }
+      })
+    })
   }
 
-  createPackageLinksForProject(project: ProjectService<any>) {
-    const linksWithRelativePath = this.resolveLinkDependenciesForProject(project)
-    const linksWithAbsolutePath = linksWithRelativePath.map(link => ({
-      sourcePath: path.join(this.packagePath, link.sourcePathName, link.relativeSourcePath),
-      linkPath: path.join(this.packagePath, link.destinationPathName, link.relativeLinkPath)
-    }))
-
-    return createSymlinks(linksWithAbsolutePath)
-  }
-
-  static createPackage(packagePath: string, packageData: Package) {
+  static createPackageMetadata(packagePath: string, packageData: Package) {
     const packageMetadata = JSON.stringify(packageData)
 
     try {
@@ -133,23 +174,6 @@ export class PackageService {
       console.error(`Cannot write sked.pkg.json file to ${packagePath}.`)
       throw error
     }
-  }
-
-  private resolveLinkDependenciesForProject(project: ProjectService<any>) {
-    const pathName = project.pathName
-
-    return this.packageMetadata.linkedComponents
-      .filter(link => link.dependants.map(d => d.item).includes(pathName))
-      .map(link => {
-        const dependantMetadata = link.dependants.find(d => d.item === pathName)
-
-        return {
-          sourcePathName: link.source,
-          destinationPathName: pathName,
-          relativeSourcePath: link.sourcePath || DEFAULT_LINK_SOURCE_PATH,
-          relativeLinkPath: dependantMetadata!.linkPath || DEFAULT_LINK_DESTINATION_PATH
-        }
-      })
   }
 
   private bundlePackage() {

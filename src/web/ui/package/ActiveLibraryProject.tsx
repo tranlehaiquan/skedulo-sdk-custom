@@ -1,32 +1,28 @@
 
 import * as React from 'react'
 import { Observable, Subscription } from 'rxjs'
-import { MainServices } from '../../service-layer/MainServices'
-import { MobilePageProjectService } from '../../service-layer/package/MobilePageProjectService'
 import { PackageService } from '../../service-layer/package/PackageService'
+import { LibraryProjectService } from '../../service-layer/package/LibraryProjectService'
 import { LogItem } from '../../utils/shell'
 import { Terminal, TerminalSize } from '../Terminal'
-import { ButtonGroup, Button } from '@skedulo/sked-ui'
+import { Button, ButtonGroup } from '@skedulo/sked-ui'
 
 interface Props {
   back?: () => void
   concurrentActiveProject: boolean
-  projectService: MobilePageProjectService
+  projectService: LibraryProjectService
   packageService: PackageService
 }
 
 interface State {
   inProgress: boolean
   log$: Observable<LogItem> | null
-  portNumber: number | null
 }
 
-export class ActiveMobilePageProject extends React.PureComponent<Props, State> {
-
+export class ActiveLibraryProject extends React.PureComponent<Props, State> {
   state: State = {
-    inProgress: false,
     log$: null,
-    portNumber: null
+    inProgress: false
   }
 
   private subscriptions = new Subscription()
@@ -46,15 +42,12 @@ export class ActiveMobilePageProject extends React.PureComponent<Props, State> {
   }
 
   startDev = async () => {
-
-    const portNumber = await MainServices.getPort()
-
-    const log$ = this.props.projectService.startDev(portNumber)
+    const log$ = this.props.projectService.startDev()
       .finally(() => this.resetState())
       .publish()
 
     this.subscriptions.add(log$.connect())
-    this.setState({ inProgress: true, log$, portNumber })
+    this.setState({ inProgress: true, log$ })
   }
 
   cancel = () => {
@@ -62,16 +55,13 @@ export class ActiveMobilePageProject extends React.PureComponent<Props, State> {
     this.subscriptions = new Subscription()
   }
 
-  resetState = () => this.setState({ inProgress: false, portNumber: null })
+  resetState = () => this.setState({ inProgress: false })
 
   renderDevReady = () => {
-    if (this.state.portNumber) {
-      return (
-        <React.Fragment>
-          <p>Mobile page dev session started. Login to SkedX and use "Developer Mode" to see this session to continue development.</p>
-        </React.Fragment>)
+    if (this.state.log$) {
+      return 'Library build currently active...'
     } else {
-      return 'Select "start development" to begin building your mobile page'
+      return 'Select "start development" to build your library in "watch" mode'
     }
   }
 

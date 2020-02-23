@@ -1,0 +1,29 @@
+query fetchJobsWithJobProducts($filter: EQLQueryFilterJobs!) {
+  jobs(filter: $filter) {
+    edges {
+      node {
+        UID
+        Name
+        JobProducts {
+          UID
+          Qty
+          Name
+          JobId
+          ProductId
+        }
+      }
+    }
+  }
+}
+
+query fetchProducts {
+  products {
+    edges {
+      node {
+        UID
+        Name
+        Description
+      }
+    }
+  }
+}

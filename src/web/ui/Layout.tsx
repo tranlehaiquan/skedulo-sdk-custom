@@ -17,23 +17,11 @@ export const HeaderLayout: React.StatelessComponent<ILayoutProps> = props => {
       <div className="header">
         <i className="ski ski-skedulo header__logo" onClick={ props.onHomeClick } />
         <div className="header__text">Skedulo SDK</div>
-        {/* Harish: you might want to use this https://dev.phoenix.test.skl.io/ui/dropdowns */ }
-        {
-          props.userMetadata && <div className="header__actions">
-            <div className="sked-dropdown">
-              <div className="header__user">
-                { getInitialsFromName(props.userMetadata.fullName) || '--' }
-              </div>
-              { /* <div className="sked-dropdown-menu sked-dropdown-menu--with-top-right-arrow right">
-              <div className="menu-body-links">
-                <div className="dropdown-item">Harish Sked</div>
-                <div className="dropdown-item">Skedulo Dev</div>
-              </div>
-            </div>
-            */ }
-            </div>
+        <div className="header__actions">
+          <div className="header__user">
+            { (props.userMetadata && getInitialsFromName(props.userMetadata.fullName)) || '--' }
           </div>
-        }
+        </div>
       </div>
       <div className="content">
         { props.children }

@@ -1,8 +1,7 @@
 import * as ms from 'ms'
-import { FunctionProject } from '@skedulo/sked-commons'
+import { FunctionProject, validateFor } from '@skedulo/packaging-internal-commons'
 
 import { startLambdaServer } from '../../server/lambda-server'
-import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
 import { ProjectService } from './ProjectService'
 
@@ -10,6 +9,12 @@ export class FunctionProjectService extends ProjectService<FunctionProject> {
 
   static at(packagePath: string, projectName: string, session: SessionData): FunctionProjectService {
     return new FunctionProjectService(packagePath, projectName, session)
+  }
+
+  static async create(packagePath: string, projectName: string, template: string, projectData: FunctionProject, session: SessionData): Promise<FunctionProjectService> {
+    await this.setupProject(packagePath, projectName, template, projectData)
+
+    return this.at(packagePath, projectName, session)
   }
 
   evaluate(data: any) {

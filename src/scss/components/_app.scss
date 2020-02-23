@@ -46,9 +46,54 @@
   padding: $global-padding-large;
   margin-bottom: $global-padding-large;
 
+  &__header {
+    display: flow-root;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: $global-padding;
+  }
+
   > div {
     p:last-child {
       margin-bottom: 0;
     }
+  }
+
+  div:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card-list-item {
+  display: flow-root;
+  padding: $global-padding;
+  margin-bottom: $global-padding-small;
+  border-color: $grey-4;
+  border-width: thin;
+}
+
+.diagnostics-button {
+  position: absolute;
+  top: calc(100% - 30px);
+  left: calc(100% - 30px);
+}
+
+.dependencies-modal {
+  width: 500px;
+
+  &__header {
+    padding: $global-padding;
+  }
+
+  &__item {
+    display: flow-root;
+    padding: $global-padding;
+    margin-bottom: $global-padding-small;
+    background-color: $grey-5;
+  }
+
+  &__footer {
+    display: flow-root;
+    padding: $global-padding;
   }
 }

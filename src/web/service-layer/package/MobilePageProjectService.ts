@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs'
-import { MobilePageProject } from '@skedulo/sked-commons'
+import { MobilePageProject, validateFor } from '@skedulo/packaging-internal-commons'
 
-import { validateFor } from '../schema-validation'
 import { SessionData } from '../types'
 import { ProjectService } from './ProjectService'
 
@@ -9,6 +8,12 @@ export class MobilePageProjectService extends ProjectService<MobilePageProject> 
 
   static at(packagePath: string, projectName: string, session: SessionData): MobilePageProjectService {
     return new MobilePageProjectService(packagePath, projectName, session)
+  }
+
+  static async create(packagePath: string, projectName: string, template: string, projectData: MobilePageProject, session: SessionData): Promise<MobilePageProjectService> {
+    await this.setupProject(packagePath, projectName, template, projectData)
+
+    return this.at(packagePath, projectName, session)
   }
 
   evaluate(data: any) {

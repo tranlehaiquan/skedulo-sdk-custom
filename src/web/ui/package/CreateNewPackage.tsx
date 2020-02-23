@@ -13,23 +13,19 @@ import {
   ButtonGroup,
   Button
 } from '@skedulo/sked-ui'
-import { Package, SelectedPackage, Version } from '@skedulo/sked-commons'
+import { Package, Version } from '@skedulo/packaging-internal-commons'
 import { ContentLayout } from '../Layout'
 import { MainServices } from '../../service-layer/MainServices'
 import { SessionData } from '../../service-layer/types'
-import { ManagePackage } from './ManagePackage'
 import { FormHelper } from '../form-utils'
 import { PackageService } from '../../service-layer/package/PackageService'
-import { View } from '../App'
 
 const readDirAsync = util.promisify(fs.readdir)
 
 export interface IProps {
   back: () => void
   session: SessionData
-  packageService: PackageService | null
-  setView: (view: View) => () => void
-  setPackage: (pkgDirectory: SelectedPackage['directory']) => void
+  setPackage: (pkgDirectory: string) => void
 }
 
 export interface IState {
@@ -50,9 +46,7 @@ export const NEW_PKG_METADATA: Package = {
   version: Version.One,
   name: '',
   summary: '',
-  components: {},
-  relationships: [],
-  linkedComponents: []
+  components: {}
 }
 
 const FORM_CONFIG: FormConfig = {
@@ -101,7 +95,7 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
     const { package: pkg, packageMetadata } = this.state
     const { selectedDirectory } = pkg
 
-    PackageService.createPackage(selectedDirectory, packageMetadata)
+    PackageService.createPackageMetadata(selectedDirectory, packageMetadata)
     this.openNewPackage()
   }
 
@@ -197,19 +191,14 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
 
   render() {
     const { renderNewPackageForm } = this
-    const { setView, packageService } = this.props
 
     return (
-      packageService ? (
-        <ManagePackage package={ packageService! } setView={ setView } />
-      ) : (
-        <ContentLayout centered>
-          <h1>Create New Package</h1>
-          <div className="padding-top padding-bottom">
-            { renderNewPackageForm() }
-          </div>
-        </ContentLayout>
-      )
+      <ContentLayout centered>
+        <h1>Create New Package</h1>
+        <div className="padding-top padding-bottom">
+          { renderNewPackageForm() }
+        </div>
+      </ContentLayout>
     )
   }
 }

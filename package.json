@@ -19,15 +19,14 @@
     "compile-styles": "node-sass src/scss/main.scss app/scss/main.css",
     "watch-scripts": "tsc --watch",
     "watch-styles": "yarn compile-styles --watch",
-    "compile": "yarn gen-schema && yarn compile-scripts && yarn compile-styles && yarn copy-static",
+    "compile": "yarn compile-scripts && yarn compile-styles && yarn copy-static",
     "start-ui": "electron ./",
     "lint": "tslint --project ./",
     "start": "rm -rf app && rm -rf dist && yarn compile && electron ./",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "yarn compile && electron-builder",
-    "dev": "yarn gen-schema && yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
+    "dev": "yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
     "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./",
-    "gen-schema": "typescript-json-schema ./tsconfig.json '*' --include='src/**/*.def.ts' --titles --required --excludePrivate --aliasRefs --validationKeywords --out=./src/schema.definition.json",
     "postinstall": "ts-node ./download-ngrok-bins.ts && yarn compile && electron-builder install-app-deps"
   },
   "jest": {
@@ -109,8 +108,7 @@
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
     "tslint": "^5.19.0",
-    "typescript": "^3.7.1",
-    "typescript-json-schema": "^0.40.0"
+    "typescript": "^3.7.1"
   },
   "dependencies": {}
 }
