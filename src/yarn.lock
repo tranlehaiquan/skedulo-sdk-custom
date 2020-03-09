@@ -8,9 +8,9 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@skedulo/packaging-internal-commons@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@skedulo/packaging-internal-commons/-/packaging-internal-commons-0.0.4.tgz#826ba4ef519915a03b42bfc61957ee803264e6f8"
+"@skedulo/packaging-internal-commons@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@skedulo/packaging-internal-commons/-/packaging-internal-commons-0.0.5.tgz#7f1cfcfea9bb9da4d4ec8b94fe2b3ed33c3d09f1"
   dependencies:
     ajv "^6.11.0"
 

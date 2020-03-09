@@ -35,27 +35,6 @@ export class LegacyProjectServices {
     ]
   }
 
-  static getFunctionProjectTemplate() {
-    return {
-      name: 'Function project boilerplate',
-      path: path.join(TEMPLATE_PATH, 'function-boilerplate.tar.gz')
-    }
-  }
-
-  static getWebpageProjectTemplate() {
-    return {
-      name: 'Webpage project boilerplate',
-      path: path.join(TEMPLATE_PATH, 'minimal-react-typescript-package.tar.gz')
-    }
-  }
-
-  static getLibraryProjectTemplate() {
-    return {
-      name: 'Library project boilerplate',
-      path: path.join(TEMPLATE_PATH, 'type-generation.tar.gz')
-    }
-  }
-
   getProjectData(): ProjectData {
 
     try {

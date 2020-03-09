@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 
 import { Button, ButtonGroup } from '@skedulo/sked-ui'
 import { FunctionProject, MobilePageProject, WebPageProject, LibraryProject } from '@skedulo/packaging-internal-commons'
-import { PackageService, IPreDeployErrors, AllProjectService } from '../../service-layer/package/PackageService'
+import { PackageService, IPreDeployErrors, AllProjectService, isMobileProjectService } from '../../service-layer/package/PackageService'
 import { ProjectService } from '../../service-layer/package/ProjectService'
 import { MainServices } from '../../service-layer/MainServices'
 import { ContentLayout } from '../Layout'
@@ -19,7 +19,7 @@ interface Props {
 
 interface State {
   inProgress: boolean
-  activeProject: ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject> | null
+  activeProjects: (ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject>)[] | null
   dependenciesModalDependant:  AllProjectService | null
   preDeployCheckErrors: IPreDeployErrors | null
   deployStatus: string | null
@@ -31,7 +31,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
 
     this.state = {
       inProgress: false,
-      activeProject: null,
+      activeProjects: null,
       dependenciesModalDependant: null,
       preDeployCheckErrors: null,
       deployStatus: null
@@ -40,13 +40,13 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
 
   componentDidUpdate() {
     const { dependenciesModalDependant } = this.state
-    const { lambdas, webpages, libraries } = this.props.package
+    const { lambdas, webpages, libraries, mobilepages } = this.props.package
 
     if (!dependenciesModalDependant) {
       return
     }
 
-    const currentDependant = [...lambdas, ...webpages, ...libraries]
+    const currentDependant = [...lambdas, ...webpages, ...libraries, ...mobilepages]
       .find(proj => proj.project.name === dependenciesModalDependant.project.name)
 
     if (!currentDependant) {
@@ -61,10 +61,24 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
     }
   }
 
-  back = () => this.setState({ activeProject: null })
+  back = () => this.setState({ activeProjects: null })
   closeModal = () => this.setState({ dependenciesModalDependant: null })
 
-  selectProject = (selectedProject: AllProjectService) => () => this.setState({ activeProject: selectedProject })
+  selectProject = (selectedProject: AllProjectService) => () => {
+    const { package: pkg } = this.props
+
+    const parentProjects = isMobileProjectService(selectedProject)
+      ? [selectedProject, pkg.lambdas.find(x => x.project.name === selectedProject.project.lifecycleFunction)!] 
+      : [selectedProject]
+
+    const projectDependencies = (selectedProject.project.dependencies || []).map(x => x.dependencyName)
+    const dependencyProjects = projectDependencies.length
+      ? pkg.libraries.filter(x => projectDependencies.includes(x.project.name))
+      : []
+  
+    this.setState({ activeProjects: [...parentProjects, ...dependencyProjects ] })
+  }
+
   selectProjectDependencies = (selectedProject: AllProjectService) => () => this.setState({ dependenciesModalDependant: selectedProject })
 
   setDeployStatus = (status: string) => this.setState({ deployStatus: status })
@@ -103,7 +117,6 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
     }
 
     return projects.map(p => {
-
       const { name, description } = p.project
 
       return (
@@ -128,12 +141,12 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
 
   renderActiveProject = () => {
     const { package: packageService } = this.props
-    const selectedProject = this.state.activeProject!
+    const selectedProjects = this.state.activeProjects!
 
     return (
       <ActiveProjectWrapper
         packageService={ packageService }
-        activeProjects={ [selectedProject] }
+        activeProjects={ selectedProjects }
         back={ this.back }
       />
     )
@@ -157,7 +170,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
   )
 
   renderConfigurePackageProjectLists = () => {
-    const { lambdas, webpages, libraries } = this.props.package
+    const { lambdas, webpages, libraries, mobilepages } = this.props.package
 
     return (
       <>
@@ -170,10 +183,17 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
         </div>
         <div className="card">
           <div className="card__header">
-            Web Pages
+            Connected Pages
             <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateWebpageProject) } disabled={ this.state.inProgress }>Add Connected Page</Button>
           </div>
           { this.renderProjectList(webpages) }
+        </div>
+        <div className="card">
+          <div className="card__header">
+            Mobile Connected Pages
+            <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateMobilePageProject) } disabled={ this.state.inProgress }>Add Mobile Connected Page</Button>
+          </div>
+          { this.renderProjectList(mobilepages) }
         </div>
         <div className="card">
           <div className="card__header">
@@ -201,7 +221,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
   }
 
   renderContentView = () => {
-    const { activeProject } = this.state
+    const { activeProjects: activeProject } = this.state
 
     return !!activeProject
       ? this.renderActiveProject()

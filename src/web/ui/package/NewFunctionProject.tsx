@@ -21,8 +21,8 @@ import {
 import { FunctionProjectService } from '../../service-layer/package/FunctionProjectService'
 import { ContentLayout } from '../Layout'
 import { FormHelper } from '../form-utils'
-import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
 import { PackageService } from '../../service-layer/package/PackageService'
+import { getFunctionProjectTemplate } from '../../service-layer/package/template-utils'
 
 export interface IProps {
   back: () => void
@@ -59,7 +59,7 @@ const VALIDATION_CONFIG: FormConfig = {
     isRegexMatch: {
       regex: /^[a-z0-9_]+$/i,
       message: 'Please enter a valid alphanumeric project name (use underscore)'
-    }
+    } as any
   },
   description: {
     isRequired: {
@@ -78,7 +78,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
       progress: false,
       errorMsg: '',
       project: {
-        defaultTemplate: LegacyProjectServices.getFunctionProjectTemplate()
+        defaultTemplate: getFunctionProjectTemplate()
       },
       projectMetadata: NEW_FUNCTION_PRJ_METADATA
     }
@@ -128,7 +128,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
     }
   }
 
-  updateAndValidateField = (fieldName: 'name' | 'description', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
+  updateAndValidateField = (fieldName: 'name' | 'description', fieldUpdate: SkedFormChildren<FunctionProjectForm>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
     this.projectMetadataForm.setMap(fieldName)(e)
     fieldUpdate(fieldName)(e.currentTarget.value)
   }

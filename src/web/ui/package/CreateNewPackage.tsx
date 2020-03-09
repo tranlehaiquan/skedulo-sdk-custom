@@ -57,7 +57,7 @@ const FORM_CONFIG: FormConfig = {
     isRegexMatch: {
       regex: /^[a-z0-9]+$/i,
       message: 'Please enter a valid alpha-numeric package name'
-    }
+    } as any
   },
   summary: {
     isRequired: {
@@ -110,7 +110,7 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
     }
   }
 
-  selectDirectory = (fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => async () => {
+  selectDirectory = (fieldUpdate: SkedFormChildren<PackageForm>['customFieldUpdate']) => async () => {
     const { setAndValidateDirectory } = this
     const directoryResult = await MainServices.selectDirectory()
     const selectedPath = _.head(directoryResult.filePaths) || ''
@@ -128,12 +128,12 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
     }
   }
 
-  setAndValidateDirectory = (fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate'], selectedPath: string) => {
+  setAndValidateDirectory = (fieldUpdate: SkedFormChildren<PackageForm>['customFieldUpdate'], selectedPath: string) => {
     this.packageForm.set('selectedDirectory', selectedPath)
     fieldUpdate('directory')(selectedPath)
   }
 
-  updateAndValidateField = (fieldName: 'name' | 'summary', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
+  updateAndValidateField = (fieldName: 'name' | 'summary', fieldUpdate: SkedFormChildren<PackageForm>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
     this.packageMetadataForm.setMap(fieldName)(e)
     fieldUpdate(fieldName)(e.currentTarget.value)
   }

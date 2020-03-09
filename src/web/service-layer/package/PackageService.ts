@@ -1,20 +1,19 @@
 import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as tar from 'tar'
-import * as crypto from 'crypto'
 import { mapValues, keyBy, omitBy, flatten } from 'lodash'
 
 import { Option, Lens } from '@skedulo/sked-commons'
-import { Package, validateFor, ProjectDependency, FunctionProject, MobilePageProject, WebPageProject, LibraryProject } from '@skedulo/packaging-internal-commons'
+import { Package, validateFor, ProjectDependency, FunctionProject, MobilePageProject, WebPageProject, LibraryProject, ProjectType } from '@skedulo/packaging-internal-commons'
 
+import { getFileHash, createTarBall } from '../../utils/tar'
 import { SessionData } from '../types'
 import { NetworkingService } from '../NetworkingService'
 import { FunctionProjectService } from './FunctionProjectService'
 import { MobilePageProjectService } from './MobilePageProjectService'
 import { WebPageProjectService } from './WebPageProjectService'
 import { LibraryProjectService } from './LibraryProjectService'
-import { registerNodeDependencyLink, registerLocalNodeDependency, isNodeDependency } from './dependency-utils'
+import { registerLocalNodeDependency, isNodeDependency } from './dependency-utils'
 import { PACKAGE_FILE, REQUIRED_PROJECT_SCRIPTS } from './constants'
 import { ProjectService } from './ProjectService'
 
@@ -32,6 +31,10 @@ interface SourceUploaded {
 }
 
 export type AllProjectService = ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject>
+
+export function isMobileProjectService(project: AllProjectService): project is ProjectService<MobilePageProject> {
+  return project.project.type === ProjectType.MobilePage
+}
 
 export class InvalidPackage extends Error { }
 
@@ -74,10 +77,6 @@ export class PackageService {
   async linkDependencies() {
     const projectDependencies = this.getDependenciesForPackage()
 
-    // Register all libraries for linking
-    const libraryPaths = this.libraries.map(l => path.join(this.packagePath, l.pathName))
-    await registerNodeDependencyLink(libraryPaths)
-
     const allNodeDependencyLinks = flatten(Object.keys(projectDependencies).map(key => {
       const { dependencies, dependantPathName } = projectDependencies[key]
       const fullDependantPath = path.join(this.packagePath, dependantPathName)
@@ -114,8 +113,11 @@ export class PackageService {
     this.lambdas = functions ? functions.items.map(c => FunctionProjectService.at(this.packagePath, c, this.session)) : []
     this.libraries = libraries? libraries.items.map(c => LibraryProjectService.at(this.packagePath, c, this.session)) : []
 
-    // Validate dependencies
-    this.evaluatePackageDependencies()
+    // Validate standard library dependencies
+    this.evaluateLibraryDependencies()
+
+    // Validate interproject dependencies (eg mobile page -> lifecycle function)
+    this.evaluateInterprojectDependencies()
     
     return packageMetadata
   }
@@ -138,7 +140,20 @@ export class PackageService {
     })), x => !x.dependencies.length)
   }
 
-  evaluatePackageDependencies() {
+  evaluateInterprojectDependencies() {
+    // Validate that the associated functions for mobile pages exist
+    const allFunctionNames = this.lambdas.map(λ => λ.project.name)
+
+    this.mobilepages.forEach(service => {
+      const functionDependency = service.project.lifecycleFunction
+
+      if (!allFunctionNames.includes(functionDependency)) {
+        throw new Error(`Function dependency ${functionDependency} for project ${service.project.name} does not exist.`)
+      }
+    })
+  }
+
+  evaluateLibraryDependencies() {
     const projectsWithDependencies = [...this.webpages, ...this.mobilepages, ...this.lambdas, ...this.libraries]
       .reduce((result, currService) => ({
         ...result,
@@ -163,6 +178,44 @@ export class PackageService {
         }
       })
     })
+  }
+
+  addPackageComponents(newPackageComponents: Package['components']) {
+    const mergedComponents = _.mapValues(newPackageComponents, (value, key: keyof Package['components']) => {
+      const existingComponents = this.packageMetadata.components[key]?.items
+
+      if (!existingComponents) {
+        return value
+      } else {
+        return {
+          items: _.uniq(value!.items.concat(existingComponents))
+        }
+      }
+    })
+
+    const updatedMetadata = {
+      ...this.packageMetadata,
+      components: {
+        ...this.packageMetadata.components,
+        ...mergedComponents
+      }
+    }
+
+    // Write metadata to package file
+    PackageService.createPackageMetadata(this.packagePath, updatedMetadata)
+
+    // Update metadata for this class instance
+    this.packageMetadata = updatedMetadata
+  }
+
+  getAllProjectNames() {
+    const components = this.packageMetadata.components
+
+    return _.flatten(Object
+      .keys(components)
+      .map((key: keyof Package['components']) => components[key])
+      .filter(list => !!list!['items'])
+      .map(list => list!['items']))
   }
 
   static createPackageMetadata(packagePath: string, packageData: Package) {
@@ -212,16 +265,6 @@ export class PackageService {
         name, hash, action: 'deploy'
       }
     })
-  }
-
-  private getAllProjectNames() {
-    const components = this.packageMetadata.components
-
-    return _.flatten(Object
-      .keys(components)
-      .map((key: keyof Package['components']) => components[key])
-      .filter(list => !!list!['items'])
-      .map(list => list!['items']))
   }
 
   private checkForRequiredScripts(projectNames: string[], deployErrors: IPreDeployErrors) {
@@ -279,27 +322,6 @@ export class PackageService {
   }
 }
 
-function createTarBall(destFolder: string, destFile: string, filter: (path: string) => boolean) {
-
-  return tar
-    .c({
-      file: destFile,
-      cwd: destFolder,
-      gzip: true,
-      filter
-    }, ['.'])
-    .then(() => destFile)
-}
-
 function tarballFileFilter(filePath: string) {
   return !(/node_modules|pre_deploy_assets|__shared|__generated|.git|dist/.test(filePath))
-}
-
-
-function getFileHash(file: string) {
-  const hash = crypto.createHash('sha256')
-  const f = fs.readFileSync(file)
-  hash.update(f)
-
-  return hash.digest('hex')
 }

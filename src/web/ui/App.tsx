@@ -11,20 +11,21 @@ import { ProjectData, SessionData, UserMetadata } from '../service-layer/types'
 import { setUpSSLDocLocation, sslCertsPresent } from '../utils/ssl'
 import { PackageService } from '../service-layer/package/PackageService'
 import { debugDevStack } from '../utils/shell'
+import { enumUnreachable } from '../utils/types'
 import { ActiveLegacyProject } from './legacy/ActiveLegacyProject'
-import { ContentLayout, HeaderLayout } from './Layout'
-import { Markdown } from './Markdown'
 import { NewConnectedPageProject } from './legacy/NewConnectedPageProject'
 import { NewFunctionProject } from './package/NewFunctionProject'
 import { NewWebPageProject } from './package/NewWebPageProject'
 import { CreateNewPackage } from './package/CreateNewPackage'
 import { ConfigurePackage } from './package/ConfigurePackage'
 import { SelectProject } from './legacy/SelectProject'
-import { SSLHelp } from './SSLHelp'
-
 import { SelectPackage } from './package/SelectPackage'
 import { NewLibraryProject } from './package/NewLibraryProject'
 import { DebugState, DebugInstall } from './DebugInstall'
+import { NewMobilePageProject } from './package/NewMobilePageProject'
+import { ContentLayout, HeaderLayout } from './Layout'
+import { Markdown } from './Markdown'
+import { SSLHelp } from './SSLHelp'
 
 
 export enum View {
@@ -41,6 +42,7 @@ export enum View {
   CreateFunctionProject,
   CreateWebpageProject,
   CreateLibraryProject,
+  CreateMobilePageProject,
   CreatePackage,
   ConfigurePackage,
   LoadingPackage,
@@ -50,10 +52,6 @@ export enum View {
   LegacyCreateCPProject,
   LegacySelectCPProject,
   LegacyActiveCPProject
-}
-
-function enumUnreachable(_x: never): never {
-  throw new Error('This will never throw since it would cause a type-check error during the compile step')
 }
 
 export interface IState {
@@ -137,22 +135,28 @@ export class App extends React.Component<{}, IState> {
 
   setView = (currentView: IState['currentView']) => () => this.setState({ currentView })
 
-  refreshPackage = (goToConfiguration: boolean) => {
+  refreshPackage = async (goToConfiguration: boolean, refreshLinks: boolean = false) => {
     const { selectedPackage, session, currentView: view } = this.state
-    if (!!selectedPackage) {
-      try {
-        // Re-evaluate package metadata
-        const refreshedPackage = PackageService.at(selectedPackage.packagePath, session!)
+    if (!selectedPackage) {
+      return
+    }
+    
+    try {
+      // Re-evaluate package metadata
+      const refreshedPackage = PackageService.at(selectedPackage.packagePath, session!)
 
-        this.setState({
-          currentView: goToConfiguration ? View.ConfigurePackage : view,
-          selectedPackage: refreshedPackage
-        })
-      } catch(error) {
-        MainServices.showErrorMessage('Package Error', error)
-
-        this.setState({ currentView: View.ManagePackages })
+      if (refreshLinks) {
+        await refreshedPackage.load()
       }
+
+      this.setState({
+        currentView: goToConfiguration ? View.ConfigurePackage : view,
+        selectedPackage: refreshedPackage
+      })
+    } catch(error) {
+      MainServices.showErrorMessage('Package Error', error)
+
+      this.setState({ currentView: View.ManagePackages })
     }
   }
 
@@ -457,7 +461,8 @@ some features of package development may not work as expected.  Error: ${error}`
         return <NewWebPageProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
       case View.CreateLibraryProject:
         return <NewLibraryProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
-
+      case View.CreateMobilePageProject:
+        return <NewMobilePageProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
       
       // Legacy Pages
       case View.LegacyManageConnectedPages:

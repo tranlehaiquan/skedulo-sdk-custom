@@ -1,11 +1,11 @@
 import * as path from 'path'
 import * as fs from 'fs'
 
+import { keyBy } from 'lodash'
 import { LocalNodeDependencyOptions, ProjectDependencyType, NodeProjectDependency, ProjectDependency, BaseCodeProject } from '@skedulo/packaging-internal-commons'
 
 import { shellExec } from '../../utils/shell'
 import { PROJECT_FILE } from './constants'
-import { keyBy } from 'lodash'
 
 export interface NodeDepApplicationInfo {
   dependantPath: string
@@ -19,9 +19,6 @@ export interface NodeDepRemovalInfo {
   dependencyName: string
 }
 
-export const registerNodeDependencyLink = (dependencyPaths: string[]) => Promise
-  .all(dependencyPaths.map(yarnRegisterLinkCommand))
-
 export async function registerLocalNodeDependency(dependencyInfo: NodeDepApplicationInfo) {
   // Register a local dependency between both projects
   await yarnLocalAddCommand(
@@ -29,15 +26,9 @@ export async function registerLocalNodeDependency(dependencyInfo: NodeDepApplica
     dependencyInfo.dependencyPath,
     dependencyInfo.options.devDependency
   )
-
-  // Link the dependency (note: if this has already been done, this will do nothing)
-  await yarnUseLinkCommand(dependencyInfo.dependencyName, dependencyInfo.dependantPath)
 }
 
 export async function deregisterLocalNodeDependency(dependencyInfo: NodeDepRemovalInfo) {
-  // Unlink the dependency (note: if this has already been done, this will do nothing)
-  await yarnUnlinkCommand(dependencyInfo.dependencyName, dependencyInfo.dependantPath)
-
   // Unregister a local dependency between both projects
   await yarnLocalRemoveCommand(
     dependencyInfo.dependantPath,
@@ -116,7 +107,7 @@ function yarnLocalAddCommand(dependantPath: string, dependencyPath: string, devD
    * a different environment (i.e the build container in ECS)
    */
   const relativePathToDependency = path.relative(dependantPath, dependencyPath)
-  const addCommandBase = `yarn add "file:${relativePathToDependency}"`
+  const addCommandBase = `yarn add "link:${relativePathToDependency}"`
   const addCommand = devDependency
     ? addCommandBase.concat(' --dev')
     : addCommandBase
@@ -126,16 +117,4 @@ function yarnLocalAddCommand(dependantPath: string, dependencyPath: string, devD
 
 function yarnLocalRemoveCommand(dependantPath: string, dependencyName: string) {
   return shellExec(`yarn remove ${dependencyName}`, dependantPath, {}, true).toPromise()
-}
-
-function yarnRegisterLinkCommand(dependencyPath: string) {
-  return shellExec('yarn link', dependencyPath, {}, true).toPromise()
-}
-
-function yarnUseLinkCommand(dependencyName: string, dependantPath: string) {
-  return shellExec(`yarn link "${dependencyName}"`, dependantPath, {}, true).toPromise()
-}
-
-function yarnUnlinkCommand(dependencyName: string, dependantPath: string) {
-  return shellExec(`yarn unlink "${dependencyName}"`, dependantPath, {}, true).toPromise()
 }

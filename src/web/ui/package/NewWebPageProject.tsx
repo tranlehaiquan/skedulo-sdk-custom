@@ -5,7 +5,6 @@ import {
   FormElementWrapper,
   FormInputElement,
   FormLabel,
-  // @ts-ignore
   FormConfig,
   SkedFormChildren,
   ButtonGroup,
@@ -20,11 +19,13 @@ import {
   WebPageHook,
   ProjectType
 } from '@skedulo/packaging-internal-commons'
-import { ContentLayout } from '../Layout'
-import { FormHelper } from '../form-utils'
-import { LegacyProjectServices } from '../../service-layer/LegacyProjectServices'
+
 import { WebPageProjectService } from '../../service-layer/package/WebPageProjectService'
 import { PackageService } from '../../service-layer/package/PackageService'
+import { getWebpageProjectTemplate } from '../../service-layer/package/template-utils'
+
+import { ContentLayout } from '../Layout'
+import { FormHelper } from '../form-utils'
 
 export interface IProps {
   back: () => void
@@ -42,11 +43,6 @@ export interface IState {
     defaultTemplate: { name: string, path: string }
   }
   projectMetadata: WebPageProject
-}
-
-interface WebpageProjectForm {
-  name: string
-  description: string
 }
 
 export const NEW_WEBPAGE_PRJ_METADATA: WebPageProject = {
@@ -87,7 +83,7 @@ const VALIDATION_CONFIG: FormConfig = {
     isRegexMatch: {
       regex: /^[a-z0-9_]+$/i,
       message: 'Please enter a valid alphanumeric project name (use underscore)'
-    }
+    } as any
   },
   description: {
     isRequired: {
@@ -101,7 +97,7 @@ const VALIDATION_CONFIG: FormConfig = {
     isRegexMatch: {
       regex: /^[a-z0-9-_]+$/i,
       message: 'Please enter a valid project url'
-    }
+    } as any
   },
   renderType: {
     isRequired: {
@@ -131,7 +127,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
         renderType: null,
         embeddedHook: WebPageHook.JobDetails,
         showInNavBar: false,
-        defaultTemplate: LegacyProjectServices.getWebpageProjectTemplate()
+        defaultTemplate: getWebpageProjectTemplate()
       },
       projectMetadata: NEW_WEBPAGE_PRJ_METADATA
     }
@@ -207,7 +203,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     }
   }
 
-  updateAndValidateField = (fieldName: 'name' | 'description' | 'url', fieldUpdate: SkedFormChildren<FormConfig>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
+  updateAndValidateField = (fieldName: 'name' | 'description' | 'url', fieldUpdate: SkedFormChildren<WebPageProject>['customFieldUpdate']) => (e: React.FormEvent<HTMLInputElement>) => {
     this.projectMetadataForm.setMap(fieldName)(e)
     fieldUpdate(fieldName)(e.currentTarget.value)
   }
@@ -247,15 +243,11 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     const { projectMetadataForm, updateAndValidateField, renderWebpageTypes, renderEmbeddedHooks, renderShowInNavBar, createProject } = this
     const { projectMetadata, progress, project } = this.state
     const { back } = this.props
-    const initialFormValues: WebpageProjectForm = {
-      name: '',
-      description: ''
-    }
 
     return (
       <SkedFormValidation
         config={ VALIDATION_CONFIG }
-        initialValues={ initialFormValues }
+        initialValues={ NEW_WEBPAGE_PRJ_METADATA }
         onSubmit={ createProject }
       >
         {
@@ -276,7 +268,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
               { renderWebpageTypes(isValidAfterModified) }
               { project.renderType && project.renderType === WebPageType.Embedded && renderEmbeddedHooks(isValidAfterModified) }
               { renderShowInNavBar() }
-              <ButtonGroup className="sk-button-group">
+              <ButtonGroup>
                 <Button buttonType="transparent" onClick={ back }>
                   Cancel
                   </Button>
