@@ -30,6 +30,7 @@ export interface IState {
 
 interface MobilePageProjectForm {
   name: string
+  label: string
   functionName: string
   description: string
   suiteType: MobilePageBoilerplateSuite | null
@@ -38,6 +39,7 @@ interface MobilePageProjectForm {
 function convertFormToProjectMetadata(form: MobilePageProjectForm): MobilePageProject {
   return {
     name: form.name,
+    label: form.label,
     description: form.description,
     type: ProjectType.MobilePage,
     context: 'job',
@@ -58,6 +60,7 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
 
   DEFAULT_FORM_VALUES: MobilePageProjectForm = {
     name: '',
+    label: '',
     description: '',
     functionName: '',
     suiteType: null
@@ -65,6 +68,11 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
   
   VALIDATION_CONFIG: FormConfig = {
     name: PROJECT_NAME_VALIDATION,
+    label: {
+      isRequired: {
+        message: 'Please enter a display label'
+      }
+    },
     functionName: FUNCTION_PROJECT_NAME_VALIDATION,
     suiteType: {
       isRequired: {
@@ -143,6 +151,11 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
                 <FormElementWrapper name="name" size="full" className="text-left" validation={ customProjectNameValidation(fields.name, fields) || isValidAfterModified('name') }>
                   <FormLabel className="span-label">Name</FormLabel>
                   <FormInputElement name="name" type="text" value={ fields.name } />
+                </FormElementWrapper>
+
+                <FormElementWrapper name="label" size="full" className="text-left" validation={ isValidAfterModified('label') }>
+                  <FormLabel className="span-label">Display Label (as displayed in mobile app)</FormLabel>
+                  <FormInputElement name="label" type="text" value={ fields.label } />
                 </FormElementWrapper>
 
                 <FormElementWrapper name="description" size="full" className="text-left" validation={ isValidAfterModified('description') }>
