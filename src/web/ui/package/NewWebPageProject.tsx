@@ -30,7 +30,7 @@ import { FormHelper } from '../form-utils'
 export interface IProps {
   back: () => void
   selectedPackage: PackageService
-  refreshPackage: (goToConfiguration: boolean) => void
+  refreshPackage: (goToConfiguration: boolean) => Promise<void>
 }
 
 export interface IState {

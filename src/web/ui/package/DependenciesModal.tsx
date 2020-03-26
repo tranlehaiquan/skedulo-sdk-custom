@@ -10,7 +10,7 @@ import { MainServices } from '../../service-layer/MainServices'
 interface Props {
   package: PackageService
   selectedProject: AllProjectService
-  refreshPackage: (goToConfiguration: boolean) => void
+  refreshPackage: (goToConfiguration: boolean) => Promise<void>
   closeModal: () => void
 }
 

@@ -23,7 +23,7 @@ import { PROJECT_NAME_VALIDATION, PROJECT_DESCRIPTION_VALIDATION } from './valid
 export interface IProps {
   back: () => void
   selectedPackage: PackageService
-  refreshPackage: (goToConfiguration: boolean) => void
+  refreshPackage: (goToConfiguration: boolean) => Promise<void>
 }
 
 export interface IState {

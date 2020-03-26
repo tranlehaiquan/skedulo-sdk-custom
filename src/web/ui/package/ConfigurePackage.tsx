@@ -13,7 +13,7 @@ import { DependenciesModal } from './DependenciesModal'
 
 interface Props {
   package: PackageService
-  refreshPackage: (goToConfiguration: boolean) => void
+  refreshPackage: (goToConfiguration: boolean) => Promise<void>
   setView: (view: View) => () => void
 }
 

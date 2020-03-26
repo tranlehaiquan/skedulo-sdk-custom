@@ -27,7 +27,7 @@ import { getFunctionProjectTemplate } from '../../service-layer/package/template
 export interface IProps {
   back: () => void
   selectedPackage: PackageService
-  refreshPackage: (goToConfiguration: boolean) => void
+  refreshPackage: (goToConfiguration: boolean) => Promise<void>
 }
 
 export interface IState {
@@ -100,7 +100,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
     return Lens('components', 'functions', 'items').over(_items => [ ...items, projectMetadata.name ])(metadata) as Package
   }
 
-  createProject = () => {
+  createProject = async () => {
     const { getUpdatedPackageMetadata } = this
     const { projectMetadata, project } = this.state
     const { selectedPackage, refreshPackage } = this.props
@@ -111,15 +111,14 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
     this.setState({ progress: true })
 
     try {
-      return FunctionProjectService
+      await FunctionProjectService
         .create(pkgDirectory, projectMetadata.name, defaultTemplate.path, projectMetadata, {} as any)
-        .then(() => {
-          // Update the package metadata file
-          PackageService.createPackageMetadata(pkgDirectory, getUpdatedPackageMetadata())
 
-          // Refresh package in state (this will also refresh the view)
-          refreshPackage(true)
-        })
+      // Update the package metadata file
+      PackageService.createPackageMetadata(pkgDirectory, getUpdatedPackageMetadata())
+
+      // Refresh package in state (this will also refresh the view)
+      await refreshPackage(true)
     } catch (error) {
       this.setState({
         progress: false,
