@@ -12,6 +12,8 @@ export class FunctionProjectService extends ProjectService<FunctionProject> {
   }
 
   static async create(packagePath: string, projectName: string, template: string, projectData: FunctionProject, session: SessionData): Promise<FunctionProjectService> {
+    validateFor<FunctionProject>('FunctionProject', projectData)
+
     await this.setupProject(packagePath, projectName, template, projectData)
 
     return this.at(packagePath, projectName, session)

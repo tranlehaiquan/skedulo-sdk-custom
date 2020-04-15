@@ -11,6 +11,8 @@ export class MobilePageProjectService extends ProjectService<MobilePageProject> 
   }
 
   static async create(packagePath: string, projectName: string, template: string, projectData: MobilePageProject, session: SessionData): Promise<MobilePageProjectService> {
+    validateFor<MobilePageProject>('MobilePageProject', projectData)
+
     await this.setupProject(packagePath, projectName, template, projectData)
 
     return this.at(packagePath, projectName, session)

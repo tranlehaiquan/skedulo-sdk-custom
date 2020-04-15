@@ -14,6 +14,8 @@ export class WebPageProjectService extends ProjectService<WebPageProject> {
   }
 
   static async create(packagePath: string, projectName: string, template: string, projectData: WebPageProject, session: SessionData): Promise<WebPageProjectService> {
+    validateFor<WebPageProject>('WebPageProject', projectData)
+
     await this.setupProject(packagePath, projectName, template, projectData)
 
     return this.at(packagePath, projectName, session)

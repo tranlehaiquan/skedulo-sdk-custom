@@ -13,6 +13,8 @@ export class LibraryProjectService extends ProjectService<LibraryProject> {
   }
 
   static async create(packagePath: string, projectName: string, template: string, projectData: LibraryProject, session: SessionData): Promise<LibraryProjectService> {
+    validateFor<LibraryProject>('LibraryProject', projectData)
+
     await this.setupProject(packagePath, projectName, template, projectData)
 
     // Modify package.json to use name of project as the library name
