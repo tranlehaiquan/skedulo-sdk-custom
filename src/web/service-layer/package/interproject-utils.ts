@@ -41,7 +41,7 @@ async function createJobProductsMobileSuite(packageService: PackageService, core
     // Only create the shared library if it does not yet exist
     const libraryMetadata: LibraryProject = {
       name: JP_LIBRARY_NAME,
-      description: 'Shared types for Job Products mobile page suite',
+      description: 'Shared types for Job Products mobile extension suite',
       type: ProjectType.Library
     }
 
@@ -65,7 +65,7 @@ async function createJobProductsMobileSuite(packageService: PackageService, core
   // Create the lifecycle function
   const functionMetadata: FunctionProject = {
     name: coreProjectData.lifecycleFunction,
-    description: 'Lifecycle function for Job Products mobile page suite',
+    description: 'Lifecycle function for Job Products mobile extension suite',
     type: ProjectType.Function,
     runtime: NodeVersion.nodejs12,
     dependencies: [libraryDependencyData]
@@ -115,7 +115,7 @@ async function createJobAttachmentsMobileSuite(packageService: PackageService, c
   // Create the lifecycle function
   const functionMetadata: FunctionProject = {
     name: coreProjectData.lifecycleFunction,
-    description: 'Lifecycle function for Job Attachments mobile page suite',
+    description: 'Lifecycle function for Job Attachments mobile extension suite',
     type: ProjectType.Function,
     runtime: NodeVersion.nodejs12
   }

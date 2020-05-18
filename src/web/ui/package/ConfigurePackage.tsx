@@ -183,15 +183,15 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
         </div>
         <div className="card">
           <div className="card__header">
-            Connected Pages
-            <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateWebpageProject) } disabled={ this.state.inProgress }>Add Connected Page</Button>
+            Web Extensions
+            <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateWebpageProject) } disabled={ this.state.inProgress }>Add Web Extension</Button>
           </div>
           { this.renderProjectList(webpages) }
         </div>
         <div className="card">
           <div className="card__header">
-            Mobile Connected Pages
-            <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateMobilePageProject) } disabled={ this.state.inProgress }>Add Mobile Connected Page</Button>
+            Mobile Extensions
+            <Button buttonType="secondary" className="float-right" onClick={ this.props.setView(View.CreateMobilePageProject) } disabled={ this.state.inProgress }>Add Mobile Extension</Button>
           </div>
           { this.renderProjectList(mobilepages) }
         </div>

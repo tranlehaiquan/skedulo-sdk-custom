@@ -47,7 +47,7 @@ export enum View {
   ConfigurePackage,
   LoadingPackage,
 
-  // Legacy Views (Connected Pages)
+  // Legacy Views (Standalone Web Extensions)
   LegacyManageConnectedPages,
   LegacyCreateCPProject,
   LegacySelectCPProject,
@@ -210,7 +210,7 @@ some features of package development may not work as expected.  Error: ${error}`
   selectConnectedPageProject = (selectedProject: string) => {
     if (!fs.existsSync(path.join(selectedProject, '/sked.proj.json'))) {
       this.setState({
-        errorMessage: 'The folder you have selected does not contain a valid Connected Pages project file. Please select another.'
+        errorMessage: 'The folder you have selected does not contain a valid Standalone Web Extensions project file. Please select another.'
       })
     } else {
       this.setState({
@@ -276,7 +276,7 @@ some features of package development may not work as expected.  Error: ${error}`
     } else if (isConnecting) {
       message = 'Connecting ...'
     } else {
-      message = 'To begin, enable "Developer Mode" from Connected Page settings in the Skedulo Web App'
+      message = 'To begin, enable "Developer Mode" from Extensions settings in the Skedulo Web App'
     }
 
     return (
@@ -290,7 +290,7 @@ some features of package development may not work as expected.  Error: ${error}`
         <p>To begin, select one of the following options.</p>
         <ButtonGroup>
           <Button buttonType="primary" onClick={ this.setView(View.ManagePackages) }>Manage Package</Button>
-          <Button buttonType="secondary" onClick={ this.setView(View.LegacyManageConnectedPages) }>Manage Connected Pages</Button>
+          <Button buttonType="secondary" onClick={ this.setView(View.LegacyManageConnectedPages) }>Manage Standalone Web Extensions</Button>
         </ButtonGroup>
       </div>
     )
@@ -311,7 +311,7 @@ some features of package development may not work as expected.  Error: ${error}`
   renderConnectedPageActionButtons = () => {
     return (
       <div>
-        <p>Select an action to manage Connected Pages.</p>
+        <p>Select an action to manage Standalone Web Extensions.</p>
         <ButtonGroup>
           <Button buttonType="primary" onClick={ this.setView(View.LegacyCreateCPProject) }>Create new project</Button>
           <Button buttonType="secondary" onClick={ this.setView(View.LegacySelectCPProject) }>Select existing project</Button>
@@ -357,7 +357,7 @@ some features of package development may not work as expected.  Error: ${error}`
   renderManageConnectedPages = () => {
     return (
       <ContentLayout className="content__center--large" centered>
-        <h1>Manage Connected Pages</h1>
+        <h1>Manage Standalone Web Extensions</h1>
         { this.renderConnectedPageActionButtons() }
       </ContentLayout>
     )
@@ -390,7 +390,7 @@ some features of package development may not work as expected.  Error: ${error}`
         <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
 
         <p>
-          In order to run the Connected Pages SDK, you will need to set up your dev environment with a self-signed SSL Certificate (must be X.509 v3) and
+          In order to run the Packages SDK, you will need to set up your dev environment with a self-signed SSL Certificate (must be X.509 v3) and
           follow a few steps to allow your Chrome browser to trust it. This is due to service workers requiring a trusted certificate to work correctly which
           are used during the development of your app.
         </p>

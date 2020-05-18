@@ -101,7 +101,7 @@ export class NewConnectedPageProject extends React.PureComponent<IProps, IState>
     return (
       <ContentLayout centered>
 
-        <h1>Create Connected Page</h1>
+        <h1>Create Standalone Web Extension</h1>
 
         <div className="padding-top padding-bottom">
           <label className="required">

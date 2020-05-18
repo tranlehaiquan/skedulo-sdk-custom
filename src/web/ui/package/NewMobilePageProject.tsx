@@ -181,7 +181,7 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
                     Cancel
                   </Button>
                   <Button buttonType="primary" loading={ progress } onClick={ submit }>
-                    Create Mobile Page Suite
+                    Create Mobile Extension Suite
                   </Button>
                 </ButtonGroup>
               </React.Fragment>
@@ -198,7 +198,7 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
 
     return (
       <ContentLayout centered>
-        <h1>Create Mobile Connected Page Project</h1>
+        <h1>Create Mobile Extension Project</h1>
         { errorMsg && <div className="callout warning">{ errorMsg }</div> }
 
         <div className="padding-top padding-bottom">

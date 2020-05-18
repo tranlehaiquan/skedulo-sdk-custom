@@ -1,4 +1,4 @@
-# Connected Pages SSL Setup
+# Packages SSL Setup
 
 ## Windows setup
 

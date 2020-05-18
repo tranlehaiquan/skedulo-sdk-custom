@@ -99,7 +99,7 @@ export class ActiveLegacyProject extends React.PureComponent<IProps, IState> {
       const url = `${this.props.session.origin}/c-dev`
       return <React.Fragment><p>Navigate to the following link to view the page <br /><a className="blue-link" onClick={ () => openUrl(url) }>{ url }</a></p></React.Fragment>
     } else {
-      return 'Select "start development" to begin building your connected page'
+      return 'Select "start development" to begin building your web extension'
     }
   }
 
