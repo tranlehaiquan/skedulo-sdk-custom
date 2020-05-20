@@ -129,7 +129,8 @@ export class LegacyProjectServices {
   }
 
   startCoverage() {
-    return shellExec('yarn coverage', this.project).share()
+    // Force jest to run jest in coverage mode.  It seems to be using --watch by default with the latest Node.
+    return shellExec('yarn coverage --coverage', this.project).share()
   }
 
   startBuild() {
