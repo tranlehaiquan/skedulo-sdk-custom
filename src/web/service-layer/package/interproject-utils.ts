@@ -14,7 +14,7 @@ export enum MobilePageBoilerplateSuite {
 
 // The name referenced amongst the job products suite, still not exactly sure how to make
 // this completely dynamic as the function and view boilerplate reference this library by its name
-const JP_LIBRARY_NAME = 'mcp-jp-types'
+const JP_LIBRARY_NAME = 'jp-typegen-library'
 
 export function createMobilePageSuite(
   suite: MobilePageBoilerplateSuite,

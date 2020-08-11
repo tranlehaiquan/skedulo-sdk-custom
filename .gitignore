@@ -3,3 +3,4 @@ app/
 schema.definition.json
 .cache/
 node_modules
+.DS_STORE
