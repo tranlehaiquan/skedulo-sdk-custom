@@ -21,6 +21,11 @@ export interface IPreDeployErrors {
   [key: string]: string[]
 }
 
+export enum DATA_SOURCE_TYPE {
+  STANDALONE = 'standalone',
+  ELASTIC_SERVER = 'elasticserver'
+}
+
 interface SourceUploaded {
   name: string
   hash: string
@@ -265,7 +270,7 @@ export class PackageService {
 
   private startBuild(name: string, hash: string) {
     return this.apiRequest.post({
-      url: `/pkgr/build`,
+      url: this.getBuildUrlBasedOnFlag(`/pkgr/build`),
       body: {
         name, hash, action: 'deploy'
       }
@@ -275,6 +280,11 @@ export class PackageService {
 
   private getPackageUrlBasedOnFlag = (path: string, usePkgr: USE_PKGR = USE_PKGR.NO) => {
     return usePkgr === USE_PKGR.YES ? `/pkgr${path}?source=standalone` : `/pkg${path}`
+  }
+
+  private getBuildUrlBasedOnFlag = (path: string, usePkgr: USE_PKGR = USE_PKGR.NO) => {
+    const sourceType = usePkgr === USE_PKGR.YES ? DATA_SOURCE_TYPE.STANDALONE : DATA_SOURCE_TYPE.ELASTIC_SERVER
+    return `/pkgr${path}?source=${sourceType}`
   }
 
   private checkForRequiredScripts(projectNames: string[], deployErrors: IPreDeployErrors) {
