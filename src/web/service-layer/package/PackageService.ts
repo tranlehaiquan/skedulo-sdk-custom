@@ -32,6 +32,11 @@ interface SourceUploaded {
 
 export type AllProjectService = ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject>
 
+enum USE_PKGR {
+  YES = 'YES',
+  NO = 'NO'
+}
+
 export function isMobileProjectService(project: AllProjectService): project is ProjectService<MobilePageProject> {
   return project.project.type === ProjectType.MobilePage
 }
@@ -251,7 +256,7 @@ export class PackageService {
     }
 
     return this.apiRequest.post({
-      url: `/pkg/source/${encodeURIComponent(metadata.name)}`,
+      url: this.getPackageUrlBasedOnFlag(`/source/${encodeURIComponent(metadata.name)}`, process.env.USE_PKGR as USE_PKGR),
       formData,
       json: true
     })
@@ -265,6 +270,11 @@ export class PackageService {
         name, hash, action: 'deploy'
       }
     })
+  }
+
+
+  private getPackageUrlBasedOnFlag = (path: string, usePkgr: USE_PKGR = USE_PKGR.NO) => {
+    return usePkgr === USE_PKGR.YES ? `/pkgr${path}?source=standalone` : `/pkg${path}`
   }
 
   private checkForRequiredScripts(projectNames: string[], deployErrors: IPreDeployErrors) {
