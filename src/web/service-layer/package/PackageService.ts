@@ -270,7 +270,7 @@ export class PackageService {
 
   private startBuild(name: string, hash: string) {
     return this.apiRequest.post({
-      url: this.getBuildUrlBasedOnFlag(`/build`),
+      url: this.getBuildUrlBasedOnFlag(`/build`, process.env.USE_PKGR as USE_PKGR),
       body: {
         name, hash, action: 'deploy'
       }
