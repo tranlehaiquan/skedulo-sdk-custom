@@ -3,6 +3,7 @@ import * as http from 'http'
 import * as KCors from 'kcors'
 import * as Koa from 'koa'
 import * as bodyParser from 'koa-bodyparser'
+import { pickBy } from 'lodash'
 import * as path from 'path'
 import { Observable } from 'rxjs'
 import { LogItem } from '../utils/shell'
@@ -26,6 +27,8 @@ interface ResponseType {
 
 type ChildMessage = { type: 'init' } | ResponseType | { type: 'error', data: any }
 
+const SKED_HEADERS_PREFIX = 'sked-'
+
 export function startLambdaServer(port: number, lambdaProjectPath: string, executionTimeout: number) {
 
   return new Observable<LogItem>(obs => {
@@ -47,6 +50,7 @@ export function startLambdaServer(port: number, lambdaProjectPath: string, execu
 
       const fnPayload: FnPayload = {
         headers: {
+          ...pickBy(ctx.req.headers, (_value, key) => key.toLowerCase().startsWith(SKED_HEADERS_PREFIX)),
           Authorization: `Bearer ${apiToken}`,
           'sked-api-server': ctx.req.headers['sked-api-server'] as string,
           'Content-Type': ctx.req.headers['content-type']

@@ -82,7 +82,10 @@ async function createJobProductsMobileSuite(packageService: PackageService, core
   // Create the mobile page
   const coreProjectMetadata: MobilePageProject = {
     ...coreProjectData,
-    dependencies: [libraryDependencyData]
+    dependencies: [libraryDependencyData],
+    metadata: {
+      fetchCache: true
+    }
   }
 
   await MobilePageProjectService.create(
