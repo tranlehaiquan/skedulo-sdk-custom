@@ -343,5 +343,5 @@ export class PackageService {
 }
 
 function tarballFileFilter(filePath: string) {
-  return !(/node_modules|pre_deploy_assets|__shared|__generated|.git|dist/.test(filePath))
+  return !(/node_modules|pre_deploy_assets|__shared|__generated|\.git|dist/.test(filePath))
 }

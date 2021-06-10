@@ -8,10 +8,10 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@skedulo/packaging-internal-commons@^0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@skedulo/packaging-internal-commons/-/packaging-internal-commons-0.0.11.tgz#58b639c424b953c54b65d4d9ff54410f0add023c"
-  integrity sha512-cma5xCazz23187tIKZqoeLRjCbIZ3nhObCBG5ZWXh/e0OrYQGJAjeRJ9QjGFqYmYci4MY+z29NBH+4KG2n1GfQ==
+"@skedulo/packaging-internal-commons@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@skedulo/packaging-internal-commons/-/packaging-internal-commons-0.0.12.tgz#94e70e9d9a939fe6c76474ee72e9b136f48b71df"
+  integrity sha512-DmVgHkRPS/Fe9tL8/JgawBUzSXUiWAQfGbuXdk0uj9+mHIBSK91fXtKOrl4irJIMDv8Atnpzgijr8HC3y72t8g==
   dependencies:
     ajv "^6.11.0"
 

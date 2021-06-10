@@ -27,7 +27,7 @@
     "dist": "yarn compile && electron-builder",
     "dev": "yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
     "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./",
-    "postinstall": "ts-node ./download-ngrok-bins.ts && yarn compile && electron-builder install-app-deps"
+    "postinstall": "ts-node ./download-ngrok-bins.ts && yarn compile"
   },
   "jest": {
     "testMatch": [

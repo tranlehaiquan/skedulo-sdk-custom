@@ -29,19 +29,23 @@ commands:
     steps:
       # Restore Custom Page node_modules
       - restore_cache:
-          key: yarn-cache-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
+          key: yarn-cache-v2-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
 
       - run:
           command: |
             yarn bootstrap
-            # https://github.com/electron-userland/electron-builder/issues/3179
-            USE_HARD_LINKS=false yarn dist -wml
 
       - save_cache:
-          key: yarn-cache-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
+          key: yarn-cache-v2-{{ checksum "yarn.lock" }}-{{ checksum "src/yarn.lock" }}
           paths:
             - node_modules
             - src/node_modules
+
+      - run:
+          command: |
+            yarn electron-builder install-app-deps
+            # https://github.com/electron-userland/electron-builder/issues/3179
+            USE_HARD_LINKS=false yarn electron-builder -wml
 
   authenticate-with-npm:
     steps:
