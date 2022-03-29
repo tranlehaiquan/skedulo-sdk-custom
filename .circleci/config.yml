@@ -9,7 +9,7 @@ electron: &electron
 
 defaults: &defaults
   docker:
-    - image: circleci/node:10.16.3-buster
+    - image: cimg/node:10.24.1
   environment:
     TZ: "/usr/share/zoneinfo/Australia/Brisbane"
   resource_class: medium
@@ -81,7 +81,8 @@ jobs:
 workflows:
   everything:
     jobs:
-      - build-custom-page-sdk
+      - build-custom-page-sdk:
+          context: npm_skeddevenv_read_only
 
       - deploy-sdk-to-s3:
           name: deploy-latest-file

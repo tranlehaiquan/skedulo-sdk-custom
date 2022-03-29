@@ -1,6 +1,6 @@
 import * as child_process from 'child_process'
 import * as http from 'http'
-import * as KCors from 'kcors'
+import * as KCors from '@koa/cors'
 import * as Koa from 'koa'
 import * as bodyParser from 'koa-bodyparser'
 import { pickBy } from 'lodash'

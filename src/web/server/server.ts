@@ -1,5 +1,5 @@
 import * as https from 'https'
-import * as KCors from 'kcors'
+import * as KCors from '@koa/cors'
 import * as Koa from 'koa'
 import * as KJsonError from 'koa-json-error'
 import { omit, noop } from 'lodash'
@@ -31,8 +31,10 @@ export function start(eventChannel: Channel) {
     app.use(require('koa-logger')())
   }
 
-  // Enable Cross Origin Requests
-  app.use(KCors())
+  app.use(KCors({
+    //@ts-ignore new options @types/koa__cors is not up to date
+    privateNetworkAccess: true
+  }))
 
   // Attach all request handlers ( router ) to the app
   setupRouter(app, eventChannel)
