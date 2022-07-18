@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron'
+import { setEnvironment } from './web/logging/logWrapper'
 import * as path from 'path'
 import * as url from 'url'
 
@@ -6,7 +7,6 @@ import { BASE_PATH } from './base-path'
 
 // Don't let "win" be garbage collected
 let win: Electron.BrowserWindow | null
-
 app.on('ready', () => {
 
   // Create "electron" window
@@ -66,11 +66,12 @@ function createWindow() {
     slashes: true
   }))
 
+  const isProduction : boolean = process.env.NODE_ENV !== 'development'
+  setEnvironment(isProduction)
   // Prevent opening dev-tools
   // when dev tools is "opened", immediately close it
-  if (process.env.NODE_ENV !== 'development') {
+  if (isProduction) {
     win.removeMenu()
-
     win.webContents.on('devtools-opened', () => {
       win!.webContents.closeDevTools()
     })

@@ -5,6 +5,7 @@ import { LogItem } from '../../utils/shell'
 import { proxyTo } from '../../utils/proxy'
 import { SessionData } from '../types'
 import { ProjectService } from './ProjectService'
+import { errorHandler } from '../../utils/errorHandler'
 
 
 export class WebPageProjectService extends ProjectService<WebPageProject> {
@@ -60,9 +61,8 @@ export class WebPageProjectService extends ProjectService<WebPageProject> {
         )
       })
       .retry(15)
-      .catch(() => {
-        console.log('Failed to connect to SDK server')
-
+      .catch((error) => {
+        errorHandler(error)
         return Observable.empty()
       })
   }

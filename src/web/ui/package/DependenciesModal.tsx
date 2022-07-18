@@ -5,7 +5,7 @@ import { Button, DynamicModal, EmptyState, Lozenge } from '@skedulo/sked-ui'
 import { PackageService, AllProjectService } from '../../service-layer/package/PackageService'
 import { LibraryProjectService } from '../../service-layer/package/LibraryProjectService'
 import { addLocalNodeDependencyToPackage, removeLocalNodeDependencyFromPackage } from '../../service-layer/package/dependency-utils'
-import { MainServices } from '../../service-layer/MainServices'
+import { errorHandler } from '../../utils/errorHandler'
 
 interface Props {
   package: PackageService
@@ -48,7 +48,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
         }
       })
     } catch (error) {
-      MainServices.showErrorMessage('Failed to add dependency', error)
+      errorHandler(error, 'Failed to add dependency')
     } finally {
       this.setState({ inProgress: false })
 
@@ -67,7 +67,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
         dependencyName: dependency.project.name
       })
     } catch (error) {
-      MainServices.showErrorMessage('Failed to remove dependency', error)
+        errorHandler(error, 'Failed to remove dependency')
     } finally {
       this.setState({ inProgress: false })
 
@@ -85,7 +85,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
           <p>{ dep.service.project.description }</p>
         </div>
           {
-            dep.isCircular 
+            dep.isCircular
               ? (
                 <Lozenge
                   label="Dependency would be circular"
@@ -124,7 +124,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
       .map(lib => {
 
         const dependenciesForLib = (lib.project.dependencies || []).map(dep => dep.dependencyName)
-        
+
         return {
           service: lib,
           isCircular: dependenciesForLib.includes(selectedProject.project.name),
@@ -145,7 +145,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
 
     const footer = (
       <div className="dependencies-modal__footer">
-        <Button buttonType="primary" className="float-right" onClick={ closeModal }>Close</Button> 
+        <Button buttonType="primary" className="float-right" onClick={ closeModal }>Close</Button>
       </div>
     )
 
@@ -162,7 +162,7 @@ export class DependenciesModal extends React.PureComponent<Props, State> {
         loading={ inProgress }
         className="dependencies-modal"
       >
-        { libraryDependencies.length 
+        { libraryDependencies.length
           ? libraryDependencies.map(this.renderModalItem)
           : emptyState
         }

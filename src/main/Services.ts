@@ -4,6 +4,7 @@ import * as getPort from 'get-port'
 import * as os from 'os'
 
 import { getPlatform, whenPlatformIs } from '../platform'
+import { log } from '../web/logging/logWrapper'
 
 export class Services {
 
@@ -45,7 +46,8 @@ export class Services {
     })
   }
 
-  showErrorMessage(title: string, content: string) {
+  showAndLogErrorMessage(title: string, content: string, logContent: string) {
+    log(logContent)
     return dialog.showErrorBox(title, content)
   }
 

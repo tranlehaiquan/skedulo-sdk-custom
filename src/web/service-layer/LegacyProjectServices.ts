@@ -12,6 +12,7 @@ import { LogItem, shellExec } from '../utils/shell'
 import { WEB_BASE_PATH } from '../web-base-path'
 import { ICoverage, ProjectData, SessionData } from './types'
 import { NetworkingService } from './NetworkingService'
+import { errorHandler } from '../utils/errorHandler'
 
 export { LogItem } from '../utils/shell'
 
@@ -187,9 +188,8 @@ export class LegacyProjectServices {
         )
       })
       .retry(15)
-      .catch(() => {
-        console.log('Failed to connect to SDK server')
-
+      .catch((error) => {
+        errorHandler(error)
         return Observable.empty()
       })
   }

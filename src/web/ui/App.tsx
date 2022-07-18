@@ -26,6 +26,8 @@ import { NewMobilePageProject } from './package/NewMobilePageProject'
 import { ContentLayout, HeaderLayout } from './Layout'
 import { Markdown } from './Markdown'
 import { SSLHelp } from './SSLHelp'
+import { errorHandler } from '../utils/errorHandler'
+import { LoadPackageError } from '../../SkedError'
 
 
 export enum View {
@@ -140,7 +142,7 @@ export class App extends React.Component<{}, IState> {
     if (!selectedPackage) {
       return
     }
-    
+
     try {
       // Re-evaluate package metadata
       const refreshedPackage = PackageService.at(selectedPackage.packagePath, session!)
@@ -154,8 +156,7 @@ export class App extends React.Component<{}, IState> {
         selectedPackage: refreshedPackage
       })
     } catch(error) {
-      MainServices.showErrorMessage('Package Error', error)
-
+      errorHandler(error)
       this.setState({ currentView: View.ManagePackages })
     }
   }
@@ -164,8 +165,7 @@ export class App extends React.Component<{}, IState> {
     try {
       await this.trySetPackage(pkgDirectory)
     } catch(error) {
-      MainServices.showErrorMessage('Package Error', error)
-
+      errorHandler(error)
       this.setState({ currentView: View.ManagePackages })
     }
   }
@@ -186,12 +186,7 @@ export class App extends React.Component<{}, IState> {
       try {
         await newPackage.load()
       } catch (error) {
-        MainServices.showErrorMessage(
-          'Failed to load package.',
-`Something went wrong when loading package.
-This may be an environment issue and therefore is not fatal however \
-some features of package development may not work as expected.  Error: ${error}`
-        )
+        errorHandler(new LoadPackageError(error))
       }
 
       this.setState({
@@ -335,7 +330,7 @@ some features of package development may not work as expected.  Error: ${error}`
       <>
         <ContentLayout className="content__center--large" centered>
           <h1>{ SKEDULO_WELCOME_MESSAGE }</h1>
-          { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() } 
+          { isConnected ? this.renderHomeActionButtons() : this.renderNotConnected() }
         </ContentLayout>
 
         <div className="diagnostics-button">
@@ -463,7 +458,7 @@ some features of package development may not work as expected.  Error: ${error}`
         return <NewLibraryProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
       case View.CreateMobilePageProject:
         return <NewMobilePageProject back={ manageProjectBack } selectedPackage={ selectedPackage! } refreshPackage={ refreshPackage } />
-      
+
       // Legacy Pages
       case View.LegacyManageConnectedPages:
         return this.renderManageConnectedPages()

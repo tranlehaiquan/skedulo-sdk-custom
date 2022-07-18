@@ -94,7 +94,7 @@ workflows:
               only:
                   - master
                   - dev
-      
+
       - deploy-sdk-to-s3:
           name: deploy-release-file
           deploy_type: "release"

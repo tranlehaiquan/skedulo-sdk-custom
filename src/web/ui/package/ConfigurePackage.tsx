@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import { dialog } from 'electron'
 
 import { Button, ButtonGroup } from '@skedulo/sked-ui'
 import { FunctionProject, MobilePageProject, WebPageProject, LibraryProject } from '@skedulo/packaging-internal-commons'
@@ -68,14 +69,14 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
     const { package: pkg } = this.props
 
     const parentProjects = isMobileProjectService(selectedProject)
-      ? [selectedProject, pkg.lambdas.find(x => x.project.name === selectedProject.project.lifecycleFunction)!] 
+      ? [selectedProject, pkg.lambdas.find(x => x.project.name === selectedProject.project.lifecycleFunction)!]
       : [selectedProject]
 
     const projectDependencies = (selectedProject.project.dependencies || []).map(x => x.dependencyName)
     const dependencyProjects = projectDependencies.length
       ? pkg.libraries.filter(x => projectDependencies.includes(x.project.name))
       : []
-  
+
     this.setState({ activeProjects: [...parentProjects, ...dependencyProjects ] })
   }
 
@@ -94,7 +95,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
 
       if (!!collatedErrors.length) {
         this.setState({ preDeployCheckErrors: errors })
-        MainServices.showErrorMessage('Error', 'Found errors. Please fix the error messages and try again!')
+        dialog.showErrorBox('Error', 'Found errors. Please fix the error messages and try again!')
         return
       } else {
         this.setState({ preDeployCheckErrors: null })
@@ -105,7 +106,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
       MainServices.showMessageBox({ type: 'info', title: 'Deploy', message: 'Deploy success!' })
     } catch (error) {
       this.setState({ deployStatus: error.message })
-      MainServices.showErrorMessage('Deploy', 'Deploy failed! Please check the error message.')
+      dialog.showErrorBox('Deploy', 'Deploy failed! Please check the error message.')
     } finally {
       this.setState({ inProgress: false })
     }
@@ -240,13 +241,13 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
     return (
       <>
         { this.renderContentView() }
-        { !!dependenciesModalDependant && 
-          <DependenciesModal 
+        { !!dependenciesModalDependant &&
+          <DependenciesModal
             selectedProject={ dependenciesModalDependant }
             refreshPackage={ refreshPackage }
             package={ pkg }
             closeModal={ this.closeModal }
-          /> 
+          />
         }
       </>
     )

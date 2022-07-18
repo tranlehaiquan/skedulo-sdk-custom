@@ -16,6 +16,7 @@ import { LibraryProjectService } from './LibraryProjectService'
 import { registerLocalNodeDependency, isNodeDependency } from './dependency-utils'
 import { PACKAGE_FILE, REQUIRED_PROJECT_SCRIPTS } from './constants'
 import { ProjectService } from './ProjectService'
+import { DeployError, InvalidPackageError } from '../../../SkedError'
 
 export interface IPreDeployErrors {
   [key: string]: string[]
@@ -46,8 +47,6 @@ export function isMobileProjectService(project: AllProjectService): project is P
   return project.project.type === ProjectType.MobilePage
 }
 
-export class InvalidPackage extends Error { }
-
 export class PackageService {
 
   private apiRequest = (new NetworkingService(this.session)).getAPIRequest()
@@ -67,14 +66,18 @@ export class PackageService {
     const pkgFile = path.join(this.packagePath, '/', PACKAGE_FILE)
 
     if (!fs.existsSync(pkgFile)) {
-      throw new InvalidPackage(`Package file does not exist for ${this.packagePath}`)
+      throw new InvalidPackageError(`Package file does not exist for ${this.packagePath}`)
     }
 
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'))
       this.packageMetadata = this.evaluate(pkg)
     } catch (e) {
-      throw new InvalidPackage(`InvalidPackage: ${e.message}`)
+      if (e instanceof Error) {
+        throw new InvalidPackageError(`InvalidPackage: ${e.message}`)
+      } else {
+        throw e
+      }
     }
   }
 
@@ -337,7 +340,10 @@ export class PackageService {
 
       await this.startBuild(name, hash)
     } catch (error) {
-      throw new Error(error)
+      if (error instanceof Error){
+        throw new DeployError(error.message)
+      }
+      throw error
     }
   }
 }
