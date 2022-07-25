@@ -111,7 +111,5 @@
     "tslint": "^5.19.0",
     "typescript": "^3.7.1"
   },
-  "dependencies": {
-    "electron-log": "^4.4.6"
-  }
+  "dependencies": {}
 }

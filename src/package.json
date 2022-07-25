@@ -38,6 +38,7 @@
     "bourbon": "^4.3.4",
     "classnames": "^2.2.5",
     "cross-spawn": "^7.0.0",
+    "electron-log": "^4.4.6",
     "fix-path": "^2.1.0",
     "get-port": "^5.0.0",
     "highlight.js": "^9.12.0",
