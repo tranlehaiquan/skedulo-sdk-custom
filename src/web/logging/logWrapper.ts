@@ -2,8 +2,8 @@ import { log as electronLog } from "electron-log";
 
 let isProduction: boolean;
 
-export const setEnvironment = ( isProduction: boolean ) => {
-  isProduction = isProduction
+export const setEnvironment = ( isProd: boolean ) => {
+  isProduction = isProd
 }
 
 export const log = (logContent: unknown) => {
