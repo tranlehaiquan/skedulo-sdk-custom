@@ -17,12 +17,6 @@ TOOLS_PATH=$(echo $4 | sed 's:/*$::')
 # Master is the only branch we ever want to use to deploy to AWS production, deal with credentials here
 if [ "$BRANCH_NAME" = "master" ]
 then
-  # Overwrite dev credentials for AWS with production credentials
-  set +x
-  export AWS_ACCESS_KEY_ID="$SKEDPKG_PROD_ACCESS_KEY"
-  export AWS_SECRET_ACCESS_KEY="$SKEDPKG_PROD_SECRET_KEY"
-  set -x
-
   AWS_BUCKET="$SKEDSDK_PROD_AWS_BUCKET"
 else
   AWS_BUCKET="$SKEDSDK_TEST_AWS_BUCKET"

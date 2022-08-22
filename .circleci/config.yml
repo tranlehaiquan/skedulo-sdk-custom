@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  ci: skedulo/ci@0.1.3
+
 electron: &electron
   resource_class: medium
   environment:
@@ -15,15 +18,6 @@ defaults: &defaults
   resource_class: medium
 
 commands:
-  aws-cli-setup:
-    steps:
-      - run:
-          name: Install aws-cli
-          command: |
-            sudo apt-get update -y
-            sudo apt-get install -y python3-pip
-            sudo pip3 install --upgrade awscli
-
   build-sdk:
     description: Bootstrap, Test and Compile Custom Page SDK
     steps:
@@ -73,7 +67,26 @@ jobs:
 
     steps:
       - checkout
-      - aws-cli-setup
+      - when:
+        # Auth to Core-Test by default
+          condition:
+              not:
+                matches:
+                  pattern: "^master$"
+                  value: << pipeline.git.branch >>
+          steps:
+              - ci/aws_assume_role:
+                  aws_role_arn: arn:aws:iam::208503650764:role/circle_ci_update_sdks
+
+      - when:
+         # If this branch is master, auth to Core-Prod instead
+          condition:
+              matches:
+                  pattern: "^master$"
+                  value: << pipeline.git.branch >>
+          steps:
+              - ci/aws_assume_role:
+                  aws_role_arn: arn:aws:iam::133580534388:role/circle_ci_update_sdks
       - attach_workspace:
           at: ./
       - run: ~/project/tools/evaluate-sdk-deploy.sh << parameters.deploy_type >> $CIRCLE_BRANCH ~/project/dist ~/project/tools
@@ -94,6 +107,7 @@ workflows:
               only:
                   - master
                   - dev
+          context: aws_blank_oidc_context
 
       - deploy-sdk-to-s3:
           name: deploy-release-file
@@ -104,6 +118,7 @@ workflows:
             branches:
               only:
                   - master
+          context: aws_blank_oidc_context
 
       - deploy-sdk-to-s3:
           name: deploy-branch-file
@@ -115,3 +130,4 @@ workflows:
               ignore:
                   - master
                   - dev
+          context: aws_blank_oidc_context
