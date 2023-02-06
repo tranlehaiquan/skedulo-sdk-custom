@@ -1,14 +1,12 @@
 import { app, BrowserWindow } from 'electron'
 import { setEnvironment } from './web/logging/logWrapper'
 import * as path from 'path'
-import * as url from 'url'
+// import * as url from 'url'
 
 import { BASE_PATH } from './base-path'
-
 // Don't let "win" be garbage collected
 let win: Electron.BrowserWindow | null
 app.on('ready', () => {
-
   // Create "electron" window
   createWindow()
 })
@@ -40,7 +38,8 @@ function createWindow() {
     width: 1224,
     height: 700,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false,
     },
     icon: path.join(BASE_PATH, '/assets/icons/64x64.png')
   })
@@ -48,6 +47,7 @@ function createWindow() {
   // After the window has finished loading, this event
   // is fired at which point we show the window
   win.on('ready-to-show', () => {
+    console.log('ready-to-show')
     win!.show()
   })
 
@@ -60,20 +60,25 @@ function createWindow() {
   })
 
   // and load the index.html of the app.
-  win.loadURL(url.format({
-    pathname: path.join(__dirname, './index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  // win.loadURL(url.format({
+  //   pathname: path.join(__dirname, './index.html'),
+  //   protocol: 'file:',
+  //   slashes: true
+  // }))
+
+  // Load the index.html from the "dist" folder
+  console.log(path.join(__dirname, './index.html'))
+  win.loadFile(path.join(__dirname, './index.html'))
+  win.webContents.openDevTools()
 
   const isProduction : boolean = process.env.NODE_ENV !== 'development'
   setEnvironment(isProduction)
   // Prevent opening dev-tools
   // when dev tools is "opened", immediately close it
-  if (isProduction) {
-    win.removeMenu()
-    win.webContents.on('devtools-opened', () => {
-      win!.webContents.closeDevTools()
-    })
-  }
+  // if (isProduction) {
+  //   win.removeMenu()
+  //   win.webContents.on('devtools-opened', () => {
+  //     win!.webContents.closeDevTools()
+  //   })
+  // }
 }

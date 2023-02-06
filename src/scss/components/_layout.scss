@@ -33,7 +33,7 @@ body,
   &__logo {
     float: left;
     margin-right: $title-spacing;
-
+    cursor: pointer;
     &,
     &.ski{
       font-size: $title-line-height;

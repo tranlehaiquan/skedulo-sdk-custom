@@ -1,82 +1,104 @@
-import * as _ from 'lodash'
-import * as fs from 'fs'
-import * as path from 'path'
-import { mapValues, keyBy, omitBy, flatten } from 'lodash'
+import * as _ from "lodash";
+import * as fs from "fs";
+import * as path from "path";
+import { mapValues, keyBy, omitBy, flatten } from "lodash";
 
-import { Option, Lens } from '@skedulo/sked-commons'
-import { Package, validateFor, ProjectDependency, FunctionProject, MobilePageProject, WebPageProject, LibraryProject, ProjectType } from '@skedulo/packaging-internal-commons'
+import { Option, Lens } from "@skedulo/sked-commons";
+import {
+  Package,
+  validateFor,
+  ProjectDependency,
+  FunctionProject,
+  MobilePageProject,
+  WebPageProject,
+  LibraryProject,
+  ProjectType,
+} from "@skedulo/packaging-internal-commons";
 
-import { getFileHash, createTarBall } from '../../utils/tar'
-import { SessionData } from '../types'
-import { NetworkingService } from '../NetworkingService'
-import { FunctionProjectService } from './FunctionProjectService'
-import { MobilePageProjectService } from './MobilePageProjectService'
-import { WebPageProjectService } from './WebPageProjectService'
-import { LibraryProjectService } from './LibraryProjectService'
-import { registerLocalNodeDependency, isNodeDependency } from './dependency-utils'
-import { PACKAGE_FILE, REQUIRED_PROJECT_SCRIPTS } from './constants'
-import { ProjectService } from './ProjectService'
-import { DeployError, InvalidPackageError } from '../../../SkedError'
+import { getFileHash, createTarBall } from "../../utils/tar";
+import { SessionData } from "../types";
+import { NetworkingService } from "../NetworkingService";
+import { FunctionProjectService } from "./FunctionProjectService";
+import { MobilePageProjectService } from "./MobilePageProjectService";
+import { WebPageProjectService } from "./WebPageProjectService";
+import { LibraryProjectService } from "./LibraryProjectService";
+import {
+  registerLocalNodeDependency,
+  isNodeDependency,
+} from "./dependency-utils";
+import { PACKAGE_FILE, REQUIRED_PROJECT_SCRIPTS } from "./constants";
+import { ProjectService } from "./ProjectService";
+import { DeployError, InvalidPackageError } from "../../../SkedError";
 
+import * as fsExtra from "fs-extra";
 export interface IPreDeployErrors {
-  [key: string]: string[]
+  [key: string]: string[];
 }
 
 export enum DATA_SOURCE_TYPE {
-  STANDALONE = 'standalone',
-  ELASTIC_SERVER = 'elasticserver'
+  STANDALONE = "standalone",
+  ELASTIC_SERVER = "elasticserver",
 }
 
 interface SourceUploaded {
-  name: string
-  hash: string
-  metadata: Package
-  created: string
-  createdBy: string
-  revisionCount: number
+  name: string;
+  hash: string;
+  metadata: Package;
+  created: string;
+  createdBy: string;
+  revisionCount: number;
 }
 
-export type AllProjectService = ProjectService<FunctionProject> | ProjectService<MobilePageProject> | ProjectService<WebPageProject> | ProjectService<LibraryProject>
+export type AllProjectService =
+  | ProjectService<FunctionProject>
+  | ProjectService<MobilePageProject>
+  | ProjectService<WebPageProject>
+  | ProjectService<LibraryProject>;
 
 enum USE_PKGR {
-  YES = 'YES',
-  NO = 'NO'
+  YES = "YES",
+  NO = "NO",
 }
 
-export function isMobileProjectService(project: AllProjectService): project is ProjectService<MobilePageProject> {
-  return project.project.type === ProjectType.MobilePage
+export function isMobileProjectService(
+  project: AllProjectService
+): project is ProjectService<MobilePageProject> {
+  return project.project.type === ProjectType.MobilePage;
 }
 
 export class PackageService {
+  private apiRequest = new NetworkingService(this.session).getAPIRequest();
 
-  private apiRequest = (new NetworkingService(this.session)).getAPIRequest()
-
-  packageMetadata: Package
-  webpages: WebPageProjectService[] = []
-  mobilepages: MobilePageProjectService[] = []
-  lambdas: FunctionProjectService[] = []
-  libraries: LibraryProjectService[] = []
+  packageMetadata: Package;
+  webpages: WebPageProjectService[] = [];
+  mobilepages: MobilePageProjectService[] = [];
+  lambdas: FunctionProjectService[] = [];
+  libraries: LibraryProjectService[] = [];
 
   static at(packagePath: string, session: SessionData) {
-    return new PackageService(packagePath, session)
+    return new PackageService(packagePath, session);
   }
 
-  private constructor(public packagePath: string, private session: SessionData) {
-
-    const pkgFile = path.join(this.packagePath, '/', PACKAGE_FILE)
+  private constructor(
+    public packagePath: string,
+    private session: SessionData
+  ) {
+    const pkgFile = path.join(this.packagePath, "/", PACKAGE_FILE);
 
     if (!fs.existsSync(pkgFile)) {
-      throw new InvalidPackageError(`Package file does not exist for ${this.packagePath}`)
+      throw new InvalidPackageError(
+        `Package file does not exist for ${this.packagePath}`
+      );
     }
 
     try {
-      const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'))
-      this.packageMetadata = this.evaluate(pkg)
+      const pkg = JSON.parse(fs.readFileSync(pkgFile, "utf8"));
+      this.packageMetadata = this.evaluate(pkg);
     } catch (e) {
       if (e instanceof Error) {
-        throw new InvalidPackageError(`InvalidPackage: ${e.message}`)
+        throw new InvalidPackageError(`InvalidPackage: ${e.message}`);
       } else {
-        throw e
+        throw e;
       }
     }
   }
@@ -84,270 +106,458 @@ export class PackageService {
   load() {
     // Link all dependencies.  All linking should be idempotent, if previously done this will have no effect
     // however this will ensure that the package is ready for development each time it's opened.
-    return this.linkDependencies()
+    return this.linkDependencies();
   }
 
   async linkDependencies() {
-    const projectDependencies = this.getDependenciesForPackage()
+    const projectDependencies = this.getDependenciesForPackage();
 
-    const allNodeDependencyLinks = flatten(Object.keys(projectDependencies).map(key => {
-      const { dependencies, dependantPathName } = projectDependencies[key]
-      const fullDependantPath = path.join(this.packagePath, dependantPathName)
+    const allNodeDependencyLinks = flatten(
+      Object.keys(projectDependencies).map((key) => {
+        const { dependencies, dependantPathName } = projectDependencies[key];
+        const fullDependantPath = path.join(
+          this.packagePath,
+          dependantPathName
+        );
 
-      const nodeDependencies = dependencies.filter(isNodeDependency)
+        const nodeDependencies = dependencies.filter(isNodeDependency);
 
-      return nodeDependencies.map(dep => { 
-        const fullDependencyPath = path.join(this.packagePath, dep.dependencyPathName)
+        return nodeDependencies.map((dep) => {
+          const fullDependencyPath = path.join(
+            this.packagePath,
+            dep.dependencyPathName
+          );
 
-        return {
-          ...dep,
-          dependantPath: fullDependantPath,
-          dependencyPath: fullDependencyPath
-        }
+          return {
+            ...dep,
+            dependantPath: fullDependantPath,
+            dependencyPath: fullDependencyPath,
+          };
+        });
       })
-    }))
+    );
 
     // Apply each local node link
-    await Promise.all(allNodeDependencyLinks.map(registerLocalNodeDependency))
+    await Promise.all(allNodeDependencyLinks.map(registerLocalNodeDependency));
   }
 
   getPackageMetadata() {
-    return this.packageMetadata
+    return this.packageMetadata;
   }
 
   evaluate(data: any) {
+    const packageMetadata = validateFor<Package>("Package", data);
 
-    const packageMetadata = validateFor<Package>('Package', data)
+    const { webpages, mobilepages, functions, libraries } =
+      packageMetadata.components;
 
-    const { webpages, mobilepages, functions, libraries } = packageMetadata.components
-
-    this.webpages = webpages ? webpages.items.map(c => WebPageProjectService.at(this.packagePath, c, this.session)) : []
-    this.mobilepages = mobilepages ? mobilepages.items.map(c => MobilePageProjectService.at(this.packagePath, c, this.session)) : []
-    this.lambdas = functions ? functions.items.map(c => FunctionProjectService.at(this.packagePath, c, this.session)) : []
-    this.libraries = libraries? libraries.items.map(c => LibraryProjectService.at(this.packagePath, c, this.session)) : []
+    this.webpages = webpages
+      ? webpages.items.map((c) =>
+          WebPageProjectService.at(this.packagePath, c, this.session)
+        )
+      : [];
+    this.mobilepages = mobilepages
+      ? mobilepages.items.map((c) =>
+          MobilePageProjectService.at(this.packagePath, c, this.session)
+        )
+      : [];
+    this.lambdas = functions
+      ? functions.items.map((c) =>
+          FunctionProjectService.at(this.packagePath, c, this.session)
+        )
+      : [];
+    this.libraries = libraries
+      ? libraries.items.map((c) =>
+          LibraryProjectService.at(this.packagePath, c, this.session)
+        )
+      : [];
 
     // Validate standard library dependencies
-    this.evaluateLibraryDependencies()
+    this.evaluateLibraryDependencies();
 
     // Validate interproject dependencies (eg mobile page -> lifecycle function)
-    this.evaluateInterprojectDependencies()
-    
-    return packageMetadata
+    this.evaluateInterprojectDependencies();
+
+    return packageMetadata;
   }
 
   private getDependenciesForPackage = () => {
-    const allProjectsByName = keyBy([...this.webpages, ...this.mobilepages, ...this.lambdas, ...this.libraries], x => x.project.name)
+    const allProjectsByName = keyBy(
+      [
+        ...this.webpages,
+        ...this.mobilepages,
+        ...this.lambdas,
+        ...this.libraries,
+      ],
+      (x) => x.project.name
+    );
 
-    return omitBy(mapValues(allProjectsByName, service => ({
+    return omitBy(
+      mapValues(allProjectsByName, (service) => ({
         dependantPathName: service.pathName,
-        dependencies: (service.project.dependencies || []).map(dep => {
+        dependencies: (service.project.dependencies || []).map((dep) => {
           if (!allProjectsByName[dep.dependencyName]) {
-            throw new Error(`Unable to find library dependency ${dep.dependencyName} for project ${service.project.name}`)
+            throw new Error(
+              `Unable to find library dependency ${dep.dependencyName} for project ${service.project.name}`
+            );
           }
 
           return {
             ...dep,
-            dependencyPathName: allProjectsByName[dep.dependencyName].pathName
-          }
-        })
-    })), x => !x.dependencies.length)
-  }
+            dependencyPathName: allProjectsByName[dep.dependencyName].pathName,
+          };
+        }),
+      })),
+      (x) => !x.dependencies.length
+    );
+  };
 
   evaluateInterprojectDependencies() {
     // Validate that the associated functions for mobile pages exist
-    const allFunctionNames = this.lambdas.map(λ => λ.project.name)
+    const allFunctionNames = this.lambdas.map((λ) => λ.project.name);
 
-    this.mobilepages.forEach(service => {
-      const functionDependency = service.project.lifecycleFunction
+    this.mobilepages.forEach((service) => {
+      const functionDependency = service.project.lifecycleFunction;
 
       if (!allFunctionNames.includes(functionDependency)) {
-        throw new Error(`Function dependency ${functionDependency} for project ${service.project.name} does not exist.`)
+        throw new Error(
+          `Function dependency ${functionDependency} for project ${service.project.name} does not exist.`
+        );
       }
-    })
+    });
   }
 
   evaluateLibraryDependencies() {
-    const projectsWithDependencies = [...this.webpages, ...this.mobilepages, ...this.lambdas, ...this.libraries]
-      .reduce((result, currService) => ({
+    const projectsWithDependencies = [
+      ...this.webpages,
+      ...this.mobilepages,
+      ...this.lambdas,
+      ...this.libraries,
+    ].reduce(
+      (result, currService) => ({
         ...result,
-        [currService.project.name]: currService.project.dependencies || []
-      }), {} as { [projectName: string]: ProjectDependency[] })
+        [currService.project.name]: currService.project.dependencies || [],
+      }),
+      {} as { [projectName: string]: ProjectDependency[] }
+    );
 
-    const allLibraryNames = this.libraries.map(x => x.project.name)
+    const allLibraryNames = this.libraries.map((x) => x.project.name);
 
     mapValues(projectsWithDependencies, (dependencies, projectName) => {
-      const projectDeps = dependencies.map(x => x.dependencyName)
+      const projectDeps = dependencies.map((x) => x.dependencyName);
 
-      projectDeps.forEach(depName => {
+      projectDeps.forEach((depName) => {
         if (!allLibraryNames.includes(depName)) {
           // Dependency does not exist within the package
-          throw new Error(`Library dependency ${depName} for project ${projectName} does not exist.`)
+          throw new Error(
+            `Library dependency ${depName} for project ${projectName} does not exist.`
+          );
         } else {
-          const dependenciesForDep = projectsWithDependencies[depName]
-          if (dependenciesForDep.some(d => d.dependencyName === projectName)) {
+          const dependenciesForDep = projectsWithDependencies[depName];
+          if (
+            dependenciesForDep.some((d) => d.dependencyName === projectName)
+          ) {
             // Circuler reference of dependency
-            throw new Error(`Dependency ${depName} for project ${projectName} is a circular reference.`)
+            throw new Error(
+              `Dependency ${depName} for project ${projectName} is a circular reference.`
+            );
           }
         }
-      })
-    })
+      });
+    });
   }
 
-  addPackageComponents(newPackageComponents: Package['components']) {
-    const mergedComponents = _.mapValues(newPackageComponents, (value, key: keyof Package['components']) => {
-      const existingComponents = this.packageMetadata.components[key]?.items
+  addPackageComponents(newPackageComponents: Package["components"]) {
+    const mergedComponents = _.mapValues(
+      newPackageComponents,
+      (value, key: keyof Package["components"]) => {
+        const existingComponents = this.packageMetadata.components[key]?.items;
 
-      if (!existingComponents) {
-        return value
-      } else {
-        return {
-          items: _.uniq(value!.items.concat(existingComponents))
+        if (!existingComponents) {
+          return value;
+        } else {
+          return {
+            items: _.uniq(value!.items.concat(existingComponents)),
+          };
         }
       }
-    })
+    );
 
     const updatedMetadata = {
       ...this.packageMetadata,
       components: {
         ...this.packageMetadata.components,
-        ...mergedComponents
-      }
-    }
+        ...mergedComponents,
+      },
+    };
 
     // Write metadata to package file
-    PackageService.createPackageMetadata(this.packagePath, updatedMetadata)
+    PackageService.createPackageMetadata(this.packagePath, updatedMetadata);
 
     // Update metadata for this class instance
-    this.packageMetadata = updatedMetadata
+    this.packageMetadata = updatedMetadata;
   }
 
   getAllProjectNames() {
-    const components = this.packageMetadata.components
+    const components = this.packageMetadata.components;
 
-    return _.flatten(Object
-      .keys(components)
-      .map((key: keyof Package['components']) => components[key])
-      .filter(list => !!list!['items'])
-      .map(list => list!['items']))
+    return _.flatten(
+      Object.keys(components)
+        .map((key: keyof Package["components"]) => components[key])
+        .filter((list) => !!list!["items"])
+        .map((list) => list!["items"])
+    );
   }
 
   static createPackageMetadata(packagePath: string, packageData: Package) {
-    const packageMetadata = JSON.stringify(packageData)
+    const packageMetadata = JSON.stringify(packageData);
 
     try {
-      fs.writeFileSync(path.join(packagePath, 'sked.pkg.json'), packageMetadata)
+      fs.writeFileSync(
+        path.join(packagePath, "sked.pkg.json"),
+        packageMetadata
+      );
     } catch (error) {
-      console.error(`Cannot write sked.pkg.json file to ${packagePath}.`)
-      throw error
+      console.error(`Cannot write sked.pkg.json file to ${packagePath}.`);
+      throw error;
     }
   }
 
   private bundlePackage() {
-    const buildAssetsPath = path.join(this.packagePath, '/pre_deploy_assets')
+    const buildAssetsPath = path.join(this.packagePath, "/pre_deploy_assets");
 
     if (!fs.existsSync(buildAssetsPath)) {
-      fs.mkdirSync(buildAssetsPath)
+      fs.mkdirSync(buildAssetsPath);
     }
 
-    const targetPackageFile = path.join(buildAssetsPath, '/package.tar.gz')
-    return createTarBall(this.packagePath, targetPackageFile, tarballFileFilter)
+    const targetPackageFile = path.join(buildAssetsPath, "/package.tar.gz");
+    return createTarBall(
+      this.packagePath,
+      targetPackageFile,
+      tarballFileFilter
+    );
   }
 
-  private async uploadPackage(bundlePath: string, pkg: Package): Promise<SourceUploaded> {
-    const metadata = pkg
+  private async bundlePackageWithByPassCompile() {
+    const folderDeploy = "pre_deploy_assets";
+    const pgkName = this.packageMetadata.name;
+    const buildAssetsPath = path.join(this.packagePath, `/${folderDeploy}`);
+    if (!fs.existsSync(buildAssetsPath)) {
+      fs.mkdirSync(buildAssetsPath);
+    }
+    // folder projects using for copy all project to outDIR
+    const outDIR = this.packagePath + `/../projects/${pgkName}`;
+    if (!fs.existsSync(outDIR)) {
+      fs.mkdirSync(outDIR);
+    }
+
+    // empty outDIR
+    // await fsExtra.emptyDir(outDIR);
+
+    // copy folder to the current working directory outDIR
+    await fsExtra.copy(this.packagePath, `${outDIR}`, {
+      filter: tarballFileFilter,
+      overwrite: true
+    });
+
+    // read file /${outDIR}/sked.pkg.json
+    const file = await fsExtra.readFile(`${outDIR}/sked.pkg.json`, "utf8");
+    const config = JSON.parse(file);
+
+    const webpages = config.components.webpages?.items || [];
+    const libraries = config.components.libraries?.items || [];
+    const functions = config.components.functions?.items || [];
+
+    const items = [...webpages, ...libraries, ...functions];
+
+    await items.map(async (project) => {
+      // skip if build folder does not exist
+      if (!fs.existsSync(`${outDIR}/${project}/build`)) {
+        return;
+      }
+
+      // update package.json in each project
+      // dependencies and devDependencies to empty object
+      // scripts bootstrap, compile to echo 'bootstrap/compile'
+      const packageJson = await fsExtra.readFile(
+        `${outDIR}/${project}/package.json`,
+        "utf8"
+      );
+      const packageJsonConfig = JSON.parse(packageJson);
+      packageJsonConfig.dependencies = {};
+      packageJsonConfig.devDependencies = {};
+      packageJsonConfig.scripts = {
+        bootstrap: "echo 'bootstrap'",
+        compile: "echo 'compile'",
+      };
+      await fsExtra.writeFile(
+        `${outDIR}/${project}/package.json`,
+        JSON.stringify(packageJsonConfig, null, 2)
+      );
+    });
+
+
+    const targetPackageFile = path.join(buildAssetsPath, "/package.tar.gz");
+    const tar = createTarBall(
+      outDIR,
+      targetPackageFile,
+      tarballFileFilter
+    );
+
+    // TODO: need update to node 14
+    // remove folder outDIR 
+    // await fsExtra.emptyDir(outDIR);
+    return tar;
+  }
+
+  private async uploadPackage(
+    bundlePath: string,
+    pkg: Package
+  ): Promise<SourceUploaded> {
+    const metadata = pkg;
 
     const formData = {
       name: pkg.name,
       hash: getFileHash(bundlePath),
       source: fs.createReadStream(bundlePath),
-      metadata: JSON.stringify(metadata)
-    }
+      metadata: JSON.stringify(metadata),
+    };
 
-    return this.apiRequest.post({
-      url: this.getPackageUrlBasedOnFlag(`/source/${encodeURIComponent(metadata.name)}`, process.env.USE_PKGR as USE_PKGR),
-      formData,
-      json: true
-    })
-      .then(res => res.result as SourceUploaded)
+    return this.apiRequest
+      .post({
+        url: this.getPackageUrlBasedOnFlag(
+          `/source/${encodeURIComponent(metadata.name)}`,
+          process.env.USE_PKGR as USE_PKGR
+        ),
+        formData,
+        json: true,
+      })
+      .then((res) => res.result as SourceUploaded);
   }
 
   private startBuild(name: string, hash: string) {
     return this.apiRequest.post({
-      url: this.getBuildUrlBasedOnFlag(`/build`, process.env.USE_PKGR as USE_PKGR),
+      url: this.getBuildUrlBasedOnFlag(
+        `/build`,
+        process.env.USE_PKGR as USE_PKGR
+      ),
       body: {
-        name, hash, action: 'deploy'
+        name,
+        hash,
+        action: "deploy",
+      },
+    });
+  }
+
+  private getPackageUrlBasedOnFlag = (
+    path: string,
+    usePkgr: USE_PKGR = USE_PKGR.NO
+  ) => {
+    return usePkgr === USE_PKGR.YES
+      ? `/pkgr${path}?source=standalone`
+      : `/pkg${path}`;
+  };
+
+  private getBuildUrlBasedOnFlag = (
+    path: string,
+    usePkgr: USE_PKGR = USE_PKGR.NO
+  ) => {
+    const sourceType =
+      usePkgr === USE_PKGR.YES
+        ? DATA_SOURCE_TYPE.STANDALONE
+        : DATA_SOURCE_TYPE.ELASTIC_SERVER;
+    return `/pkgr${path}?source=${sourceType}`;
+  };
+
+  private checkForRequiredScripts(
+    projectNames: string[],
+    deployErrors: IPreDeployErrors
+  ) {
+    let errors = deployErrors;
+
+    projectNames.map((name) => {
+      const projectPackageFile = path.join(
+        this.packagePath,
+        name,
+        "package.json"
+      );
+      const currentProjectErrors = Option.of(errors).next(name).getOrElse([]);
+      const errorSet = new Set();
+
+      try {
+        const packageData = JSON.parse(
+          fs.readFileSync(projectPackageFile, "utf8")
+        );
+        const currentScripts = Object.keys(
+          Option.of(packageData).next("scripts").getOrElse({})
+        );
+        const currentScriptSet = new Set(currentScripts) as Set<string>;
+
+        REQUIRED_PROJECT_SCRIPTS.map((script) => {
+          if (!currentScriptSet.has(script)) {
+            errorSet.add(
+              `Does not have the ${script} script in package.json. Please add the script.`
+            );
+          }
+        });
+      } catch (_error) {
+        errorSet.add(`No package.json file found in ${name} project`);
       }
-    })
-  }
 
+      errors = Lens(name).over((_item) => [
+        ...currentProjectErrors,
+        ...errorSet,
+      ])(errors) as IPreDeployErrors;
+    });
 
-  private getPackageUrlBasedOnFlag = (path: string, usePkgr: USE_PKGR = USE_PKGR.NO) => {
-    return usePkgr === USE_PKGR.YES ? `/pkgr${path}?source=standalone` : `/pkg${path}`
-  }
-
-  private getBuildUrlBasedOnFlag = (path: string, usePkgr: USE_PKGR = USE_PKGR.NO) => {
-    const sourceType = usePkgr === USE_PKGR.YES ? DATA_SOURCE_TYPE.STANDALONE : DATA_SOURCE_TYPE.ELASTIC_SERVER
-    return `/pkgr${path}?source=${sourceType}`
-  }
-
-  private checkForRequiredScripts(projectNames: string[], deployErrors: IPreDeployErrors) {
-    let errors = deployErrors
-
-    projectNames
-      .map(name => {
-        const projectPackageFile = path.join(this.packagePath, name, 'package.json')
-        const currentProjectErrors = Option.of(errors).next(name).getOrElse([])
-        const errorSet = new Set()
-
-        try {
-          const packageData = JSON.parse(fs.readFileSync(projectPackageFile, 'utf8'))
-          const currentScripts = Object.keys(Option.of(packageData).next('scripts').getOrElse({}))
-          const currentScriptSet = new Set(currentScripts) as Set<string>
-
-          REQUIRED_PROJECT_SCRIPTS.map(script => {
-            if (!currentScriptSet.has(script)) {
-              errorSet.add(`Does not have the ${script} script in package.json. Please add the script.`)
-            }
-          })
-
-        } catch (_error) {
-          errorSet.add(`No package.json file found in ${name} project`)
-        }
-
-        errors = Lens(name).over(_item => [ ...currentProjectErrors, ...errorSet ])(errors) as IPreDeployErrors
-      })
-
-    return errors
+    return errors;
   }
 
   preDeployChecks() {
-    const projectNames = this.getAllProjectNames()
-    const defaultDeployErrors = projectNames.reduce((acc, cur) => ({ ...acc, [cur]: [] }), {})
+    const projectNames = this.getAllProjectNames();
+    const defaultDeployErrors = projectNames.reduce(
+      (acc, cur) => ({ ...acc, [cur]: [] }),
+      {}
+    );
 
-    return this.checkForRequiredScripts(projectNames, defaultDeployErrors) as IPreDeployErrors
+    return this.checkForRequiredScripts(
+      projectNames,
+      defaultDeployErrors
+    ) as IPreDeployErrors;
   }
 
-  async deploy(setDeployStatus: (status: string | null) => void) {
-    const pkg = this.evaluate(this.packageMetadata)
-
+  async deploy(setDeployStatus: (status: string | null) => void, byPassCompile: boolean = false) {
+    const pkg = this.evaluate(this.packageMetadata);
     try {
-      const bundlePath = await this.bundlePackage()
-      if (bundlePath) { setDeployStatus('Bundle success!') }
-
-      const deployedPackage = await this.uploadPackage(bundlePath, pkg)
-      const { name, hash } = deployedPackage
-      if (name && hash) { setDeployStatus('Upload success!') }
-
-      await this.startBuild(name, hash)
-    } catch (error) {
-      if (error instanceof Error){
-        throw new DeployError(error.message)
+      let bundlePath;
+      if (byPassCompile) {
+        bundlePath = await this.bundlePackageWithByPassCompile();
+      } else {
+        bundlePath = await this.bundlePackage();
       }
-      throw error
+
+      if (bundlePath) {
+        setDeployStatus("Bundle success!");
+      }
+
+      const deployedPackage = await this.uploadPackage(bundlePath, pkg);
+      const { name, hash } = deployedPackage;
+      if (name && hash) {
+        setDeployStatus("Upload success!");
+      }
+
+      await this.startBuild(name, hash);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new DeployError(error.message);
+      }
+      throw error;
     }
   }
 }
 
 function tarballFileFilter(filePath: string) {
-  return !(/node_modules|pre_deploy_assets|__shared|__generated|\.git|dist/.test(filePath))
+  return !/node_modules|pre_deploy_assets|__shared|__generated|\.git|dist/.test(
+    filePath
+  );
 }
