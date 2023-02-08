@@ -1,7 +1,7 @@
 /**
  * "Web" side services
  */
-import { remote } from 'electron'
+const remote = require('@electron/remote')
 
 // NOTE: The path when doing a "remote-require" is from root of the project
 import { Services } from '../../main/Services'

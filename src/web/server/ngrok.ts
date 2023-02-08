@@ -24,7 +24,7 @@ import * as crossSpawn from 'cross-spawn'
 // type NgrokLog = NgrokLogBase & NgrokStartedTunnel
 
 const RESOURCES_PATH = process.env.NODE_ENV === 'development'
-  ? require('electron').remote.app.getAppPath()
+  ? require('@electron/remote').app.getAppPath()
   : process.resourcesPath!
 
 const NGROK_BASE_PATH = path.join(RESOURCES_PATH, '/app/assets/')

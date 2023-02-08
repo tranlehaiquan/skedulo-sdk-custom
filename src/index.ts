@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { setEnvironment } from './web/logging/logWrapper'
 import * as path from 'path'
+require('@electron/remote/main').initialize()
 // import * as url from 'url'
 
 import { BASE_PATH } from './base-path'
@@ -31,6 +32,7 @@ app.on('activate', () => {
 
 function createWindow() {
   // Create a "window", but don't show it
+  
   win = new BrowserWindow({
     show: false,
     minWidth: 1224,
@@ -47,6 +49,8 @@ function createWindow() {
   // After the window has finished loading, this event
   // is fired at which point we show the window
   win.on('ready-to-show', () => {
+    require("@electron/remote/main").enable(win?.webContents)
+
     console.log('ready-to-show')
     win!.show()
   })

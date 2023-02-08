@@ -13,7 +13,7 @@ export class SSLHelp extends React.PureComponent {
       clipboard.writeText(command.replace(/\n/g, EOL))
   }
 
-  openHomeFolder = () => shell.openItem(sslDir)
+  openHomeFolder = () => shell.openPath(sslDir)
 
   renderOSXSetupInstructions = () => {
     return (

@@ -350,9 +350,9 @@ export class PackageService {
     if (!fs.existsSync(outDIR)) {
       fs.mkdirSync(outDIR);
     }
-
+    
     // empty outDIR
-    // await fsExtra.emptyDir(outDIR);
+    await fsExtra.emptyDir(outDIR);
 
     // copy folder to the current working directory outDIR
     await fsExtra.copy(this.packagePath, `${outDIR}`, {
@@ -406,7 +406,7 @@ export class PackageService {
 
     // TODO: need update to node 14
     // remove folder outDIR 
-    // await fsExtra.emptyDir(outDIR);
+    await fsExtra.emptyDir(outDIR);
     return tar;
   }
 

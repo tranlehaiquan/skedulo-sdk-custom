@@ -101,7 +101,7 @@
     "cross-env": "^5.2.0",
     "decompress-zip": "^0.2.2",
     "devtron": "1.4.0",
-    "electron": "^7.1.1",
+    "electron": "^14.2.9",
     "electron-builder": "^21.2.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.1.0",
