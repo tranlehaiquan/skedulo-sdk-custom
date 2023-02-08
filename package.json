@@ -14,7 +14,7 @@
     "node-run-dev": "yarn node-run -r ts-node/register",
     "dev-node": "nodemon --watch src -e ts,js -x 'yarn node-run-dev' src/server/server.ts",
     "copy-ngrok": "node scripts/copyNgrok.js",
-    "copy-static": "node scripts/copyAssets.js && yarn run copy-ngrok && cd app",
+    "copy-static": "node scripts/copyAssets.js && yarn run copy-ngrok",
     "compile-scripts": "tsc",
     "compile-styles": "node-sass src/scss/main.scss app/scss/main.css",
     "watch-scripts": "tsc --watch",
@@ -23,8 +23,8 @@
     "start-ui": "electron ./",
     "lint": "tslint --project ./",
     "start": "rm -rf app && rm -rf dist && yarn compile && electron ./",
-    "pack": "yarn compile && electron-builder --dir",
-    "dist": "yarn compile && electron-builder",
+    "pack": "yarn compile && cd app && electron-builder --dir",
+    "dist": "yarn compile && cd app && electron-builder",
     "dev": "yarn copy-static && yarn compile-styles && node ./tools/watch-web.js",
     "dev-ui": "cross-env NODE_ENV=development nodemon -x yarn start-ui ./",
     "postinstall": "ts-node ./download-ngrok-bins.ts && yarn compile"
@@ -172,6 +172,7 @@
     "request-promise": "^4.2.2",
     "rxjs": "5",
     "semver": "^5.5.0",
+    "shelljs": "^0.8.5",
     "tar": "^4.0.2"
   }
 }
