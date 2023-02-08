@@ -1,4 +1,6 @@
 
+// ignore ts
+// @ts-ignore
 import { ChildProcess } from 'child_process'
 import * as logfmt from 'logfmt'
 import * as path from 'path'
@@ -8,18 +10,18 @@ import { MainServices } from '../service-layer/MainServices'
 import { streamToRx } from '../utils/shell'
 import * as crossSpawn from 'cross-spawn'
 
-interface NgrokLogBase {
-  t: string
-  lvl: 'info' | 'debug' | 'error'
-  msg: string
-}
+// interface NgrokLogBase {
+//   t: string
+//   lvl: 'info' | 'debug' | 'error'
+//   msg: string
+// }
 
-interface NgrokStartedTunnel {
-  msg: 'started tunnel',
-  url: string
-}
+// interface NgrokStartedTunnel {
+//   msg: 'started tunnel',
+//   url: string
+// }
 
-type NgrokLog = NgrokLogBase & NgrokStartedTunnel
+// type NgrokLog = NgrokLogBase & NgrokStartedTunnel
 
 const RESOURCES_PATH = process.env.NODE_ENV === 'development'
   ? require('electron').remote.app.getAppPath()
@@ -87,7 +89,7 @@ export function connectToNgrok(port: number) {
         : Observable.empty<string>()
 
       return stdout$.merge(stderr$)
-        .map(logline => logfmt.parse(logline) as NgrokLog)
+        .map(logline => logfmt.parse(logline))
         .switchMap(logItem => {
           if (logItem.msg === 'started tunnel') {
             return Observable.of(logItem.url)

@@ -49,7 +49,7 @@ export const NEW_PKG_METADATA: Package = {
   components: {}
 }
 
-const FORM_CONFIG: FormConfig = {
+const FORM_CONFIG: FormConfig<any> = {
   name: {
     isRequired: {
       message: 'Please enter a package name'
@@ -105,7 +105,7 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
 
     try {
       setPackage(pkg.selectedDirectory)
-    } catch (e) {
+    } catch (e: any) {
       this.setState({ errorMessage: e.message })
     }
   }
@@ -123,7 +123,7 @@ export class CreateNewPackage extends React.PureComponent<IProps, IState> {
       } else {
         setAndValidateDirectory(fieldUpdate, '')
       }
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(err.message)
     }
   }

@@ -51,7 +51,7 @@ export const NEW_FUNCTION_PRJ_METADATA: FunctionProject = {
   description: ''
 }
 
-const VALIDATION_CONFIG: FormConfig = {
+const VALIDATION_CONFIG: FormConfig<any> = {
   name: {
     isRequired: {
       message: 'Please enter a project name'
@@ -119,7 +119,7 @@ export class NewFunctionProject extends React.PureComponent<IProps, IState> {
 
       // Refresh package in state (this will also refresh the view)
       await refreshPackage(true)
-    } catch (error) {
+    } catch (error: any) {
       this.setState({
         progress: false,
         errorMsg: error.message

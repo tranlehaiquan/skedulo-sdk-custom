@@ -23,7 +23,7 @@ async function init() {
   // Make cache dir if it dosen't exist
   try {
     await mkDirAsync(TEMP_PATH)
-  } catch (e) {
+  } catch (e: any) {
     if (!e || e.code !== 'EEXIST') {
       throw e
     }

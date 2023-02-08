@@ -43,7 +43,7 @@ export class SelectPackage extends React.PureComponent<Props, State> {
     if (selectedDirectory) {
       try {
         await setPackage(selectedDirectory)
-      } catch (e) {
+      } catch (e: any) {
         this.setState({ errorMessage: e.message })
       }
     }

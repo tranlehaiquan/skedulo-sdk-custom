@@ -155,7 +155,7 @@ export class ConfigurePackage extends React.PureComponent<Props, State> {
         title: "Deploy",
         message: "Deploy success!",
       });
-    } catch (error) {
+    } catch (error: any) {
       this.setState({ deployStatus: error.message });
       dialog.showErrorBox(
         "Deploy",

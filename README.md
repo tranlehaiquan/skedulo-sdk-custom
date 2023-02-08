@@ -25,3 +25,12 @@ yarn dev
 # and in another terminal
 yarn dev-ui
 ```
+
+dev: 
+  - copy-static 
+    - create app/assets folder
+    - yarn copy-ngrok
+  - compile-styles
+  - node ./tools/watch-web.js
+    - yarn watch-styles
+    - yarn watch-scripts

@@ -36,7 +36,7 @@ export abstract class ProjectService<T> {
     try {
       const proj = JSON.parse(fs.readFileSync(prjFile, 'utf8'))
       this.project = this.evaluate(proj)
-    } catch (e) {
+    } catch (e: any) {
       throw new InvalidProject(`InvalidProject: ${e.message}`)
     }
   }
@@ -94,7 +94,7 @@ export abstract class ProjectService<T> {
 
       const ngrok$ = connectToNgrok(port)
         .subscribe(
-          ngrokUrl => {
+          (ngrokUrl: string) => {
             url = ngrokUrl
 
             return this.startDevSession(ngrokUrl, name, type, metadata)

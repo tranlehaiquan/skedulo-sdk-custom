@@ -44,7 +44,7 @@ function convertFormToProjectMetadata(form: LibraryProjectForm): LibraryProject 
   }
 }
 
-const VALIDATION_CONFIG: FormConfig = {
+const VALIDATION_CONFIG: FormConfig<any> = {
   name: PROJECT_NAME_VALIDATION,
   description: PROJECT_DESCRIPTION_VALIDATION
 }
@@ -82,7 +82,7 @@ export class NewLibraryProject extends React.PureComponent<IProps, IState> {
           // Refresh package in state (this will also refresh the view)
           refreshPackage(true)
         })
-    } catch (error) {
+    } catch (error: any) {
       this.setState({
         progress: false,
         errorMsg: error.message

@@ -58,7 +58,7 @@ export function startLambdaServer(port: number, lambdaProjectPath: string, execu
         method: ctx.request.method,
         querystring: ctx.request.querystring,
         path: ctx.request.path,
-        body: ctx.request.body
+        body: (ctx.request as any).body
       }
 
       try {
@@ -71,7 +71,7 @@ export function startLambdaServer(port: number, lambdaProjectPath: string, execu
           ctx.body = body
         }
 
-      } catch (e) {
+      } catch (e: any) {
         ctx.status = 400
         ctx.body = e.message
       }

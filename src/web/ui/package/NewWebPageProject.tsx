@@ -107,7 +107,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     showInNavBar: 'true'
   }
 
-  VALIDATION_CONFIG: FormConfig = {
+  VALIDATION_CONFIG: FormConfig<any> = {
     name: PROJECT_NAME_VALIDATION,
     description: PROJECT_DESCRIPTION_VALIDATION,
     label: {
@@ -162,7 +162,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
           // Refresh package in state (this will also refresh the view)
           refreshPackage(true)
         })
-    } catch (error) {
+    } catch (error: any) {
       this.setState({
         progress: false,
         errorMsg: error.message

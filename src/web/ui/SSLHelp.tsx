@@ -35,7 +35,7 @@ export class SSLHelp extends React.PureComponent {
   renderWindowsSetupInstructions = () => {
     return (
       <React.Fragment>
-        <p>Add the rootCA.pem found in the .localhost-ssl folder to Chrome by going to Settings > Manage Certificates > Select the Trusted Root Certification Authorities tab and click Import.
+        <p>Add the rootCA.pem found in the .localhost-ssl folder to Chrome by going to Settings &gt; Manage Certificates &gt; Select the Trusted Root Certification Authorities tab and click Import.
           Note that the .pem format is not available by default in the list of selectable formats, the file will need to be selected with All Files selected as the format in the file prompt.
           You will be asked if you want to use this certificate as a trusted Authority. Click Yes.</p>
       </React.Fragment>
