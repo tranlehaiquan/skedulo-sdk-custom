@@ -7,7 +7,7 @@ require('@electron/remote/main').initialize()
 import { BASE_PATH } from './base-path'
 // Don't let "win" be garbage collected
 let win: Electron.BrowserWindow | null
-app.on('ready', () => {
+app.whenReady().then(() => {
   // Create "electron" window
   createWindow()
 })
@@ -29,7 +29,6 @@ app.on('activate', () => {
   }
 })
 
-
 function createWindow() {
   // Create a "window", but don't show it
   
@@ -45,12 +44,11 @@ function createWindow() {
     },
     icon: path.join(BASE_PATH, '/assets/icons/64x64.png')
   })
+  require("@electron/remote/main").enable(win?.webContents)
 
   // After the window has finished loading, this event
   // is fired at which point we show the window
   win.on('ready-to-show', () => {
-    require("@electron/remote/main").enable(win?.webContents)
-
     console.log('ready-to-show')
     win!.show()
   })
