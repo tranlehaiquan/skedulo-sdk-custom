@@ -1,0 +1,60 @@
+{
+  "name": "@skedulo/sked-commons",
+  "version": "0.7.3",
+  "description": "A central repository store for all the common utils, interfaces etc that are used across all the Skedulo projects.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "bootstrap": "rm -rf node_modules && yarn install --pure-lockfile --peer",
+    "lint": "tslint 'src/**/*.ts'",
+    "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts dist/index.js",
+    "compile": "tsc",
+    "build": "npm run compile && node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/src/**/*.test.(ts|tsx)"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "ts"
+    ]
+  },
+  "files": [
+    "dist/",
+    "package.json",
+    "yarn.lock"
+  ],
+  "prepublish": "tsc",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Skedulo/sked-commons.git"
+  },
+  "author": "Skedulo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Skedulo/sked-commons/issues"
+  },
+  "homepage": "https://github.com/Skedulo/sked-commons#readme",
+  "devDependencies": {
+    "@babel/core": "^7.10.1",
+    "@babel/preset-env": "^7.10.1",
+    "@babel/preset-typescript": "^7.10.1",
+    "@types/jest": "^25.2.3",
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^12.12.5",
+    "babel-jest": "^26.0.1",
+    "nodemon": "^1.19.4",
+    "ts-node": "^8.4.1",
+    "tslint": "^6.0.0-beta0",
+    "tslint-microsoft-contrib": "^6.2.0",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "jest": "^26.0.1",
+    "lodash": "^4.17.21"
+  }
+}
