@@ -71,7 +71,7 @@ function createWindow() {
   // Load the index.html from the "dist" folder
   console.log(path.join(__dirname, './index.html'))
   win.loadFile(path.join(__dirname, './index.html'))
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   const isProduction : boolean = process.env.NODE_ENV !== 'development'
   setEnvironment(isProduction)
