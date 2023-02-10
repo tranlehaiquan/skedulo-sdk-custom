@@ -89,9 +89,9 @@ function runRequest(projectPath: string, fnPayload: FnPayload, executionTimeout:
   return new Promise((resolve, reject) => {
     const child = child_process.fork(path.join(WEB_BASE_PATH, '/assets/lambda-dev-wrapper'), [], {
       cwd: projectPath,
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      execArgv:['--inspect=14396']
     })
-
     if (!child) {
       return reject(new Error('Unable to fork new process to run request'))
     }
