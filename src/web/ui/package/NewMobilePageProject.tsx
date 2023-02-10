@@ -66,7 +66,7 @@ export class NewMobilePageProject extends React.PureComponent<IProps, IState> {
     suiteType: null
   }
   
-  VALIDATION_CONFIG: FormConfig<any> = {
+  VALIDATION_CONFIG: FormConfig = {
     name: PROJECT_NAME_VALIDATION,
     label: {
       isRequired: {

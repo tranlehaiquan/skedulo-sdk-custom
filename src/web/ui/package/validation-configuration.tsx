@@ -1,6 +1,6 @@
 import { FormConfig } from '@skedulo/sked-ui'
 
-export const PROJECT_NAME_VALIDATION: FormConfig<any> = {
+export const PROJECT_NAME_VALIDATION: FormConfig = {
   isMaxLength: {
     message: 'Name cannot be longer than 64 characters',
     length: 64
@@ -18,7 +18,7 @@ export const PROJECT_NAME_VALIDATION: FormConfig<any> = {
   } as any
 }
 
-export const PROJECT_DESCRIPTION_VALIDATION: FormConfig<any> = {
+export const PROJECT_DESCRIPTION_VALIDATION: FormConfig = {
   isMaxLength: {
     message: 'Name cannot be longer than 500 characters',
     length: 500
@@ -32,7 +32,7 @@ export const PROJECT_DESCRIPTION_VALIDATION: FormConfig<any> = {
   }
 }
 
-export const FUNCTION_PROJECT_NAME_VALIDATION: FormConfig<any> = {
+export const FUNCTION_PROJECT_NAME_VALIDATION: FormConfig = {
   ...PROJECT_NAME_VALIDATION,
   isMaxLength: {
     message: 'Name cannot be longer than 64 characters',

@@ -49,7 +49,7 @@ export const NEW_PKG_METADATA: Package = {
   components: {}
 }
 
-const FORM_CONFIG: FormConfig<any> = {
+const FORM_CONFIG: FormConfig = {
   name: {
     isRequired: {
       message: 'Please enter a package name'

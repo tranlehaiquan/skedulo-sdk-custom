@@ -905,10 +905,10 @@
     jest "^26.0.1"
     lodash "^4.17.21"
 
-"@skedulo/sked-ui@^19.4.1":
-  version "19.23.0"
-  resolved "https://registry.yarnpkg.com/@skedulo/sked-ui/-/sked-ui-19.23.0.tgz#c785ad9a86f79809348c2b99ce1c47ef86ae9d03"
-  integrity sha512-PY4XlGNzkbVaL51rAWa9C9DdaJjj2ORIMXdyIGKMr+7dtUlwLsYmejJcWgQsbygHPr/m+wAxo9Xh6wAb4A6opg==
+"@skedulo/sked-ui@^20.2.0":
+  version "20.2.0"
+  resolved "https://registry.yarnpkg.com/@skedulo/sked-ui/-/sked-ui-20.2.0.tgz#68dcf86ee8871734311df5b0a913140180ecfe9d"
+  integrity sha512-oedOESg0/w6bRD8UUpR0qP6hvRcKxDidKRo9hBzC/gh9znmN/gCFKe3wkiIRLx2lEzpd4VoXAI9EIw5/f1yXKg==
   dependencies:
     "@popperjs/core" "^2.5.4"
     "@types/calidation" "^1.16.2"

@@ -44,7 +44,7 @@ function convertFormToProjectMetadata(form: LibraryProjectForm): LibraryProject 
   }
 }
 
-const VALIDATION_CONFIG: FormConfig<any> = {
+const VALIDATION_CONFIG: FormConfig = {
   name: PROJECT_NAME_VALIDATION,
   description: PROJECT_DESCRIPTION_VALIDATION
 }

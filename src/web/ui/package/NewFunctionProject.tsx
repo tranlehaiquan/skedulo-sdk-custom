@@ -51,7 +51,7 @@ export const NEW_FUNCTION_PRJ_METADATA: FunctionProject = {
   description: ''
 }
 
-const VALIDATION_CONFIG: FormConfig<any> = {
+const VALIDATION_CONFIG: FormConfig = {
   name: {
     isRequired: {
       message: 'Please enter a project name'

@@ -91,8 +91,8 @@ export function connectToNgrok(port: number) {
       return stdout$.merge(stderr$)
         .map(logline => logfmt.parse(logline))
         .switchMap(logItem => {
-          if (logItem.msg === 'started tunnel') {
-            return Observable.of(logItem.url)
+          if ((logItem as any).msg === 'started tunnel') {
+            return Observable.of((logItem as any).url)
           } else {
             return Observable.empty<string>()
           }

@@ -107,7 +107,7 @@ export class NewWebPageProject extends React.PureComponent<IProps, IState> {
     showInNavBar: 'true'
   }
 
-  VALIDATION_CONFIG: FormConfig<any> = {
+  VALIDATION_CONFIG: FormConfig = {
     name: PROJECT_NAME_VALIDATION,
     description: PROJECT_DESCRIPTION_VALIDATION,
     label: {
