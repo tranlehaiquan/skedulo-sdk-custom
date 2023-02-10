@@ -27,7 +27,7 @@ export class FunctionProjectService extends ProjectService<FunctionProject> {
     return this.session.API_SERVER + `/pkgr/dev/function/${encodeURIComponent(this.project.name)}`
   }
 
-  startDev(port: number) {
+  startDev(port: number, inspect: boolean = false) {
 
     // Start the compiler and "dev" mode
     const devLog$ = this.dev().map(item => {
@@ -36,7 +36,7 @@ export class FunctionProjectService extends ProjectService<FunctionProject> {
     })
 
     // Start "lambda" request handler
-    const lambdaServer$ = startLambdaServer(port, this.projectPath, ms('60s')).map(item => {
+    const lambdaServer$ = startLambdaServer(port, this.projectPath, ms('60s'), inspect).map(item => {
       item.value = 'app: ' + item.value
       return item
     })

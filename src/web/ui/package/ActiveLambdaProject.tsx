@@ -45,11 +45,11 @@ export class ActiveLambdaProject extends React.PureComponent<Props, State> {
     this.setState({ inProgress: true, log$ })
   }
 
-  startDev = async () => {
+  startDev = async (inspect?: boolean) => {
 
     const portNumber = await MainServices.getPort()
 
-    const log$ = this.props.projectService.startDev(portNumber)
+    const log$ = this.props.projectService.startDev(portNumber, inspect)
       .finally(() => this.resetState())
       .publish()
 
@@ -94,7 +94,8 @@ export class ActiveLambdaProject extends React.PureComponent<Props, State> {
                 : null
               }
               <Button buttonType="secondary" onClick={ this.bootstrap } disabled={ this.state.inProgress } >Bootstrap</Button>
-              <Button buttonType="primary" onClick={ this.startDev } disabled={ this.state.inProgress } >Start Development</Button>
+              <Button buttonType="primary" onClick={ () => this.startDev() } disabled={ this.state.inProgress } >Start Development</Button>
+              <Button buttonType="primary" onClick={ () => this.startDev(true) } disabled={ this.state.inProgress } >Start Debug</Button>
             </ButtonGroup>
           </div>
         </div>
